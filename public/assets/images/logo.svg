@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 562" width="100%" height="100%">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF2B2"/>
+      <stop offset="25%" stop-color="#E5C158"/>
+      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="75%" stop-color="#C59B27"/>
+      <stop offset="100%" stop-color="#F3D882"/>
+    </linearGradient>
+    <linearGradient id="goldShine" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#D4AF37"/>
+      <stop offset="45%" stop-color="#FFF5C0"/>
+      <stop offset="55%" stop-color="#E6C45E"/>
+      <stop offset="100%" stop-color="#B88A1B"/>
+    </linearGradient>
+    <filter id="goldGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <style>
+    .gold-stroke { stroke: url(#goldGrad); fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .gold-fill { fill: url(#goldGrad); }
+    .gold-text { fill: url(#goldGrad); font-family: 'Assistant', 'Heebo', sans-serif; font-weight: 700; }
+  </style>
+
+  <!-- Right Side: Cloche on Hand with Steam -->
+  <g transform="translate(480, 20)">
+    <!-- Cloche handle top knob -->
+    <ellipse cx="230" cy="50" rx="14" ry="12" class="gold-stroke" stroke-width="7"/>
+    <path d="M222 62 C222 70, 238 70, 238 62" class="gold-stroke" stroke-width="7"/>
+
+    <!-- Cloche Dome -->
+    <path d="M48 200 C50 95, 120 75, 230 75 C340 75, 410 95, 412 200 Z" class="gold-stroke" stroke-width="8" fill="none"/>
+    <path d="M25 210 C120 226, 340 226, 435 210 C438 214, 430 225, 415 228 C320 242, 140 242, 45 228 C30 225, 22 214, 25 210 Z" class="gold-stroke" stroke-width="7" fill="url(#goldGrad)" fill-opacity="0.12"/>
+    
+    <!-- Steam Swirls -->
+    <path d="M-10 180 C-40 140, 5 120, -15 80 C-25 60, -10 40, 10 50 C25 60, 20 80, 5 85 C-10 90, -15 75, -5 70" class="gold-stroke" stroke-width="6"/>
+    <path d="M15 150 C5 110, 45 90, 30 50 C20 30, 45 20, 60 35 C75 50, 65 70, 50 75 C35 80, 30 65, 40 60" class="gold-stroke" stroke-width="5"/>
+    <path d="M-30 190 C-70 160, -60 110, -40 90 C-20 70, 0 85, -10 105 C-20 125, -50 120, -45 140" class="gold-stroke" stroke-width="5"/>
+
+    <!-- Hand holding platter -->
+    <path d="M100 248 C105 285, 155 330, 205 325 C260 320, 350 270, 395 240 C370 260, 330 295, 290 325 C250 355, 195 365, 160 350 C145 342, 130 310, 125 260 Z" class="gold-stroke" stroke-width="7" fill="url(#goldGrad)" fill-opacity="0.1"/>
+    <!-- Wrist & Cuff -->
+    <path d="M125 350 C140 375, 160 415, 175 440 C155 445, 140 435, 120 400 C110 380, 105 360, 100 350" class="gold-stroke" stroke-width="7"/>
+    <path d="M145 425 C175 440, 200 420, 215 390" class="gold-stroke" stroke-width="6"/>
+  </g>
+
+  <!-- Left Side: Hebrew Calligraphy "יהודלס" -->
+  <g transform="translate(40, 240)">
+    <!-- Chef character with toque hat (on the far left) -->
+    <g transform="translate(10, 0)">
+      <!-- Chef Hat -->
+      <path d="M30 45 C15 35, 10 15, 25 0 C40 -15, 65 -15, 80 5 C95 -10, 125 -5, 130 20 C135 40, 115 50, 105 55" class="gold-stroke" stroke-width="6" fill="none"/>
+      <path d="M30 52 C55 58, 85 58, 108 52" class="gold-stroke" stroke-width="5"/>
+      <path d="M32 60 C55 66, 85 66, 106 60" class="gold-stroke" stroke-width="5"/>
+
+      <!-- Face inside swirl -->
+      <path d="M45 68 C20 75, 15 110, 30 135 C50 160, 95 160, 115 135 C125 120, 125 90, 115 75" class="gold-stroke" stroke-width="6" fill="none"/>
+      
+      <!-- Eyes & Smile -->
+      <circle cx="58" cy="98" r="7" class="gold-stroke" stroke-width="3" fill="none"/>
+      <circle cx="58" cy="97" r="3" class="gold-fill"/>
+      <!-- Winking eye -->
+      <path d="M80 94 C84 90, 92 90, 96 95" class="gold-stroke" stroke-width="3"/>
+      <!-- Smile -->
+      <path d="M55 120 C68 135, 88 135, 100 120" class="gold-stroke" stroke-width="4"/>
+    </g>
+
+    <!-- Stylized Hebrew letters: 'י ה ו ד ל ס -->
+    <!-- Custom elegant curved glyph strokes matching the brand identity -->
+    <g transform="translate(110, 10)">
+      <!-- Apostrophe ' -->
+      <path d="M85 -10 C92 -25, 100 -35, 95 -45 C90 -50, 80 -45, 78 -35 C75 -25, 78 -15, 85 -10 Z" class="gold-fill"/>
+
+      <!-- י (Yud) -->
+      <path d="M440 25 C450 10, 460 -10, 475 -15 C490 -20, 500 -5, 495 15 C490 35, 475 55, 460 70 C450 60, 440 45, 440 25 Z" class="gold-fill"/>
+
+      <!-- ה (He) -->
+      <path d="M350 -10 C380 -15, 410 -5, 420 15 C410 45, 395 85, 385 115 C375 110, 370 95, 375 75 C380 50, 390 20, 370 15 C350 10, 335 25, 330 40 L315 25 C325 5, 335 -5, 350 -10 Z" class="gold-fill"/>
+      <path d="M340 55 C345 80, 340 105, 325 120 C315 115, 318 95, 322 75 Z" class="gold-fill"/>
+
+      <!-- ו (Vav) -->
+      <path d="M285 -15 C305 -15, 315 0, 310 20 C300 60, 280 110, 270 125 C255 120, 265 95, 275 60 C280 35, 280 10, 275 5 Z" class="gold-fill"/>
+
+      <!-- ד (Dalet) -->
+      <path d="M205 -10 C235 -15, 255 -5, 260 15 C250 50, 235 90, 225 120 C210 115, 220 85, 230 50 C235 25, 230 15, 215 12 C195 10, 185 20, 180 30 L168 15 C178 0, 190 -8, 205 -10 Z" class="gold-fill"/>
+
+      <!-- ל (Lamed with high reaching flourish) -->
+      <path d="M125 -65 C135 -70, 145 -60, 140 -40 C130 -10, 115 40, 105 85 C95 125, 80 135, 60 130 C45 125, 55 100, 68 80 C80 60, 95 10, 105 -25 C110 -45, 115 -60, 125 -65 Z" class="gold-fill"/>
+
+      <!-- ס (Samech) -->
+      <path d="M5 25 C15 -10, 55 -15, 75 5 C95 25, 95 75, 75 105 C55 130, 15 130, -5 105 C-20 80, -15 35, 5 25 Z M25 35 C15 45, 15 85, 25 98 C40 112, 60 110, 70 95 C80 80, 80 45, 68 32 C55 20, 35 22, 25 35 Z" class="gold-fill"/>
+    </g>
+
+    <!-- Subtitle: — הצ'ולנט הכי טעים בעיר — -->
+    <g transform="translate(30, 165)">
+      <!-- Left decorative dash line -->
+      <path d="M20 5 L120 5" class="gold-stroke" stroke-width="2.5"/>
+      <circle cx="120" cy="5" r="2.5" class="gold-fill"/>
+
+      <!-- Hebrew text -->
+      <text x="320" y="12" text-anchor="middle" class="gold-text" font-size="28" letter-spacing="3">
+        הצ'ולנט הכי טעים בעיר
+      </text>
+
+      <!-- Right decorative dash line -->
+      <circle cx="520" cy="5" r="2.5" class="gold-fill"/>
+      <path d="M520 5 L620 5" class="gold-stroke" stroke-width="2.5"/>
+    </g>
+  </g>
+</svg>

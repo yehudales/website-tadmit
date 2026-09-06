@@ -1,0 +1,6 @@
+{
+  "name": "יהודלס - חווית ליל שישי | טעם ברמה גבוהה",
+  "description": "יהודלס (Yehudales) - מותג אוכל פרימיום בטייק אווי והזמנות WhatsApp באשדוד. חווית ליל שישי, בשרים וצ'ולנט בטעם ברמה גבוהה, שירות וניקיון ללא פשרות. כשרות מהודרת נווה ציון ובד\"ץ העדה החרדית.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

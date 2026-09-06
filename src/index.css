@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Brand Dark Luxury Color System */
+    --brand-bg-deep: #0B0C0E;
+    --brand-bg-soft: #121417;
+    --brand-card: #1A1D22;
+    --brand-card-hover: #22262D;
+
+    /* Luxury Accent Gold Palette */
+    --brand-gold-primary: #C9A227;
+    --brand-gold-secondary: #E0BE55;
+    --brand-gold-muted: #9F7D22;
+
+    /* Typography & Contrast */
+    --brand-white: #FAF9F6;
+    --brand-gray: #94A3B8;
+    --brand-border: #252A32;
+    --brand-border-subtle: #1c2026;
+
+    /* Status Colors */
+    --brand-success: #10B981;
+    --brand-error: #EF4444;
+    --brand-warning: #F59E0B;
+
+    /* Fonts */
+    --font-primary: 'Outfit', 'Assistant', 'Arimo', system-ui, -apple-system, sans-serif;
+    --font-numeric: 'Rubik', 'Outfit', 'Assistant', system-ui, sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: var(--font-primary);
+    background-color: var(--brand-bg-deep);
+    color: var(--brand-white);
+    overflow-x: hidden;
+    min-width: 320px;
+  }
+
+  /* Numeric figures aligned in tables and price displays */
+  .numeric-tabular {
+    font-family: var(--font-numeric);
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  /* Accessible high-contrast focus indicators */
+  :focus-visible {
+    outline: 2px solid var(--brand-gold-secondary);
+    outline-offset: 3px;
+  }
+}
+
+/* Warm Luxury Gold text gradient */
+.gold-gradient-text {
+  background: linear-gradient(135deg, #FAF9F6 0%, #E0BE55 45%, #C9A227 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-gradient-bg {
+  background: linear-gradient(135deg, #FAF9F6 0%, #E0BE55 50%, #C9A227 100%);
+}
+
+/* Hide scrollbar for clean horizontal tab lists on mobile */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Smooth custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0C0E;
+}
+::-webkit-scrollbar-thumb {
+  background: #252A32;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9F7D22;
+}
+
+/* Subtle breathing glow animations for modern brand live timer */
+@keyframes timerGlowPulseOrange {
+  0%, 100% {
+    filter: drop-shadow(0 0 16px rgba(249, 115, 22, 0.28));
+    border-color: rgba(249, 115, 22, 0.35);
+  }
+  50% {
+    filter: drop-shadow(0 0 32px rgba(249, 115, 22, 0.5));
+    border-color: rgba(249, 115, 22, 0.6);
+  }
+}
+
+@keyframes timerGlowPulseGreen {
+  0%, 100% {
+    filter: drop-shadow(0 0 18px rgba(34, 197, 94, 0.3));
+    border-color: rgba(34, 197, 94, 0.4);
+  }
+  50% {
+    filter: drop-shadow(0 0 36px rgba(34, 197, 94, 0.55));
+    border-color: rgba(34, 197, 94, 0.7);
+  }
+}
+
+.timer-card-orange {
+  animation: timerGlowPulseOrange 3.5s ease-in-out infinite;
+}
+
+.timer-card-green {
+  animation: timerGlowPulseGreen 3s ease-in-out infinite;
+}
+
