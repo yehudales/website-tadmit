@@ -236,8 +236,10 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Ensure native muted & playsInline configuration for full mobile policy acceptance
-    video.muted = true;
+    // Ensure native muted & playsInline configuration for full mobile policy acceptance only if not yet unlocked
+    if (!hasUnlockedAudioRef.current) {
+      video.muted = true;
+    }
     video.playsInline = true;
 
     if (isPlayPendingRef.current) return;
@@ -270,8 +272,10 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     video.playsInline = true;
     video.autoplay = true;
     video.loop = true;
-    video.muted = true;
-    video.defaultMuted = true;
+    if (!hasUnlockedAudioRef.current) {
+      video.muted = true;
+      video.defaultMuted = true;
+    }
 
     // If media is already cached / ready (readyState >= 2), attempt playback immediately
     if (video.readyState >= 2) {
@@ -280,17 +284,22 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       safeAutoplay();
     }
 
-    // Unified single-guarded unlock handler triggered on the first genuine user interaction anywhere on the page
+    // Unified multi-gesture unlock handler triggered on genuine user interaction anywhere on the page
     const events = [
-      'pointerdown',
       'touchstart',
+      'touchend',
+      'pointerdown',
       'mousedown',
       'click',
       'keydown',
       'wheel',
     ] as const;
 
+    let isListenerActive = true;
+
     const removeGestureListeners = () => {
+      if (!isListenerActive) return;
+      isListenerActive = false;
       events.forEach((evt) => {
         window.removeEventListener(evt, handleFirstGesture, { capture: true } as EventListenerOptions);
         document.removeEventListener(evt, handleFirstGesture, { capture: true } as EventListenerOptions);
@@ -308,36 +317,59 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
         removeGestureListeners();
         return;
       }
-      hasUnlockedAudioRef.current = true;
-      removeGestureListeners();
 
       const userPref = sessionStorage.getItem(AUDIO_PREF_KEY);
       if (userPref === 'muted') {
+        hasUnlockedAudioRef.current = true;
+        removeGestureListeners();
         return; // Explicit manual mute preference is preserved
       }
 
       if (video) {
         video.muted = false;
-        video.volume = 1;
+        video.volume = 1.0;
         setIsMuted(false);
         isMutedRef.current = false;
         sessionStorage.setItem(AUDIO_PREF_KEY, 'unmuted');
 
         const gainNode = initAudioGraph();
         const ctx = audioCtxRef.current;
-        if (gainNode && ctx) {
-          if (ctx.state === 'suspended') {
-            ctx.resume().catch(() => {});
-          }
-          const now = ctx.currentTime;
+
+        const applyRunningGain = (audioContext: AudioContext, gain: GainNode) => {
+          hasUnlockedAudioRef.current = true;
+          removeGestureListeners();
+
+          const now = audioContext.currentTime;
           const isPaused = video.paused;
           const targetGain = !isPaused ? (isHeroVisibleRef.current ? 1.0 : 0.08) : 0;
-          gainNode.gain.cancelScheduledValues(now);
-          gainNode.gain.setValueAtTime(targetGain, now);
-        }
+          gain.gain.cancelScheduledValues(now);
+          gain.gain.setValueAtTime(targetGain, now);
 
-        if (video.paused) {
-          video.play().then(() => setIsPlaying(true)).catch(() => {});
+          if (video.paused) {
+            video.play().then(() => setIsPlaying(true)).catch(() => {});
+          }
+        };
+
+        if (gainNode && ctx) {
+          if (ctx.state === 'running') {
+            applyRunningGain(ctx, gainNode);
+          } else {
+            // Attempt synchronous resume inside user activation context
+            const resumePromise = ctx.resume();
+            if (ctx.state === 'running') {
+              applyRunningGain(ctx, gainNode);
+            } else if (resumePromise && typeof resumePromise.then === 'function') {
+              resumePromise
+                .then(() => {
+                  if (ctx.state === 'running') {
+                    applyRunningGain(ctx, gainNode);
+                  }
+                })
+                .catch(() => {
+                  // If resume failed or was rejected on early pointerdown, leave listeners active for touchstart/touchend/click!
+                });
+            }
+          }
         }
       }
     };

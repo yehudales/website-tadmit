@@ -44,14 +44,20 @@ export default function App() {
     // Immediate synchronous reset
     resetToTop();
 
-    // Secondary post-layout stabilization reset (frame-bounded, does NOT permanently lock scrolling)
-    const rafId = requestAnimationFrame(() => {
-      resetToTop();
+    // Bounded multi-stage post-layout stabilization resets (frame-bounded, does NOT permanently lock scrolling)
+    const raf1 = requestAnimationFrame(resetToTop);
+    const raf2 = requestAnimationFrame(() => {
+      requestAnimationFrame(resetToTop);
     });
 
+    const timer1 = setTimeout(resetToTop, 50);
+    const timer2 = setTimeout(resetToTop, 150);
+    const timer3 = setTimeout(resetToTop, 300);
+
     const handlePageShow = (e: PageTransitionEvent) => {
+      resetToTop();
       if (e.persisted) {
-        resetToTop();
+        requestAnimationFrame(resetToTop);
       }
     };
 
@@ -59,7 +65,11 @@ export default function App() {
     window.addEventListener('load', resetToTop, { once: true });
 
     return () => {
-      cancelAnimationFrame(rafId);
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
       window.removeEventListener('pageshow', handlePageShow);
       window.removeEventListener('load', resetToTop);
     };
