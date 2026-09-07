@@ -32,8 +32,8 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     isMutedRef.current = isMuted;
   }, [isMuted]);
 
-  // Smooth cinematic audio volume transition (fading between 100% and 8% over ~3.8s)
-  const fadeVolumeTo = useCallback((targetVol: number, durationMs = 3800) => {
+  // Smooth cinematic audio volume transition (fading between 100% and 8%)
+  const fadeVolumeTo = useCallback((targetVol: number, durationMs = 350) => {
     const video = videoRef.current;
     if (!video || video.muted || isMutedRef.current) return;
 
@@ -44,7 +44,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
 
     const startVol = video.volume;
     const diff = targetVol - startVol;
-    if (Math.abs(diff) < 0.005) {
+    if (Math.abs(diff) < 0.01) {
       video.volume = targetVol;
       return;
     }
@@ -54,10 +54,8 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     const step = (now: number) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / durationMs, 1);
-      // Smooth easeInOutCubic transition for organic, cinematic audio attenuation
-      const ease = progress < 0.5
-        ? 4 * progress * progress * progress
-        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+      // Ease out cubic transition for organic audio attenuation
+      const ease = 1 - Math.pow(1 - progress, 3);
       const current = startVol + diff * ease;
       if (video && !video.muted && !isMutedRef.current) {
         video.volume = Math.max(0, Math.min(1, current));
@@ -148,9 +146,9 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
         const isVisible = entry.isIntersecting && entry.intersectionRatio > 0.05;
         isHeroVisibleRef.current = isVisible;
 
-        // Smoothly adjust volume according to viewport presence over ~3.8s
+        // Smoothly adjust volume according to viewport presence
         const targetVolume = isVisible ? 1.0 : 0.08;
-        fadeVolumeTo(targetVolume, 3800);
+        fadeVolumeTo(targetVolume, 380);
       },
       {
         threshold: [0, 0.05, 0.15],
