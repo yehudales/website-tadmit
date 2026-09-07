@@ -21,6 +21,14 @@ export default function App() {
   const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
+  // Configure manual scroll restoration on initial mount so page and refresh always start at top (scrollY 0)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+  }, []);
+
   // Synchronize document direction and lang attribute
   useEffect(() => {
     document.documentElement.lang = lang;

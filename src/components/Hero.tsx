@@ -26,8 +26,12 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
 
   const videoSrc = BUSINESS_CONFIG.media.heroVideoUrl || '/assets/videos/hero.mp4';
 
-  // Initial state is always muted on initial load to ensure reliable, unblocked mobile autoplay
-  const [isMuted, setIsMuted] = useState<boolean>(true);
+  // Default user audio preference is ACTIVE (unmuted / isMuted=false) unless explicitly saved as 'muted'
+  const [isMuted, setIsMuted] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    const pref = sessionStorage.getItem(AUDIO_PREF_KEY);
+    return pref === 'muted';
+  });
 
   const isMutedRef = useRef<boolean>(isMuted);
   useEffect(() => {
@@ -388,6 +392,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
             disableRemotePlayback
             tabIndex={-1}
             aria-label={lang === 'he' ? 'סרטון אווירה של יהודלס' : 'Yehudales atmosphere video'}
+            onLoadedMetadata={safeAutoplay}
             onLoadedData={safeAutoplay}
             onCanPlay={safeAutoplay}
             onPlaying={() => {
