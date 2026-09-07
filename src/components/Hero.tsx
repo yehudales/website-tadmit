@@ -19,8 +19,10 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
   const isAudioConnectedRef = useRef<boolean>(false);
 
   const [isPlaying, setIsPlaying] = useState(true);
+  const [hasVideoStarted, setHasVideoStarted] = useState<boolean>(false);
   const [heroHeight, setHeroHeight] = useState<number>(0);
   const [isScrolledPast, setIsScrolledPast] = useState<boolean>(false);
+  const isPlayPendingRef = useRef<boolean>(false);
 
   const videoSrc = BUSINESS_CONFIG.media.heroVideoUrl || '/assets/videos/hero.mp4';
 
@@ -192,7 +194,38 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     };
   }, [fadeGainTo]);
 
-  // Autoplay with native muted configuration for 100% browser acceptance
+  // Single authoritative guarded autoplay function
+  const safeAutoplay = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Ensure native muted & playsInline configuration for full mobile policy acceptance
+    video.muted = true;
+    video.playsInline = true;
+
+    if (isPlayPendingRef.current) return;
+    if (!video.paused) {
+      setIsPlaying(true);
+      return;
+    }
+
+    isPlayPendingRef.current = true;
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          isPlayPendingRef.current = false;
+          setIsPlaying(true);
+        })
+        .catch(() => {
+          isPlayPendingRef.current = false;
+        });
+    } else {
+      isPlayPendingRef.current = false;
+    }
+  }, []);
+
+  // Autoplay with native muted configuration and cached-readiness check
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -203,20 +236,12 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     video.muted = true;
     video.defaultMuted = true;
 
-    const startAutoplay = async () => {
-      try {
-        await video.play();
-        setIsPlaying(true);
-      } catch {
-        // Safe fallback retry on canplay event
-        const onCanPlay = () => {
-          video.play().then(() => setIsPlaying(true)).catch(() => {});
-        };
-        video.addEventListener('canplay', onCanPlay, { once: true });
-      }
-    };
-
-    startAutoplay();
+    // If media is already cached / ready (readyState >= 2), attempt playback immediately
+    if (video.readyState >= 2) {
+      safeAutoplay();
+    } else {
+      safeAutoplay();
+    }
 
     // On user's first document gesture, activate audio seamlessly without conflicting with speaker button
     const handleFirstGesture = (e: Event) => {
@@ -261,7 +286,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       window.removeEventListener('touchstart', handleFirstGesture);
       window.removeEventListener('click', handleFirstGesture);
     };
-  }, [videoSrc, initAudioGraph]);
+  }, [videoSrc, initAudioGraph, safeAutoplay]);
 
   // Clean up Web Audio graph on unmount
   useEffect(() => {
@@ -363,9 +388,16 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
             disableRemotePlayback
             tabIndex={-1}
             aria-label={lang === 'he' ? 'סרטון אווירה של יהודלס' : 'Yehudales atmosphere video'}
-            onPlay={() => setIsPlaying(true)}
+            onLoadedData={safeAutoplay}
+            onCanPlay={safeAutoplay}
+            onPlaying={() => {
+              setHasVideoStarted(true);
+              setIsPlaying(true);
+            }}
             onPause={() => setIsPlaying(false)}
-            className="w-full h-full object-cover object-center block pointer-events-none select-none"
+            className={`w-full h-full object-cover object-center block pointer-events-none select-none transition-opacity duration-300 ${
+              hasVideoStarted ? 'opacity-100' : 'opacity-0'
+            }`}
           />
 
           {/* Subtle top vignette gradient for header readability */}
