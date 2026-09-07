@@ -23,6 +23,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
   const [heroHeight, setHeroHeight] = useState<number>(0);
   const [isScrolledPast, setIsScrolledPast] = useState<boolean>(false);
   const isPlayPendingRef = useRef<boolean>(false);
+  const hasUnlockedAudioRef = useRef<boolean>(false);
 
   const videoSrc = BUSINESS_CONFIG.media.heroVideoUrl || '/assets/videos/hero.mp4';
 
@@ -247,13 +248,18 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       safeAutoplay();
     }
 
-    // On user's first document gesture, activate audio seamlessly without conflicting with speaker button
+    // On user's first document activation gesture, seamlessly unlock AudioContext and enable sound if active
     const handleFirstGesture = (e: Event) => {
-      // Do not trigger general un-mute if the gesture was on the video controls
+      // If the interaction happened directly on video controls, speaker button handler takes absolute priority
       const target = e.target as HTMLElement | null;
       if (target && target.closest('#hero-video-controls')) {
         return;
       }
+
+      if (hasUnlockedAudioRef.current) {
+        return;
+      }
+      hasUnlockedAudioRef.current = true;
 
       const userPref = sessionStorage.getItem(AUDIO_PREF_KEY);
       if (userPref === 'muted') {
@@ -283,12 +289,16 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       }
     };
 
+    window.addEventListener('pointerdown', handleFirstGesture, { once: true, passive: true });
     window.addEventListener('touchstart', handleFirstGesture, { once: true, passive: true });
     window.addEventListener('click', handleFirstGesture, { once: true, passive: true });
+    window.addEventListener('keydown', handleFirstGesture, { once: true, passive: true });
 
     return () => {
+      window.removeEventListener('pointerdown', handleFirstGesture);
       window.removeEventListener('touchstart', handleFirstGesture);
       window.removeEventListener('click', handleFirstGesture);
+      window.removeEventListener('keydown', handleFirstGesture);
     };
   }, [videoSrc, initAudioGraph, safeAutoplay]);
 
@@ -318,6 +328,9 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
   const toggleMute = () => {
     const video = videoRef.current;
     if (!video) return;
+
+    // Mark audio unlocked to prevent any competing global gesture overrides
+    hasUnlockedAudioRef.current = true;
 
     if (isMuted || video.muted) {
       // Immediate unmute with immediate target gain

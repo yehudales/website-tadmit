@@ -6,6 +6,14 @@
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <link rel="apple-touch-icon" href="/logo.svg" />
 
+    <!-- Early synchronous scroll restoration override: guarantee initial page load and refresh start at scrollY=0 -->
+    <script>
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+      window.scrollTo(0, 0);
+    </script>
+
     <title>יהודלס - חווית ליל שישי | טעם ברמה גבוהה</title>
     <meta name="description" content="יהודלס (Yehudales) - מותג אוכל פרימיום בטייק אווי והזמנות WhatsApp באשדוד. חווית ליל שישי, בשרים וצ'ולנט בטעם ברמה גבוהה, שירות וניקיון ללא פשרות. כשרות מהודרת נווה ציון ובד&quot;ץ העדה החרדית." />
     <meta name="keywords" content="יהודלס, צ'ולנט אשדוד, ליל שישי אשדוד, הזמנה בוואטסאפ אשדוד, אוכל מוכן לשבת אשדוד, טייק אווי אשדוד, אוכל כשר למהדרין אשדוד, קייטרינג שבת, Yehudales" />
