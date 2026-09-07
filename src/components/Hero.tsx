@@ -39,6 +39,19 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     isMutedRef.current = isMuted;
   }, [isMuted]);
 
+  // Immediate audio stop helper: cancels all scheduled values and zeros GainNode instantly
+  const stopAudioImmediately = useCallback(() => {
+    const ctx = audioCtxRef.current;
+    const gainNode = gainNodeRef.current;
+    if (gainNode && ctx) {
+      try {
+        const now = ctx.currentTime;
+        gainNode.gain.cancelScheduledValues(now);
+        gainNode.gain.setValueAtTime(0, now);
+      } catch {}
+    }
+  }, []);
+
   // Safe lazy Web Audio API Graph Initialization (connected only once per video element)
   const initAudioGraph = useCallback(() => {
     const video = videoRef.current;
@@ -66,7 +79,8 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
 
       if (!gainNodeRef.current) {
         const gainNode = ctx.createGain();
-        const initialGain = isMutedRef.current ? 0 : (isHeroVisibleRef.current ? 1.0 : 0.08);
+        const isPaused = video.paused;
+        const initialGain = (isMutedRef.current || isPaused) ? 0 : (isHeroVisibleRef.current ? 1.0 : 0.08);
         gainNode.gain.setValueAtTime(initialGain, ctx.currentTime);
         sourceNodeRef.current.connect(gainNode);
         gainNode.connect(ctx.destination);
@@ -86,21 +100,24 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     }
   }, []);
 
-  // Smooth Web Audio GainNode transition (1.0 when Hero is visible, 0.08 when not visible)
+  // Smooth Web Audio GainNode transition (1.0 when Hero is visible, 0.08 when not visible, 0 when paused or muted)
   const fadeGainTo = useCallback(
     (targetGain: number, durationMs = 350) => {
+      const video = videoRef.current;
+      const isPaused = !video || video.paused;
+
+      // Priority 1: Paused -> Gain = 0 immediately
+      // Priority 2: Manual Mute -> Gain = 0 immediately
+      if (isMutedRef.current || isPaused) {
+        stopAudioImmediately();
+        return;
+      }
+
       const ctx = audioCtxRef.current;
-      const gainNode = gainNodeRef.current || (isMutedRef.current ? null : initAudioGraph());
+      const gainNode = gainNodeRef.current || initAudioGraph();
 
       if (gainNode && ctx) {
         const now = ctx.currentTime;
-        if (isMutedRef.current) {
-          // Explicitly keep Gain at 0 when manually muted; do not restore volume on scroll
-          gainNode.gain.cancelScheduledValues(now);
-          gainNode.gain.setValueAtTime(0, now);
-          return;
-        }
-
         if (ctx.state === 'suspended') {
           ctx.resume().catch(() => {});
         }
@@ -110,7 +127,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
         gainNode.gain.linearRampToValueAtTime(targetGain, now + durationSec);
       }
     },
-    [initAudioGraph]
+    [initAudioGraph, stopAudioImmediately]
   );
 
   // Callback ref to configure synchronous native DOM attributes on mount (no duplicate play calls)
@@ -180,10 +197,15 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
         const isVisible = entry.isIntersecting && entry.intersectionRatio > 0.05;
         isHeroVisibleRef.current = isVisible;
 
-        // Smoothly adjust audio GainNode according to viewport presence if not manually muted
-        if (!isMutedRef.current) {
+        const video = videoRef.current;
+        const isPaused = !video || video.paused;
+
+        // Smoothly adjust audio GainNode according to viewport presence only if not manually muted and not paused
+        if (!isMutedRef.current && !isPaused) {
           const targetGain = isVisible ? 1.0 : 0.08;
           fadeGainTo(targetGain, 350);
+        } else {
+          stopAudioImmediately();
         }
       },
       {
@@ -197,7 +219,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     return () => {
       observer.disconnect();
     };
-  }, [fadeGainTo]);
+  }, [fadeGainTo, stopAudioImmediately]);
 
   // Single authoritative guarded autoplay function
   const safeAutoplay = useCallback(() => {
@@ -248,18 +270,28 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       safeAutoplay();
     }
 
-    // On user's first document activation gesture, seamlessly unlock AudioContext and enable sound if active
+    // On user's first document activation gesture anywhere, seamlessly unlock AudioContext and enable sound if active
+    const events = ['pointerdown', 'touchstart', 'click', 'keydown'] as const;
+
+    const removeGestureListeners = () => {
+      events.forEach((evt) => {
+        window.removeEventListener(evt, handleFirstGesture, { capture: true } as EventListenerOptions);
+      });
+    };
+
     const handleFirstGesture = (e: Event) => {
-      // If the interaction happened directly on video controls, speaker button handler takes absolute priority
+      // If the interaction happened directly on video controls, speaker/play button handler takes absolute priority
       const target = e.target as HTMLElement | null;
       if (target && target.closest('#hero-video-controls')) {
         return;
       }
 
       if (hasUnlockedAudioRef.current) {
+        removeGestureListeners();
         return;
       }
       hasUnlockedAudioRef.current = true;
+      removeGestureListeners();
 
       const userPref = sessionStorage.getItem(AUDIO_PREF_KEY);
       if (userPref === 'muted') {
@@ -273,14 +305,16 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
         sessionStorage.setItem(AUDIO_PREF_KEY, 'unmuted');
 
         const gainNode = initAudioGraph();
-        if (gainNode && audioCtxRef.current) {
-          const now = audioCtxRef.current.currentTime;
-          const targetGain = isHeroVisibleRef.current ? 1.0 : 0.08;
+        const ctx = audioCtxRef.current;
+        if (gainNode && ctx) {
+          if (ctx.state === 'suspended') {
+            ctx.resume().catch(() => {});
+          }
+          const now = ctx.currentTime;
+          const isPaused = video.paused;
+          const targetGain = !isPaused ? (isHeroVisibleRef.current ? 1.0 : 0.08) : 0;
           gainNode.gain.cancelScheduledValues(now);
           gainNode.gain.setValueAtTime(targetGain, now);
-          if (audioCtxRef.current.state === 'suspended') {
-            audioCtxRef.current.resume().catch(() => {});
-          }
         }
 
         if (video.paused) {
@@ -289,16 +323,12 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       }
     };
 
-    window.addEventListener('pointerdown', handleFirstGesture, { once: true, passive: true });
-    window.addEventListener('touchstart', handleFirstGesture, { once: true, passive: true });
-    window.addEventListener('click', handleFirstGesture, { once: true, passive: true });
-    window.addEventListener('keydown', handleFirstGesture, { once: true, passive: true });
+    events.forEach((evt) => {
+      window.addEventListener(evt, handleFirstGesture, { capture: true, passive: true });
+    });
 
     return () => {
-      window.removeEventListener('pointerdown', handleFirstGesture);
-      window.removeEventListener('touchstart', handleFirstGesture);
-      window.removeEventListener('click', handleFirstGesture);
-      window.removeEventListener('keydown', handleFirstGesture);
+      removeGestureListeners();
     };
   }, [videoSrc, initAudioGraph, safeAutoplay]);
 
@@ -318,10 +348,22 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     if (!video) return;
 
     if (video.paused) {
-      video.play().then(() => setIsPlaying(true)).catch(() => {});
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+            if (!isMutedRef.current) {
+              const targetGain = isHeroVisibleRef.current ? 1.0 : 0.08;
+              fadeGainTo(targetGain, 200);
+            }
+          })
+          .catch(() => {});
+      }
     } else {
       video.pause();
       setIsPlaying(false);
+      stopAudioImmediately();
     }
   };
 
@@ -340,19 +382,23 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       sessionStorage.setItem(AUDIO_PREF_KEY, 'unmuted');
 
       const gainNode = initAudioGraph();
-      if (gainNode && audioCtxRef.current) {
-        const targetGain = isHeroVisibleRef.current ? 1.0 : 0.08;
-        const now = audioCtxRef.current.currentTime;
+      const ctx = audioCtxRef.current;
+      if (gainNode && ctx) {
+        if (ctx.state === 'suspended') {
+          ctx.resume().catch(() => {});
+        }
+        const now = ctx.currentTime;
+        const isPaused = video.paused;
+        const targetGain = !isPaused ? (isHeroVisibleRef.current ? 1.0 : 0.08) : 0;
         gainNode.gain.cancelScheduledValues(now);
         gainNode.gain.setValueAtTime(targetGain, now);
-        if (audioCtxRef.current.state === 'suspended') {
-          audioCtxRef.current.resume().catch(() => {});
-        }
       }
 
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.then(() => setIsPlaying(true)).catch(() => {});
+      if (video.paused) {
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => setIsPlaying(true)).catch(() => {});
+        }
       }
     } else {
       // Immediate manual mute: cancel any pending ramps and instantly zero out GainNode
@@ -360,12 +406,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       setIsMuted(true);
       isMutedRef.current = true;
       sessionStorage.setItem(AUDIO_PREF_KEY, 'muted');
-
-      if (gainNodeRef.current && audioCtxRef.current) {
-        const now = audioCtxRef.current.currentTime;
-        gainNodeRef.current.gain.cancelScheduledValues(now);
-        gainNodeRef.current.gain.setValueAtTime(0, now);
-      }
+      stopAudioImmediately();
     }
   };
 
@@ -411,8 +452,22 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
             onPlaying={() => {
               setHasVideoStarted(true);
               setIsPlaying(true);
+              if (!isMutedRef.current) {
+                const targetGain = isHeroVisibleRef.current ? 1.0 : 0.08;
+                fadeGainTo(targetGain, 200);
+              }
             }}
-            onPause={() => setIsPlaying(false)}
+            onPlay={() => {
+              setIsPlaying(true);
+              if (!isMutedRef.current) {
+                const targetGain = isHeroVisibleRef.current ? 1.0 : 0.08;
+                fadeGainTo(targetGain, 200);
+              }
+            }}
+            onPause={() => {
+              setIsPlaying(false);
+              stopAudioImmediately();
+            }}
             className={`w-full h-full object-cover object-center block pointer-events-none select-none transition-opacity duration-300 ${
               hasVideoStarted ? 'opacity-100' : 'opacity-0'
             }`}
