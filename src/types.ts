@@ -1,5 +1,7 @@
 export type Language = 'he' | 'en';
 
+export type NavSectionId = 'about' | 'updates' | 'business-orders' | 'location';
+
 export interface MenuItem {
   id: string;
   name: {

@@ -62,7 +62,7 @@ export const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
           ref={closeButtonRef}
           onClick={onClose}
           aria-label={lang === 'he' ? 'סגור חלון' : 'Close modal'}
-          className="absolute top-4 left-4 rtl:left-auto rtl:right-auto ltr:right-4 rtl:left-4 min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl text-[#94A3B8] hover:text-[#FAF9F6] hover:bg-[#0B0C0E] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E0BE55]"
+          className="absolute top-4 left-4 rtl:left-auto rtl:right-auto ltr:right-4 rtl:left-4 min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl text-[#94A3B8] hover:text-[#FAF9F6] hover:bg-[#0B0C0E] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C]"
         >
           <X className="w-5 h-5" />
         </button>
@@ -103,7 +103,7 @@ export const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm sm:text-base font-bold text-[#FAF9F6] group-hover:text-[#E0BE55] transition-colors">
+                  <h3 className="text-sm sm:text-base font-bold text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors">
                     {options.general.title[lang]}
                   </h3>
                   <ExternalLink className="w-4 h-4 text-[#94A3B8] group-hover:text-[#FAF9F6] transition-colors" />
@@ -131,7 +131,7 @@ export const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm sm:text-base font-bold text-[#FAF9F6] group-hover:text-[#E0BE55] transition-colors">
+                  <h3 className="text-sm sm:text-base font-bold text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors">
                     {options.catering.title[lang]}
                   </h3>
                   <ExternalLink className="w-4 h-4 text-[#94A3B8] group-hover:text-emerald-300 transition-colors" />
@@ -152,9 +152,9 @@ export const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
           <span>{lang === 'he' ? 'מעדיפים לחייג טלפונית?' : 'Prefer to call directly?'}</span>
           <a
             href={`tel:${BUSINESS_CONFIG.contact.phone}`}
-            className="inline-flex items-center gap-1.5 font-bold text-[#FAF9F6] hover:text-[#E0BE55] underline focus:outline-none min-h-[44px]"
+            className="inline-flex items-center gap-1.5 font-bold text-[#FAF9F6] hover:text-[#FF7B1C] underline focus:outline-none min-h-[44px]"
           >
-            <PhoneCall className="w-3.5 h-3.5 text-[#E0BE55]" />
+            <PhoneCall className="w-3.5 h-3.5 text-[#FF7B1C]" />
             {BUSINESS_CONFIG.contact.phoneFormatted}
           </a>
         </div>

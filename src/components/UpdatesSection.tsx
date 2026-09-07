@@ -151,30 +151,6 @@ export const UpdatesSection: React.FC<UpdatesSectionProps> = ({ lang, onOpenWhat
             </div>
           ))}
         </div>
-
-        {/* Action Banner */}
-        <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#1A1D22] to-[#121417] border border-[#252A32] flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-start">
-          <div>
-            <h4 className="text-base sm:text-lg font-bold text-[#FAF9F6] mb-1">
-              {lang === 'he' ? 'רוצים לשריין מנות ליום חמישי הקרוב?' : 'Want to secure dishes for this Thursday?'}
-            </h4>
-            <p className="text-xs sm:text-sm text-[#94A3B8]">
-              {lang === 'he'
-                ? 'שלחו לנו הודעה ישירה בוואטסאפ ונשמור לכם סיר חם ומושלם'
-                : 'Send us a direct WhatsApp message and we will reserve hot food for you'}
-            </p>
-          </div>
-
-          <a
-            href={getWhatsAppOrderUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="min-h-[46px] inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-[#0B0C0E] font-black text-xs sm:text-sm shadow-lg transition-all active:scale-95 shrink-0 w-full sm:w-auto"
-          >
-            <MessageCircle className="w-4 h-4 text-[#0B0C0E]" />
-            <span>{BUSINESS_CONFIG.whatsapp.ctaText[lang]}</span>
-          </a>
-        </div>
       </div>
     </section>
   );

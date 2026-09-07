@@ -111,10 +111,22 @@ export const StoreStatusWidget: React.FC<StoreStatusWidgetProps> = ({
         </div>
 
         <div className="mt-2 pt-2 border-t border-white/10 flex items-center justify-between text-xs">
-          <span className="text-[#94A3B8]">
-            {status.isOpen
-              ? (lang === 'he' ? 'נסגר בעוד:' : 'Closes in:')
-              : (lang === 'he' ? 'נפתח בעוד:' : 'Opens in:')}
+          <span className="text-[#94A3B8] flex items-center gap-1">
+            {status.isOpen ? (
+              <>
+                <span className="font-bold text-[#22C55E] drop-shadow-[0_0_8px_rgba(34,197,94,0.55)]">
+                  {lang === 'he' ? 'פתוח' : 'Open'}
+                </span>
+                <span>{lang === 'he' ? 'החנות נסגרת בעוד:' : 'Store closes in:'}</span>
+              </>
+            ) : (
+              <>
+                <span className="font-bold text-[#EF4444] drop-shadow-[0_0_8px_rgba(239,68,68,0.55)]">
+                  {lang === 'he' ? 'סגור' : 'Closed'}
+                </span>
+                <span>{lang === 'he' ? 'החנות נפתחת בעוד:' : 'Store opens in:'}</span>
+              </>
+            )}
           </span>
           <span
             className={`font-mono font-bold tracking-wider tabular-nums ${
@@ -141,7 +153,7 @@ export const StoreStatusWidget: React.FC<StoreStatusWidgetProps> = ({
     >
       {/* Schedule Info Header */}
       <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-[#94A3B8] mb-2 font-medium tracking-wide">
-        <Clock className="w-3.5 h-3.5 text-[#E0BE55]" />
+        <Clock className="w-3.5 h-3.5 text-[#FF7B1C]" />
         <span>
           {lang === 'he'
             ? 'פעילות: ימי חמישי 17:00 עד 01:00 (ליל שישי)'
@@ -152,29 +164,28 @@ export const StoreStatusWidget: React.FC<StoreStatusWidgetProps> = ({
       {status.isOpen ? (
         /* WHEN OPEN */
         <div className="flex flex-col items-center text-center">
-          {/* Glowing Green "פתוח" */}
-          <div className="flex items-center gap-2 mb-1">
-            <span className="w-3 h-3 rounded-full bg-[#22C55E] shadow-[0_0_12px_#22C55E] animate-pulse" />
-            <span className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-[#22C55E] drop-shadow-[0_0_15px_rgba(34,197,94,0.7)]">
-              {lang === 'he' ? 'פתוח' : 'OPEN'}
+          {/* Dynamic Status Header */}
+          <div className="text-sm sm:text-base font-medium text-[#94A3B8] mb-1 flex items-center justify-center gap-1.5">
+            <span className="font-bold text-[#22C55E] drop-shadow-[0_0_8px_rgba(34,197,94,0.55)]">
+              {lang === 'he' ? 'פתוח' : 'Open'}
             </span>
+            <span>{lang === 'he' ? 'החנות נסגרת בעוד:' : 'Store closes in:'}</span>
           </div>
 
-          {/* White subtitle with live countdown: "נסגר בעוד" */}
-          <div className="text-xs sm:text-sm font-semibold text-white mt-1 flex items-center gap-2">
-            <span className="text-white/80">{lang === 'he' ? 'נסגר בעוד' : 'Closes in'}</span>
-            <span className="font-mono text-base sm:text-lg font-bold text-white tracking-wider tabular-nums bg-white/10 px-2 py-0.5 rounded-lg">
-              {hoursStr}:{minutesStr}:{secondsStr}
-            </span>
+          <div className="font-mono text-2xl sm:text-3xl font-black tracking-wider text-white tabular-nums bg-white/10 px-3 py-1 rounded-xl mt-1">
+            {hoursStr}:{minutesStr}:{secondsStr}
           </div>
         </div>
       ) : (
         /* WHEN CLOSED */
         <div className="flex flex-col items-center text-center">
-          {/* Label: "נפתח בעוד" */}
-          <span className="text-xs sm:text-sm md:text-base font-bold text-[#FAF9F6] mb-1 tracking-wide">
-            {lang === 'he' ? 'נפתח בעוד' : 'Opens in'}
-          </span>
+          {/* Dynamic Status Header */}
+          <div className="text-sm sm:text-base font-medium text-[#94A3B8] mb-1 flex items-center justify-center gap-1.5">
+            <span className="font-bold text-[#EF4444] drop-shadow-[0_0_8px_rgba(239,68,68,0.55)]">
+              {lang === 'he' ? 'סגור' : 'Closed'}
+            </span>
+            <span>{lang === 'he' ? 'החנות נפתחת בעוד:' : 'Store opens in:'}</span>
+          </div>
 
           {/* Orange Visual Treatment: Bright premium orange, high contrast, clean typography, tabular numbers, subtle glow */}
           <div className="font-mono text-2xl sm:text-3xl md:text-4xl font-black tracking-wider text-[#FF7A00] drop-shadow-[0_0_16px_rgba(255,122,0,0.5)] tabular-nums flex items-baseline gap-1.5 sm:gap-2">

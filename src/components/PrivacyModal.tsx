@@ -50,13 +50,13 @@ export const PrivacyModal: React.FC<PrivacyModalProps> = ({
           ref={closeButtonRef}
           onClick={onClose}
           aria-label={lang === 'he' ? 'סגור מדיניות פרטיות' : 'Close privacy policy'}
-          className="absolute top-4 left-4 rtl:left-auto rtl:right-auto ltr:right-4 rtl:left-4 min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl text-[#94A3B8] hover:text-[#FAF9F6] hover:bg-[#0B0C0E] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E0BE55]"
+          className="absolute top-4 left-4 rtl:left-auto rtl:right-auto ltr:right-4 rtl:left-4 min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl text-[#94A3B8] hover:text-[#FAF9F6] hover:bg-[#0B0C0E] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C]"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-11 h-11 rounded-xl bg-[#0B0C0E] text-[#E0BE55] border border-[#252A32] flex items-center justify-center">
+          <div className="w-11 h-11 rounded-xl bg-[#0B0C0E] text-[#FF7B1C] border border-[#252A32] flex items-center justify-center">
             <Lock className="w-6 h-6" />
           </div>
           <div>

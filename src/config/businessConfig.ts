@@ -36,7 +36,14 @@ export const BUSINESS_CONFIG = {
       he: 'אדמו"ר מבעלזא 7, אשדוד',
       en: 'Admor MiBelz 7, Ashdod, Israel'
     },
-    googleMapsUrl: '[GOOGLE_MAPS_URL]', // Authoritative placeholder until provided
+    postalCode: '7730022',
+    fullAddress: {
+      he: 'אדמו"ר מבעלזא 7, אשדוד 7730022',
+      en: 'Admor MiBelz 7, Ashdod 7730022, Israel'
+    },
+    wazeUrl: `https://waze.com/ul?q=${encodeURIComponent('אדמו"ר מבעלזא 7, אשדוד 7730022')}&navigate=yes`,
+    googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('אדמו"ר מבעלזא 7, אשדוד 7730022')}`,
+    embedMapUrl: `https://maps.google.com/maps?q=${encodeURIComponent('אדמו"ר מבעלזא 7 אשדוד 7730022')}&t=&z=16&ie=UTF8&iwloc=&output=embed`,
     takeawayNote: {
       he: 'טייק אווי והזמנות בוואטסאפ בלבד • ללא מקומות ישיבה • איסוף עצמי בתיאום מראש',
       en: 'Takeaway & WhatsApp Orders Only • No Dine-in Seating • Self-pickup by arrangement'
@@ -158,7 +165,80 @@ export const BUSINESS_CONFIG = {
     heroVideoMobileUrl: '',
     heroPoster: '',
     heroImage: ''
-  }
+  },
+
+  // Authoritative live updates & announcements
+  updates: [
+    {
+      id: 'update-1',
+      date: {
+        he: 'יום חמישי הקרוב • מ-17:00',
+        en: 'This Thursday • From 17:00'
+      },
+      badge: {
+        he: 'טרי מהסיר',
+        en: 'Fresh & Hot'
+      },
+      title: {
+        he: 'הסירים מבעבעים: צ\'ולנט בקר עשיר, קישקע וקוגלים ירושלמיים',
+        en: 'Pots Simmering: Prime Beef Cholent, Kishke & Yerushalmi Kugels'
+      },
+      description: {
+        he: 'הצטרפו לחוויית ליל שישי המסורתית של יהודלס. מומלץ להזמין מראש בוואטסאפ להבטחת המנות האהובות עליכם.',
+        en: 'Join the authentic Yehudales Thursday night feast. Pre-ordering via WhatsApp is recommended to secure your favorite dishes.'
+      },
+      tag: {
+        he: 'הזמנות פתוחות',
+        en: 'Orders Open'
+      }
+    },
+    {
+      id: 'update-2',
+      date: {
+        he: 'עדכון קבוע',
+        en: 'Notice'
+      },
+      badge: {
+        he: 'כשרות מהודרת',
+        en: 'Strict Kosher'
+      },
+      title: {
+        he: 'בשר חלק מהדרין: בקר נווה ציון ומוצרי בד״ץ העדה החרדית',
+        en: 'Mehadrin Glatt Meat: Neve Zion Beef & Badatz Edah HaChareidis'
+      },
+      description: {
+        he: 'בכל שבוע אנו מקפידים על חומרי הגלם המובחרים והאיכותיים ביותר לשמירה על שקט נפשי וביטחון מושלם.',
+        en: 'Every week we select only the finest certified kosher ingredients for absolute quality and customer peace of mind.'
+      },
+      tag: {
+        he: 'ללא פשרות',
+        en: 'Uncompromised'
+      }
+    },
+    {
+      id: 'update-3',
+      date: {
+        he: 'הזמנות מראש',
+        en: 'Advance Inquiries'
+      },
+      badge: {
+        he: 'אריזות חמות',
+        en: 'Thermal Care'
+      },
+      title: {
+        he: 'איסוף עצמי מסודר וחם באדמו"ר מבעלזא 7, אשדוד',
+        en: 'Organized Warm Pickup at Admor MiBelz 7, Ashdod'
+      },
+      description: {
+        he: 'כל המנות נארזות באריזות תרמיות מוקפדות השומרות על חום וטריות מקסימלית עד השולחן שלכם.',
+        en: 'All orders are packed in premium thermal containers preserving optimal heat and freshness to your home.'
+      },
+      tag: {
+        he: 'טייק אווי מהיר',
+        en: 'Fast Pickup'
+      }
+    }
+  ]
 };
 
 /**

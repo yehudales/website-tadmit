@@ -8,21 +8,16 @@
     --brand-card: #1A1D22;
     --brand-card-hover: #22262D;
 
-    /* Luxury Accent Gold Palette */
-    --brand-gold-primary: #C9A227;
-    --brand-gold-secondary: #E0BE55;
-    --brand-gold-muted: #9F7D22;
+    /* Luxury Accent Orange Palette (#FF7B1C) */
+    --brand-gold-primary: #FF7B1C;
+    --brand-gold-secondary: #FF7B1C;
+    --brand-gold-muted: #E06509;
 
     /* Typography & Contrast */
     --brand-white: #FAF9F6;
     --brand-gray: #94A3B8;
     --brand-border: #252A32;
     --brand-border-subtle: #1c2026;
-
-    /* Status Colors */
-    --brand-success: #10B981;
-    --brand-error: #EF4444;
-    --brand-warning: #F59E0B;
 
     /* Fonts */
     --font-primary: 'Outfit', 'Assistant', 'Arimo', system-ui, -apple-system, sans-serif;
@@ -55,17 +50,6 @@
   }
 }
 
-/* Warm Luxury Gold text gradient */
-.gold-gradient-text {
-  background: linear-gradient(135deg, #FAF9F6 0%, #E0BE55 45%, #C9A227 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.gold-gradient-bg {
-  background: linear-gradient(135deg, #FAF9F6 0%, #E0BE55 50%, #C9A227 100%);
-}
-
 /* Hide scrollbar for clean horizontal tab lists on mobile */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -88,37 +72,85 @@
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #9F7D22;
+  background: #FF7B1C;
 }
 
-/* Subtle breathing glow animations for modern brand live timer */
+/* Subtle breathing glow animations for free-standing typographic timer */
 @keyframes timerGlowPulseOrange {
   0%, 100% {
-    filter: drop-shadow(0 0 16px rgba(249, 115, 22, 0.28));
-    border-color: rgba(249, 115, 22, 0.35);
+    text-shadow: 0 0 20px rgba(255, 123, 28, 0.4), 0 0 50px rgba(255, 123, 28, 0.2);
+    filter: drop-shadow(0 0 16px rgba(255, 123, 28, 0.3));
   }
   50% {
-    filter: drop-shadow(0 0 32px rgba(249, 115, 22, 0.5));
-    border-color: rgba(249, 115, 22, 0.6);
+    text-shadow: 0 0 35px rgba(255, 123, 28, 0.65), 0 0 80px rgba(255, 123, 28, 0.35);
+    filter: drop-shadow(0 0 28px rgba(255, 123, 28, 0.5));
   }
 }
 
-@keyframes timerGlowPulseGreen {
-  0%, 100% {
-    filter: drop-shadow(0 0 18px rgba(34, 197, 94, 0.3));
-    border-color: rgba(34, 197, 94, 0.4);
+.timer-typographic-orange {
+  animation: timerGlowPulseOrange 4s ease-in-out infinite;
+}
+
+/* Accessibility Feature Classes */
+html.a11y-readable-font body,
+html.a11y-readable-font * {
+  font-family: Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+html.a11y-grayscale {
+  filter: grayscale(100%) !important;
+}
+
+html.a11y-high-contrast {
+  --brand-bg-deep: #000000;
+  --brand-card: #0c0d10;
+  --brand-border: #444c56;
+  --brand-white: #ffffff;
+  --brand-gray: #d1d5db;
+}
+
+html.a11y-high-contrast * {
+  border-color: #4b5563 !important;
+}
+
+html.a11y-highlight-links a {
+  text-decoration: underline !important;
+  text-decoration-thickness: 2px !important;
+  text-underline-offset: 4px !important;
+  color: #FDE047 !important;
+}
+
+/* System reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-  50% {
-    filter: drop-shadow(0 0 36px rgba(34, 197, 94, 0.55));
-    border-color: rgba(34, 197, 94, 0.7);
+  .timer-typographic-orange,
+  .timer-typographic-green {
+    animation: none !important;
+    filter: none !important;
+    text-shadow: none !important;
   }
 }
 
-.timer-card-orange {
-  animation: timerGlowPulseOrange 3.5s ease-in-out infinite;
+/* User-toggled reduced motion in accessibility toolbar */
+html.a11y-reduced-motion *,
+html.a11y-reduced-motion ::before,
+html.a11y-reduced-motion ::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
 }
 
-.timer-card-green {
-  animation: timerGlowPulseGreen 3s ease-in-out infinite;
+html.a11y-reduced-motion .timer-typographic-orange,
+html.a11y-reduced-motion .timer-typographic-green {
+  animation: none !important;
+  filter: none !important;
+  text-shadow: none !important;
 }
 

@@ -95,8 +95,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ lang }) => {
                 </p>
 
                 <div className="pt-3.5 sm:pt-4 border-t border-[#252A32] flex items-center justify-between text-[11px] sm:text-xs text-[#94A3B8]">
-                  <span>{BUSINESS_CONFIG.location.address[lang]}</span>
-                  <span className="text-[#FAF9F6] font-mono">{BUSINESS_CONFIG.contact.phoneFormatted}</span>
+                  <span>{lang === 'he' ? 'יהודלס • חווית ליל שישי' : 'Yehudales • Friday Night Experience'}</span>
+                  <span className="text-[#FAF9F6] font-medium">{BUSINESS_CONFIG.location.city[lang]}</span>
                 </div>
               </div>
             </div>

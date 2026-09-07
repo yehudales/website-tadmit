@@ -1,198 +1,294 @@
-import React from 'react';
-import { MessageCircle, Clock, Calendar, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import {
+  Clock,
+  MapPin,
+  Phone,
+  AlertCircle,
+  ChevronUp,
+} from 'lucide-react';
 import { useStoreStatus } from '../hooks/useStoreStatus';
 import { Language } from '../types';
-import { getWhatsAppOrderUrl, BUSINESS_CONFIG } from '../config/businessConfig';
+import { BUSINESS_CONFIG } from '../config/businessConfig';
 
 interface LiveStoreStatusSectionProps {
   lang: Language;
-  onOpenWhatsApp: () => void;
+  onOpenWhatsApp?: () => void;
 }
 
 export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
   lang,
-  onOpenWhatsApp,
 }) => {
   const status = useStoreStatus();
-  const whatsappUrl = getWhatsAppOrderUrl();
+  const [isHoursOpen, setIsHoursOpen] = useState(false);
 
   const pad = (n: number) => n.toString().padStart(2, '0');
 
-  // Format hours, minutes, seconds
-  // When closed and days > 0, totalHours gives the exact running hours
-  const hoursDisplay = pad(status.totalHours);
+  // Format 4 units: Days : Hours : Minutes : Seconds
+  const daysDisplay = pad(status.days);
+  const hoursDisplay = pad(status.hours);
   const minutesDisplay = pad(status.minutes);
   const secondsDisplay = pad(status.seconds);
 
   return (
     <section
       id="store-status"
-      aria-labelledby="store-status-heading"
-      className="relative py-12 sm:py-16 md:py-20 bg-[#0B0C0E] border-b border-[#252A32] overflow-hidden"
+      aria-label={lang === 'he' ? 'סטטוס החנות וספירה לאחור' : 'Store status and countdown'}
+      className="relative pt-10 sm:pt-14 md:pt-16 pb-12 sm:pb-16 md:pb-20 bg-[#0B0C0E] overflow-hidden select-none"
     >
-      {/* Subtle background ambient radial light */}
-      <div
-        className={`absolute inset-0 pointer-events-none opacity-20 transition-opacity duration-1000 ${
-          status.isOpen
-            ? 'bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(34,197,94,0.25),transparent_70%)]'
-            : 'bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(249,115,22,0.25),transparent_70%)]'
-        }`}
-      />
-
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
+      {/* Free-Standing Typographic Timer Composition */}
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
         
-        {/* Status Header Block */}
-        {status.isOpen ? (
-          /* OPEN STATE */
-          <div className="flex flex-col items-center mb-6 sm:mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 text-xs sm:text-sm font-black tracking-widest uppercase mb-4 shadow-[0_0_20px_rgba(34,197,94,0.2)]">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-              <span>{lang === 'he' ? 'שירות פעיל עכשיו' : 'Active Service Now'}</span>
-            </div>
+        {/* Dynamic Store Status Header Line — Text-Only with subtle timer glow */}
+        <div className="text-sm sm:text-base font-medium text-[#94A3B8] tracking-wide mb-1 sm:mb-2 flex items-center justify-center gap-1.5 flex-wrap">
+          {status.isOpen ? (
+            <>
+              <span className="font-bold text-[#22C55E] drop-shadow-[0_0_8px_rgba(34,197,94,0.55)]">
+                {lang === 'he' ? 'פתוח' : 'Open'}
+              </span>
+              <span>
+                {lang === 'he' ? 'החנות נסגרת בעוד:' : 'Store closes in:'}
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="font-bold text-[#EF4444] drop-shadow-[0_0_8px_rgba(239,68,68,0.55)]">
+                {lang === 'he' ? 'סגור' : 'Closed'}
+              </span>
+              <span>
+                {lang === 'he' ? 'החנות נפתחת בעוד:' : 'Store opens in:'}
+              </span>
+            </>
+          )}
+        </div>
 
-            {/* Glowing Big "פתוח" text */}
-            <h2
-              id="store-status-heading"
-              className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-emerald-400 tracking-tight drop-shadow-[0_0_28px_rgba(34,197,94,0.45)] mb-3"
-            >
-              {lang === 'he' ? 'פתוח' : 'OPEN'}
-            </h2>
-
-            {/* "נסגר בעוד" label */}
-            <p className="text-base sm:text-xl md:text-2xl font-bold text-[#FAF9F6]/90 tracking-wide uppercase">
-              {lang === 'he' ? 'נסגר בעוד' : 'Closes in'}
-            </p>
-          </div>
-        ) : (
-          /* CLOSED STATE */
-          <div className="flex flex-col items-center mb-6 sm:mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1A1D22] border border-[#F97316]/40 text-[#F97316] text-xs sm:text-sm font-bold tracking-widest uppercase mb-4 shadow-[0_0_20px_rgba(249,115,22,0.15)]">
-              <Clock className="w-4 h-4 text-[#F97316]" />
-              <span>{lang === 'he' ? 'ליל שישי הקרוב' : 'Upcoming Thursday Night'}</span>
-            </div>
-
-            {/* Prominent "נפתח בעוד" headline */}
-            <h2
-              id="store-status-heading"
-              className="text-2xl sm:text-4xl md:text-5xl font-black text-[#F97316] tracking-tight drop-shadow-[0_0_24px_rgba(249,115,22,0.35)] mb-2"
-            >
-              {lang === 'he' ? 'נפתח בעוד' : 'Opens in'}
-            </h2>
-
-            {status.days > 0 && (
-              <p className="text-xs sm:text-sm md:text-base text-[#94A3B8] font-medium mt-1">
-                {lang === 'he'
-                  ? `יום חמישי הקרוב בשעה 17:00 (עוד ${status.days} ימים)`
-                  : `Next Thursday at 17:00 (${status.days} days remaining)`}
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Large Modern Digital Countdown Display (Tabular, Breathing Glow) */}
+        {/* The 4-Column Large Bold Free-Standing Timer — STRICTLY UNTOUCHED */}
         <div
-          className={`w-full max-w-3xl rounded-3xl p-5 sm:p-8 md:p-10 bg-[#121417] border shadow-2xl transition-all duration-700 ${
-            status.isOpen ? 'timer-card-green border-emerald-500/40' : 'timer-card-orange border-[#F97316]/40'
-          }`}
+          dir="ltr"
+          className="flex items-baseline justify-center text-white font-black tabular-nums tracking-tight my-2"
         >
-          <div className="flex items-center justify-center gap-2 sm:gap-4 md:gap-6 font-mono font-black select-none">
-            {/* Hours Block */}
-            <div className="flex flex-col items-center flex-1 min-w-[75px] sm:min-w-[110px] md:min-w-[140px]">
-              <span
-                className={`text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight ${
-                  status.isOpen ? 'text-emerald-400' : 'text-[#F97316]'
-                }`}
-              >
-                {hoursDisplay}
-              </span>
-              <span className="text-[11px] sm:text-xs md:text-sm font-sans font-bold text-[#94A3B8] uppercase mt-2 tracking-wider">
-                {lang === 'he' ? 'שעות' : 'Hours'}
-              </span>
-            </div>
-
-            {/* Colon Separator */}
-            <span
-              className={`text-3xl sm:text-5xl md:text-6xl lg:text-7xl pb-6 font-bold ${
-                status.isOpen ? 'text-emerald-400/60' : 'text-[#F97316]/60'
-              }`}
-            >
-              :
+          {/* Days */}
+          <div className="flex flex-col items-center">
+            <span className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] font-black leading-none drop-shadow-[0_0_25px_rgba(255,255,255,0.18)]">
+              {daysDisplay}
             </span>
-
-            {/* Minutes Block */}
-            <div className="flex flex-col items-center flex-1 min-w-[75px] sm:min-w-[110px] md:min-w-[140px]">
-              <span
-                className={`text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight ${
-                  status.isOpen ? 'text-emerald-400' : 'text-[#F97316]'
-                }`}
-              >
-                {minutesDisplay}
-              </span>
-              <span className="text-[11px] sm:text-xs md:text-sm font-sans font-bold text-[#94A3B8] uppercase mt-2 tracking-wider">
-                {lang === 'he' ? 'דקות' : 'Minutes'}
-              </span>
-            </div>
-
-            {/* Colon Separator */}
-            <span
-              className={`text-3xl sm:text-5xl md:text-6xl lg:text-7xl pb-6 font-bold ${
-                status.isOpen ? 'text-emerald-400/60' : 'text-[#F97316]/60'
-              }`}
-            >
-              :
+            <span className="text-[11px] sm:text-xs md:text-sm font-bold text-[#94A3B8] uppercase mt-2 sm:mt-4 tracking-widest">
+              {lang === 'he' ? 'ימים' : 'Days'}
             </span>
-
-            {/* Seconds Block */}
-            <div className="flex flex-col items-center flex-1 min-w-[75px] sm:min-w-[110px] md:min-w-[140px]">
-              <span
-                className={`text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight ${
-                  status.isOpen ? 'text-emerald-400' : 'text-[#F97316]'
-                }`}
-              >
-                {secondsDisplay}
-              </span>
-              <span className="text-[11px] sm:text-xs md:text-sm font-sans font-bold text-[#94A3B8] uppercase mt-2 tracking-wider">
-                {lang === 'he' ? 'שניות' : 'Seconds'}
-              </span>
-            </div>
           </div>
 
-          {/* Schedule Footer Note */}
-          <div className="mt-6 sm:mt-8 pt-5 border-t border-[#252A32] flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm text-[#94A3B8]">
-            <span className="flex items-center gap-1.5 text-[#FAF9F6] font-semibold">
-              <Calendar className="w-4 h-4 text-[#E0BE55]" />
-              {lang === 'he' ? 'לוח זמנים קבוע:' : 'Regular Schedule:'}
+          {/* Colon Separator */}
+          <span className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl px-1 sm:px-2 md:px-4 pb-3 sm:pb-6 text-[#FF7B1C] font-bold select-none drop-shadow-[0_0_12px_rgba(255,123,28,0.6)]">
+            :
+          </span>
+
+          {/* Hours */}
+          <div className="flex flex-col items-center">
+            <span className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] font-black leading-none drop-shadow-[0_0_25px_rgba(255,255,255,0.18)]">
+              {hoursDisplay}
             </span>
-            <span>
-              {lang === 'he'
-                ? 'כל יום חמישי 17:00 → שישי 01:00 לפנות בוקר'
-                : 'Every Thursday 17:00 → Friday 01:00 AM'}
+            <span className="text-[11px] sm:text-xs md:text-sm font-bold text-[#94A3B8] uppercase mt-2 sm:mt-4 tracking-widest">
+              {lang === 'he' ? 'שעות' : 'Hours'}
+            </span>
+          </div>
+
+          {/* Colon Separator */}
+          <span className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl px-1 sm:px-2 md:px-4 pb-3 sm:pb-6 text-[#FF7B1C] font-bold select-none drop-shadow-[0_0_12px_rgba(255,123,28,0.6)]">
+            :
+          </span>
+
+          {/* Minutes */}
+          <div className="flex flex-col items-center">
+            <span className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] font-black leading-none drop-shadow-[0_0_25px_rgba(255,255,255,0.18)]">
+              {minutesDisplay}
+            </span>
+            <span className="text-[11px] sm:text-xs md:text-sm font-bold text-[#94A3B8] uppercase mt-2 sm:mt-4 tracking-widest">
+              {lang === 'he' ? 'דקות' : 'Minutes'}
+            </span>
+          </div>
+
+          {/* Colon Separator */}
+          <span className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl px-1 sm:px-2 md:px-4 pb-3 sm:pb-6 text-[#FF7B1C] font-bold select-none drop-shadow-[0_0_12px_rgba(255,123,28,0.6)]">
+            :
+          </span>
+
+          {/* Seconds */}
+          <div className="flex flex-col items-center">
+            <span className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] font-black leading-none drop-shadow-[0_0_25px_rgba(255,255,255,0.18)]">
+              {secondsDisplay}
+            </span>
+            <span className="text-[11px] sm:text-xs md:text-sm font-bold text-[#94A3B8] uppercase mt-2 sm:mt-4 tracking-widest">
+              {lang === 'he' ? 'שניות' : 'Seconds'}
             </span>
           </div>
         </div>
 
-        {/* Primary Action Button under Timer */}
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md">
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`w-full sm:w-auto flex-1 min-h-[52px] sm:min-h-[56px] inline-flex items-center justify-center gap-3 px-8 py-3.5 rounded-xl font-black text-base sm:text-lg transition-all active:scale-95 shadow-xl ${
-              status.isOpen
-                ? 'bg-emerald-500 hover:bg-emerald-400 text-[#0B0C0E] shadow-[0_8px_30px_rgba(16,185,129,0.35)]'
-                : 'bg-emerald-600 hover:bg-emerald-500 text-[#FAF9F6] shadow-[0_8px_30px_rgba(16,185,129,0.25)]'
-            }`}
+        {/* Interactive "שעות פתיחה" Trigger with Animated Tap / Finger Icon */}
+        <div className="mt-8 sm:mt-10 flex flex-col items-center w-full max-w-2xl">
+          <button
+            type="button"
+            onClick={() => setIsHoursOpen((prev) => !prev)}
+            aria-expanded={isHoursOpen}
+            aria-controls="opening-hours-expandable-content"
+            className="group inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#14171C] hover:bg-[#1C2026] border border-[#252A32] hover:border-[#FF7B1C]/50 text-[#FAF9F6] text-xs sm:text-sm font-bold tracking-wide transition-all duration-200 cursor-pointer shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C]"
+            aria-label={
+              isHoursOpen
+                ? (lang === 'he' ? 'סגור פירוט שעות פתיחה' : 'Close opening hours details')
+                : (lang === 'he' ? 'פתח פירוט שעות פתיחה' : 'Open opening hours details')
+            }
           >
-            <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-            <span>
-              {status.isOpen
-                ? (lang === 'he' ? 'הזמנה מהירה בוואטסאפ' : 'Order Now on WhatsApp')
-                : (lang === 'he' ? 'הזמנה דרך WhatsApp' : 'Order via WhatsApp')}
+            {/* Animated Touch / Pointer Finger Icon with Soft Tap Glow */}
+            <div className="relative flex items-center justify-center w-4 h-4 text-[#FF7B1C] shrink-0">
+              {/* Soft Subtle Glow Ring */}
+              <span className="absolute inset-0 rounded-full bg-[#FF7B1C]/25 finger-tap-glow motion-reduce:hidden" />
+              {/* Touch Index Finger Icon */}
+              <svg
+                className="w-3.5 h-3.5 text-[#FF7B1C] relative z-10 finger-tap-motion"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 2a2 2 0 0 0-2 2v9.5l-1.5-1.5a2.12 2.12 0 0 0-3 3L10 19.5a6 6 0 0 0 6 2.5h1a6 6 0 0 0 6-6V13a2 2 0 0 0-2-2 2 2 0 0 0-2 2v-1a2 2 0 0 0-2-2 2 2 0 0 0-2 2V4a2 2 0 0 0-2-2z" />
+              </svg>
+            </div>
+
+            <span className="text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors">
+              {lang === 'he' ? 'שעות פתיחה' : 'Opening Hours'}
             </span>
-          </a>
+
+            {/* Reverse / Close Upward Arrow (Appears ONLY in open state, tailless chevron) */}
+            {isHoursOpen && (
+              <ChevronUp
+                className="w-3.5 h-3.5 text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors shrink-0"
+                strokeWidth={2.4}
+                aria-hidden="true"
+              />
+            )}
+          </button>
+
+          {/* Expandable Opening Hours Information Banner */}
+          <AnimatePresence>
+            {isHoursOpen && (
+              <motion.div
+                id="opening-hours-expandable-content"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.24, ease: 'easeOut' }}
+                className="w-full overflow-hidden"
+              >
+                <div className="pt-4 pb-2 text-start">
+                  <div className="p-5 sm:p-6 rounded-2xl bg-[#14171C] border border-[#252A32] shadow-2xl space-y-4">
+                    {/* Schedule Card */}
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#0B0C0E] border border-[#252A32] flex items-center justify-center shrink-0">
+                        <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-[#FF7B1C]" />
+                      </div>
+                      <div>
+                        <span className="text-[11px] sm:text-xs font-bold text-[#94A3B8] uppercase tracking-wider block">
+                          {lang === 'he' ? 'שעות פעילות' : 'Operating Schedule'}
+                        </span>
+                        <p className="text-xs sm:text-sm font-bold text-[#FF7B1C] mt-0.5">
+                          {BUSINESS_CONFIG.hours.summary[lang]}
+                        </p>
+                        <p className="text-xs text-[#94A3B8] mt-0.5">
+                          {BUSINESS_CONFIG.hours.note[lang]}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Address & Direct Phone */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#252A32]">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-[#0B0C0E] border border-[#252A32] flex items-center justify-center shrink-0 mt-0.5">
+                          <MapPin className="w-4 h-4 text-[#FF7B1C]" />
+                        </div>
+                        <div>
+                          <span className="text-[11px] text-[#94A3B8] uppercase tracking-wider block font-semibold">
+                            {lang === 'he' ? 'כתובת לאיסוף' : 'Pickup Address'}
+                          </span>
+                          <p className="text-xs sm:text-sm font-bold text-[#FAF9F6] mt-0.5">
+                            {BUSINESS_CONFIG.location.fullAddress[lang]}
+                          </p>
+                          <span className="text-[11px] text-[#94A3B8]">
+                            {lang === 'he' ? "רובע ג', אשדוד" : 'Rova Gimmel, Ashdod'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-[#0B0C0E] border border-[#252A32] flex items-center justify-center shrink-0 mt-0.5">
+                          <Phone className="w-4 h-4 text-[#FF7B1C]" />
+                        </div>
+                        <div>
+                          <span className="text-[11px] text-[#94A3B8] uppercase tracking-wider block font-semibold">
+                            {lang === 'he' ? 'טלפון ישיר' : 'Direct Phone'}
+                          </span>
+                          <a
+                            href={`tel:${BUSINESS_CONFIG.contact.phone}`}
+                            className="text-xs sm:text-sm font-bold text-[#FAF9F6] hover:text-[#FF7B1C] mt-0.5 block transition-colors underline"
+                          >
+                            {BUSINESS_CONFIG.contact.phoneFormatted}
+                          </a>
+                          <span className="text-[11px] text-[#94A3B8]">
+                            {lang === 'he' ? 'מענה בשעות הפעילות' : 'Available during open hours'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Takeaway Model Note */}
+                    <div className="p-3.5 rounded-xl bg-[#0B0C0E] border border-[#252A32] text-xs flex items-start gap-2.5">
+                      <AlertCircle className="w-4 h-4 text-[#FF7B1C] shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold text-[#FAF9F6] block">
+                          {lang === 'he' ? 'איסוף עצמי וטייק אווי' : 'Takeaway & Self-Pickup'}
+                        </span>
+                        <p className="text-[#94A3B8] mt-0.5 leading-relaxed text-[11px] sm:text-xs">
+                          {BUSINESS_CONFIG.location.takeawayNote[lang]}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
       </div>
+
+      <style>{`
+        @keyframes finger-tap-anim {
+          0%, 100% {
+            transform: translateY(0) scale(1);
+          }
+          50% {
+            transform: translateY(-1.2px) scale(0.96);
+          }
+        }
+        @keyframes finger-glow-anim {
+          0%, 100% {
+            transform: scale(0.85);
+            opacity: 0.25;
+          }
+          50% {
+            transform: scale(1.35);
+            opacity: 0.75;
+          }
+        }
+        .finger-tap-motion {
+          animation: finger-tap-anim 1.8s ease-in-out infinite;
+        }
+        .finger-tap-glow {
+          animation: finger-glow-anim 1.8s ease-in-out infinite;
+        }
+      `}</style>
     </section>
   );
 };
+

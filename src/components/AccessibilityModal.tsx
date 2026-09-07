@@ -50,13 +50,13 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
           ref={closeButtonRef}
           onClick={onClose}
           aria-label={lang === 'he' ? 'סגור הצהרת נגישות' : 'Close accessibility statement'}
-          className="absolute top-4 left-4 rtl:left-auto rtl:right-auto ltr:right-4 rtl:left-4 min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl text-[#94A3B8] hover:text-[#FAF9F6] hover:bg-[#0B0C0E] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E0BE55]"
+          className="absolute top-4 left-4 rtl:left-auto rtl:right-auto ltr:right-4 rtl:left-4 min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl text-[#94A3B8] hover:text-[#FAF9F6] hover:bg-[#0B0C0E] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C]"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-11 h-11 rounded-xl bg-[#0B0C0E] text-[#E0BE55] border border-[#252A32] flex items-center justify-center">
+          <div className="w-11 h-11 rounded-xl bg-[#0B0C0E] text-[#FF7B1C] border border-[#252A32] flex items-center justify-center">
             <ShieldCheck className="w-6 h-6" />
           </div>
           <div>
@@ -84,40 +84,56 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
               <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
               <span className="text-[#FAF9F6]">
                 {lang === 'he'
-                  ? 'עמידה בהנחיות תקן הנגישות WCAG 2.2 ברמת AA.'
-                  : 'Targeted compliance with WCAG 2.2 Level AA guidelines.'}
+                  ? 'תפריט הגדרות ונגישות המאפשר התאמת גודל טקסט, הפעלת ניגודיות גבוהה, גופן קריא, הדגשת קישורים והפסקת תנועה.'
+                  : 'Integrated settings and accessibility panel supporting text scaling, high contrast, readable font, link highlights, and reduced motion.'}
               </span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
               <span className="text-[#FAF9F6]">
                 {lang === 'he'
-                  ? 'תמיכה מלאה בניווט מקלדת, לרבות סדר מיקוד לוגי וחיווי ויזואלי ברור.'
-                  : 'Full keyboard navigation support, logical focus order, and visible focus indicators.'}
+                  ? 'תמיכה מלאה בניווט באמצעות מקלדת (TAB, Enter, מקשי חיצים ומקש ESC לסגירת תפריטים ודיאלוגים).'
+                  : 'Full keyboard navigation support (TAB, Enter, arrow keys, and ESC to close overlays and menus).'}
               </span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
               <span className="text-[#FAF9F6]">
                 {lang === 'he'
-                  ? 'מבנה סמנטי של כותרות, תגיות ARIA וטקסט אלטרנטיבי לתמונות.'
-                  : 'Semantic HTML5 structure, ARIA landmarks, and descriptive alternative texts.'}
+                  ? 'חיווי פוקוס ויזואלי ברור ומודגש סביב כל אלמנט אינטראקטיבי פעיל.'
+                  : 'Clear, high-contrast visual focus indicators on all active interactive controls.'}
               </span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
               <span className="text-[#FAF9F6]">
                 {lang === 'he'
-                  ? 'התאמה מלאה לקוראי מסך ותמיכה מובנית בשפות עברית (RTL) ואנגלית.'
-                  : 'Optimized for screen readers with native RTL Hebrew and English support.'}
+                  ? 'מבנה HTML סמנטי, כותרות היררכיות ותוויות נגישות (aria-label) בכל הכפתורים והקישורים.'
+                  : 'Semantic HTML markup, hierarchical headings, and accessible names (aria-label) on controls.'}
               </span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
               <span className="text-[#FAF9F6]">
                 {lang === 'he'
-                  ? 'יחסי ניגודיות צבעים (Contrast) מחמירים בהתאם להנחיות.'
-                  : 'Strict color contrast ratios for effortless legibility across all screens.'}
+                  ? 'התאמה לקוראי מסך ותמיכה מובנית בכיווניות עברית (RTL) ואנגלית.'
+                  : 'Screen reader optimization with native Hebrew (RTL) and English reading order.'}
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
+              <span className="text-[#FAF9F6]">
+                {lang === 'he'
+                  ? 'כיבוד העדפת מערכת להפחתת תנועה (prefers-reduced-motion) למניעת הבהובים והנפשות.'
+                  : 'Full support for system-level prefers-reduced-motion to disable animations and pulse effects.'}
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
+              <span className="text-[#FAF9F6]">
+                {lang === 'he'
+                  ? 'יחסי ניגודיות צבעים מוקפדים לטובת קריאות מרבית של כל הטקסטים והתכנים.'
+                  : 'Carefully measured color contrast for optimal readability across all content.'}
               </span>
             </li>
           </ul>
@@ -143,16 +159,16 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
             <div className="flex flex-col sm:flex-row gap-4 text-xs font-semibold">
               <a
                 href={`tel:${BUSINESS_CONFIG.contact.phone}`}
-                className="inline-flex items-center gap-1.5 text-[#FAF9F6] hover:text-[#E0BE55] hover:underline min-h-[44px]"
+                className="inline-flex items-center gap-1.5 text-[#FAF9F6] hover:text-[#FF7B1C] hover:underline min-h-[44px]"
               >
-                <Phone className="w-4 h-4 text-[#E0BE55]" />
+                <Phone className="w-4 h-4 text-[#FF7B1C]" />
                 {BUSINESS_CONFIG.contact.phoneFormatted}
               </a>
               <a
                 href={`mailto:${BUSINESS_CONFIG.contact.email}`}
-                className="inline-flex items-center gap-1.5 text-[#FAF9F6] hover:text-[#E0BE55] hover:underline min-h-[44px]"
+                className="inline-flex items-center gap-1.5 text-[#FAF9F6] hover:text-[#FF7B1C] hover:underline min-h-[44px]"
               >
-                <Mail className="w-4 h-4 text-[#E0BE55]" />
+                <Mail className="w-4 h-4 text-[#FF7B1C]" />
                 {BUSINESS_CONFIG.contact.email}
               </a>
             </div>
