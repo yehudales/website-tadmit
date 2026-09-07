@@ -22,7 +22,6 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
   const playPromiseRef = useRef<Promise<void> | null>(null);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
-  const [heroHeight, setHeroHeight] = useState<number>(0);
   const [isScrolledPast, setIsScrolledPast] = useState<boolean>(false);
 
   // Default user audio preference is unmuted unless explicitly saved as 'muted'
@@ -204,41 +203,18 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     };
   }, [attemptPlay]);
 
-  // Measure 16:9 hero container height and track scroll position for the shutter curtain effect
+  // Track scroll position for the shutter curtain effect and pointer-events toggling
   useEffect(() => {
-    const updateDimensions = () => {
-      if (containerRef.current) {
-        const height = containerRef.current.offsetHeight;
-        if (height > 0) {
-          setHeroHeight((prev) => (Math.abs(prev - height) > 1 ? height : prev));
-          document.documentElement.style.setProperty('--hero-height', `${height}px`);
-        }
-      }
-    };
-
-    updateDimensions();
-
-    const resizeObserver = new ResizeObserver(() => {
-      updateDimensions();
-    });
-
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
-    window.addEventListener('resize', updateDimensions);
-
     const handleScroll = () => {
       const scrollY = window.scrollY;
       const threshold = containerRef.current?.offsetHeight || 350;
       setIsScrolledPast(scrollY > threshold);
     };
 
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener('resize', updateDimensions);
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
@@ -288,7 +264,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     let isActivating = false;
     let listenersAttached = true;
 
-    const events = ['touchstart', 'touchend', 'pointerup', 'click', 'keydown'] as const;
+    const events = ['touchstart', 'touchend', 'click', 'keydown'] as const;
 
     const removeListeners = () => {
       if (!listenersAttached) return;
@@ -299,11 +275,13 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     };
 
     const finalizeActivation = (ctx: AudioContext, gainNode: GainNode, video: HTMLVideoElement) => {
+      // Only finalize when AudioContext is confirmed running and native video is unmuted
+      if (ctx.state !== 'running' || video.muted) return;
+
       hasUnlockedAudioRef.current = true;
       isActivating = false;
       removeListeners();
 
-      video.muted = false;
       video.volume = 1.0;
       setIsMuted(false);
       isMutedRef.current = false;
@@ -344,14 +322,27 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
 
       const { ctx, gainNode } = graph;
 
+      // Unmute native video element synchronously within the active user gesture
+      video.muted = false;
+      video.volume = 1.0;
+
+      const onConfirmedRunning = () => {
+        if (ctx.state === 'running' && !video.muted) {
+          finalizeActivation(ctx, gainNode, video);
+        } else {
+          // If state is not running yet, do not mark unlocked; keep listeners active
+          isActivating = false;
+        }
+      };
+
       if (ctx.state === 'running') {
-        finalizeActivation(ctx, gainNode, video);
+        onConfirmedRunning();
         return;
       }
 
       const resumePromise = ctx.resume();
       if (ctx.state === 'running') {
-        finalizeActivation(ctx, gainNode, video);
+        onConfirmedRunning();
         return;
       }
 
@@ -359,16 +350,25 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
         resumePromise
           .then(() => {
             if (ctx.state === 'running') {
-              finalizeActivation(ctx, gainNode, video);
+              onConfirmedRunning();
             } else {
-              // Keep listeners active so subsequent gesture can retry!
+              // Browser deferred running state; keep listeners active for next gesture
+              if (!hasUnlockedAudioRef.current) {
+                video.muted = true;
+              }
               isActivating = false;
             }
           })
           .catch(() => {
+            if (!hasUnlockedAudioRef.current) {
+              video.muted = true;
+            }
             isActivating = false;
           });
       } else {
+        if (ctx.state !== 'running' && !hasUnlockedAudioRef.current) {
+          video.muted = true;
+        }
         isActivating = false;
       }
     };
@@ -556,7 +556,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
               {isMuted ? (
                 <VolumeX className="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" />
               ) : (
-                <Volume2 className="w-3.5 h-3.5 text-slate-300 group-hover:text-white transition-colors" />
+                <Volume2 className="w-3.5 h-3.5 text-white group-hover:text-white transition-colors" />
               )}
             </button>
           </div>

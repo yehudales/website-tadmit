@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Settings, Home } from 'lucide-react';
 import { BUSINESS_CONFIG } from '../config/businessConfig';
 import { Language, NavSectionId } from '../types';
@@ -30,23 +30,38 @@ export const Header: React.FC<HeaderProps> = ({
   const headerRef = useRef<HTMLElement>(null);
   const baseHeaderRef = useRef<HTMLDivElement>(null);
 
-  // Measure base header height (row 1 + row 2) and keep --header-height CSS variable synchronized
-  useEffect(() => {
+  // Single Source of Truth: Measure actual base header element (Row 1 + Row 2)
+  // useLayoutEffect guarantees synchronous measurement BEFORE browser paint to prevent any visual jump.
+  // ResizeObserver continuously monitors baseHeaderRef for font loading, responsive layout, and window changes.
+  useLayoutEffect(() => {
+    const el = baseHeaderRef.current;
+    if (!el) return;
+
+    let lastHeight = 0;
     const updateHeaderHeight = () => {
-      if (baseHeaderRef.current) {
-        const height = baseHeaderRef.current.offsetHeight;
-        if (height > 0) {
-          document.documentElement.style.setProperty('--header-height', `${height}px`);
-        }
-      } else {
-        // Calibrated baseline fallback based on responsive layout (mobile: ~104px, desktop: ~88px)
-        const fallback = window.innerWidth >= 640 ? 88 : 104;
-        document.documentElement.style.setProperty('--header-height', `${fallback}px`);
+      if (!baseHeaderRef.current) return;
+      const rect = baseHeaderRef.current.getBoundingClientRect();
+      const height = rect.height || baseHeaderRef.current.offsetHeight;
+      if (height > 0 && Math.abs(height - lastHeight) >= 0.5) {
+        lastHeight = height;
+        document.documentElement.style.setProperty('--header-height', `${height}px`);
       }
     };
+
+    // Immediate synchronous measurement before initial paint
     updateHeaderHeight();
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateHeaderHeight();
+    });
+
+    resizeObserver.observe(el);
     window.addEventListener('resize', updateHeaderHeight);
-    return () => window.removeEventListener('resize', updateHeaderHeight);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateHeaderHeight);
+    };
   }, []);
 
   useEffect(() => {
@@ -77,7 +92,7 @@ export const Header: React.FC<HeaderProps> = ({
         className="fixed top-2 left-2 z-[99999] pointer-events-none px-2.5 py-1 rounded bg-black/90 text-[#FF7B1C] border border-[#FF7B1C] font-mono text-xs font-bold tracking-wider shadow-lg select-none"
         aria-hidden="true"
       >
-        DEBUG v3
+        DEBUG v5
       </div>
 
       <header

@@ -133,7 +133,7 @@ export default function App() {
         id="main-content"
         tabIndex={-1}
         className="focus:outline-none"
-        style={{ paddingTop: 'var(--header-height, 98px)' }}
+        style={{ paddingTop: 'var(--header-height)' }}
       >
         {/* Stationary Fixed Cinematic 16:9 Hero Video */}
         <Hero lang={lang} />
