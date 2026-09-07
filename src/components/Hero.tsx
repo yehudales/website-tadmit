@@ -12,36 +12,94 @@ const AUDIO_PREF_KEY = 'yehudales_hero_sound_pref';
 export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const volumeFadeRef = useRef<number | null>(null);
+  const isHeroVisibleRef = useRef<boolean>(true);
   const [isPlaying, setIsPlaying] = useState(true);
   const [heroHeight, setHeroHeight] = useState<number>(0);
   const [isScrolledPast, setIsScrolledPast] = useState<boolean>(false);
 
   const videoSrc = BUSINESS_CONFIG.media.heroVideoUrl || '/assets/videos/hero.mp4';
 
-  // Sound preference state (default muted for 100% reliable mobile browser autoplay compliance)
+  // Default audio is ON unless the user explicitly chose 'muted' in session
   const [isMuted, setIsMuted] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return true;
+    if (typeof window === 'undefined') return false;
     const pref = sessionStorage.getItem(AUDIO_PREF_KEY);
-    return pref !== 'unmuted';
+    return pref === 'muted';
   });
 
-  // Callback ref to guarantee synchronous DOM setup before browser media parser evaluates autoplay
+  const isMutedRef = useRef<boolean>(isMuted);
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
+
+  // Smooth cinematic audio volume transition (fading between 100% and 8% over ~3.8s)
+  const fadeVolumeTo = useCallback((targetVol: number, durationMs = 3800) => {
+    const video = videoRef.current;
+    if (!video || video.muted || isMutedRef.current) return;
+
+    if (volumeFadeRef.current) {
+      cancelAnimationFrame(volumeFadeRef.current);
+      volumeFadeRef.current = null;
+    }
+
+    const startVol = video.volume;
+    const diff = targetVol - startVol;
+    if (Math.abs(diff) < 0.005) {
+      video.volume = targetVol;
+      return;
+    }
+
+    const startTime = performance.now();
+
+    const step = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / durationMs, 1);
+      // Smooth easeInOutCubic transition for organic, cinematic audio attenuation
+      const ease = progress < 0.5
+        ? 4 * progress * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+      const current = startVol + diff * ease;
+      if (video && !video.muted && !isMutedRef.current) {
+        video.volume = Math.max(0, Math.min(1, current));
+      }
+
+      if (progress < 1) {
+        volumeFadeRef.current = requestAnimationFrame(step);
+      } else {
+        if (video && !video.muted && !isMutedRef.current) {
+          video.volume = targetVol;
+        }
+        volumeFadeRef.current = null;
+      }
+    };
+
+    volumeFadeRef.current = requestAnimationFrame(step);
+  }, []);
+
+  // Callback ref to configure synchronous DOM properties on mount
   const setVideoRef = useCallback((node: HTMLVideoElement | null) => {
     (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = node;
     if (node) {
-      node.muted = true;
-      node.defaultMuted = true;
+      const pref = sessionStorage.getItem(AUDIO_PREF_KEY);
+      const shouldMute = pref === 'muted';
+      node.muted = shouldMute;
+      node.defaultMuted = shouldMute;
+      node.volume = shouldMute ? 0 : 1.0;
       node.playsInline = true;
       node.autoplay = true;
       node.loop = true;
       node.setAttribute('playsinline', '');
       node.setAttribute('webkit-playsinline', '');
       node.setAttribute('x5-playsinline', '');
-      node.setAttribute('muted', '');
+      if (shouldMute) {
+        node.setAttribute('muted', '');
+      } else {
+        node.removeAttribute('muted');
+      }
     }
   }, []);
 
-  // Measure 16:9 hero container height and track scroll position to coordinate curtain effect
+  // Measure 16:9 hero container height and track scroll position for the shutter curtain effect
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
@@ -78,65 +136,89 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     };
   }, []);
 
-  // Robust Mobile & Desktop Autoplay & Loading Handler
+  // Dynamic Viewport Visibility-Based Audio Volume Control (100% when Hero is visible, 8% when not visible)
+  useEffect(() => {
+    const heroEl = containerRef.current;
+    if (!heroEl) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        // Hero is considered visible if it intersects with the viewport
+        const isVisible = entry.isIntersecting && entry.intersectionRatio > 0.05;
+        isHeroVisibleRef.current = isVisible;
+
+        // Smoothly adjust volume according to viewport presence over ~3.8s
+        const targetVolume = isVisible ? 1.0 : 0.08;
+        fadeVolumeTo(targetVolume, 3800);
+      },
+      {
+        threshold: [0, 0.05, 0.15],
+        rootMargin: '0px',
+      }
+    );
+
+    observer.observe(heroEl);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [fadeVolumeTo]);
+
+  // Autoplay with Audio ON by default, graceful fallback if restricted by browser policy
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Apply essential mobile autoplay & inline attributes directly to DOM element
-    video.muted = true;
-    video.defaultMuted = true;
+    const pref = sessionStorage.getItem(AUDIO_PREF_KEY);
+    const explicitlyMuted = pref === 'muted';
+
     video.playsInline = true;
     video.autoplay = true;
     video.loop = true;
-    video.setAttribute('playsinline', '');
-    video.setAttribute('webkit-playsinline', '');
-    video.setAttribute('x5-playsinline', '');
-    video.setAttribute('muted', '');
+    video.volume = explicitlyMuted ? 0 : (isHeroVisibleRef.current ? 1.0 : 0.08);
+    video.muted = explicitlyMuted;
 
-    // Force media load if needed so the initial frame renders even before user interaction
-    if (video.readyState === 0) {
-      video.load();
-    }
-
-    const tryAutoplay = () => {
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
+    const tryAutoplay = async () => {
+      try {
+        // Attempt unmuted autoplay when not explicitly muted by user
+        await video.play();
+        setIsPlaying(true);
+        if (!explicitlyMuted) {
+          video.muted = false;
+          setIsMuted(false);
+        }
+      } catch {
+        // If unmuted autoplay is blocked by browser policy, fallback to muted autoplay
+        if (!explicitlyMuted) {
+          video.muted = true;
+          setIsMuted(true);
+          try {
+            await video.play();
             setIsPlaying(true);
-            const savedPref = sessionStorage.getItem(AUDIO_PREF_KEY);
-            if (savedPref === 'unmuted') {
-              video.muted = false;
-              setIsMuted(false);
-            } else {
-              video.muted = true;
-              setIsMuted(true);
-            }
-          })
-          .catch(() => {
-            // Autoplay may be restricted by mobile OS low-power mode or background policy
-            // Video element remains completely visible and ready to play
+          } catch {
             setIsPlaying(false);
-          });
+          }
+        } else {
+          setIsPlaying(false);
+        }
       }
     };
 
     tryAutoplay();
 
-    const handleMediaReady = () => {
-      if (video.paused) {
-        tryAutoplay();
-      }
-    };
-
-    video.addEventListener('loadeddata', handleMediaReady);
-    video.addEventListener('canplay', handleMediaReady);
-
-    // Passive gesture listener on window to immediately resume if initially paused by OS policy
+    // On user's first document gesture, restore audio ON if it was suppressed by autoplay policy
     const handleFirstGesture = () => {
-      if (video && video.paused) {
-        video.play().then(() => setIsPlaying(true)).catch(() => {});
+      if (video) {
+        const userPref = sessionStorage.getItem(AUDIO_PREF_KEY);
+        if (userPref !== 'muted' && video.muted) {
+          video.muted = false;
+          video.volume = isHeroVisibleRef.current ? 1.0 : 0.08;
+          setIsMuted(false);
+        }
+        if (video.paused) {
+          video.play().then(() => setIsPlaying(true)).catch(() => {});
+        }
       }
     };
 
@@ -144,8 +226,6 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     window.addEventListener('click', handleFirstGesture, { once: true, passive: true });
 
     return () => {
-      video.removeEventListener('loadeddata', handleMediaReady);
-      video.removeEventListener('canplay', handleMediaReady);
       window.removeEventListener('touchstart', handleFirstGesture);
       window.removeEventListener('click', handleFirstGesture);
     };
@@ -169,7 +249,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
 
     if (isMuted || video.muted) {
       video.muted = false;
-      video.volume = 1.0;
+      video.volume = isHeroVisibleRef.current ? 1.0 : 0.08;
       setIsMuted(false);
       sessionStorage.setItem(AUDIO_PREF_KEY, 'unmuted');
 
@@ -211,7 +291,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
             ref={setVideoRef}
             src="/assets/videos/hero.mp4"
             playsInline
-            muted
+            muted={isMuted}
             autoPlay
             loop
             preload="auto"
@@ -232,19 +312,22 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
           <div className="absolute top-0 inset-x-0 h-20 bg-gradient-to-b from-black/70 via-black/20 to-transparent pointer-events-none" />
 
           {/* Two independent small circular glass video controls (no shared banner/container) */}
-          <div className="absolute z-20 start-4 sm:start-6 bottom-4 sm:bottom-6 flex items-center gap-3">
+          <div
+            id="hero-video-controls"
+            className="absolute z-20 start-4 sm:start-6 bottom-4 sm:bottom-6 flex items-center gap-3"
+          >
             {/* Independent Play / Pause Glass Bubble */}
             <button
               onClick={togglePlay}
               type="button"
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm border border-white/20 hover:border-white/40 text-white/90 hover:text-white shadow-sm flex items-center justify-center transition-all active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] cursor-pointer"
+              className="group w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm border border-white/20 hover:border-white/40 shadow-sm flex items-center justify-center transition-all active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 cursor-pointer"
               aria-label={isPlaying ? (lang === 'he' ? 'השהה סרטון' : 'Pause video') : (lang === 'he' ? 'נגן סרטון' : 'Play video')}
               title={isPlaying ? (lang === 'he' ? 'השהה סרטון' : 'Pause') : (lang === 'he' ? 'נגן סרטון' : 'Play')}
             >
               {isPlaying ? (
-                <Pause className="w-3.5 h-3.5 fill-white text-white" />
+                <Pause className="w-3.5 h-3.5 fill-slate-300 text-slate-300 group-hover:fill-white group-hover:text-white transition-colors" />
               ) : (
-                <Play className="w-3.5 h-3.5 fill-white text-white translate-x-0.5 rtl:-translate-x-0.5" />
+                <Play className="w-3.5 h-3.5 fill-slate-300 text-slate-300 group-hover:fill-white group-hover:text-white translate-x-0.5 rtl:-translate-x-0.5 transition-colors" />
               )}
             </button>
 
@@ -252,14 +335,14 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
             <button
               onClick={toggleMute}
               type="button"
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm border border-white/20 hover:border-white/40 text-white/90 hover:text-white shadow-sm flex items-center justify-center transition-all active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] cursor-pointer"
+              className="group w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm border border-white/20 hover:border-white/40 shadow-sm flex items-center justify-center transition-all active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 cursor-pointer"
               aria-label={isMuted ? (lang === 'he' ? 'הפעל קול בסרטון' : 'Unmute audio') : (lang === 'he' ? 'השתק סרטון' : 'Mute audio')}
               title={isMuted ? (lang === 'he' ? 'הפעל קול בסרטון' : 'Unmute') : (lang === 'he' ? 'השתק סרטון' : 'Mute')}
             >
               {isMuted ? (
-                <VolumeX className="w-3.5 h-3.5 text-white/80" />
+                <VolumeX className="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" />
               ) : (
-                <Volume2 className="w-3.5 h-3.5 text-[#FF7B1C]" />
+                <Volume2 className="w-3.5 h-3.5 text-slate-300 group-hover:text-white transition-colors" />
               )}
             </button>
           </div>
