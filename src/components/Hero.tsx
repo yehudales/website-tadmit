@@ -270,19 +270,27 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       safeAutoplay();
     }
 
-    // On user's first document activation gesture anywhere, seamlessly unlock AudioContext and enable sound if active
-    const events = ['pointerdown', 'touchstart', 'click', 'keydown'] as const;
+    // Unified single-guarded unlock handler triggered on the first genuine user interaction anywhere on the page
+    const events = [
+      'pointerdown',
+      'touchstart',
+      'mousedown',
+      'click',
+      'keydown',
+      'wheel',
+    ] as const;
 
     const removeGestureListeners = () => {
       events.forEach((evt) => {
         window.removeEventListener(evt, handleFirstGesture, { capture: true } as EventListenerOptions);
+        document.removeEventListener(evt, handleFirstGesture, { capture: true } as EventListenerOptions);
       });
     };
 
     const handleFirstGesture = (e: Event) => {
       // If the interaction happened directly on video controls, speaker/play button handler takes absolute priority
       const target = e.target as HTMLElement | null;
-      if (target && target.closest('#hero-video-controls')) {
+      if (target && target.closest && target.closest('#hero-video-controls')) {
         return;
       }
 
@@ -300,6 +308,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
 
       if (video) {
         video.muted = false;
+        video.volume = 1;
         setIsMuted(false);
         isMutedRef.current = false;
         sessionStorage.setItem(AUDIO_PREF_KEY, 'unmuted');
@@ -325,6 +334,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
 
     events.forEach((evt) => {
       window.addEventListener(evt, handleFirstGesture, { capture: true, passive: true });
+      document.addEventListener(evt, handleFirstGesture, { capture: true, passive: true });
     });
 
     return () => {
