@@ -35,17 +35,9 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
   });
 
   const isMutedRef = useRef<boolean>(isMuted);
-  // Synchronize native video.muted attribute directly with isMuted state only when unlocked or manually muted
+  // Keep isMutedRef synchronized with isMuted state
   useEffect(() => {
     isMutedRef.current = isMuted;
-    const video = videoRef.current;
-    if (video) {
-      if (hasUnlockedAudioRef.current) {
-        video.muted = isMuted;
-      } else if (isMuted) {
-        video.muted = true;
-      }
-    }
   }, [isMuted]);
 
   // Immediate audio stop helper: cancels all scheduled values and zeros GainNode instantly
@@ -541,7 +533,6 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
           <video
             ref={setVideoRef}
             src="/assets/videos/hero.mp4"
-            muted={isMuted}
             autoPlay={true}
             playsInline={true}
             loop={true}

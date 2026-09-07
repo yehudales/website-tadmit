@@ -24,7 +24,13 @@
     --font-numeric: 'Rubik', 'Outfit', 'Assistant', system-ui, sans-serif;
 
     /* Header clearance baseline to prevent layout jump before JS measurement */
-    --header-height: 98px;
+    --header-height: 104px;
+  }
+
+  @media (min-width: 640px) {
+    :root {
+      --header-height: 88px;
+    }
   }
 
   html {
