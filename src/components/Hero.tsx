@@ -124,6 +124,13 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       node.setAttribute('webkit-playsinline', '');
       node.setAttribute('x5-playsinline', '');
       node.setAttribute('muted', '');
+      node.removeAttribute('controls');
+
+      // Attempt immediate synchronous native playback as soon as node binds to DOM
+      const playPromise = node.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => setIsPlaying(true)).catch(() => {});
+      }
     }
   }, []);
 
@@ -361,8 +368,10 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
             autoPlay
             loop
             preload="auto"
+            controlsList="nodownload nofullscreen noremoteplayback noplaybackrate"
             disablePictureInPicture
             disableRemotePlayback
+            tabIndex={-1}
             aria-label={lang === 'he' ? 'סרטון אווירה של יהודלס' : 'Yehudales atmosphere video'}
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
@@ -371,7 +380,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
                 setIsMuted(videoRef.current.muted);
               }
             }}
-            className="w-full h-full object-cover object-center block"
+            className="w-full h-full object-cover object-center block pointer-events-none select-none"
           />
 
           {/* Subtle top vignette gradient for header readability */}
