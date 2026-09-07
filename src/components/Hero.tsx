@@ -12,8 +12,12 @@ const AUDIO_PREF_KEY = 'yehudales_hero_sound_pref';
 export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const volumeFadeRef = useRef<number | null>(null);
   const isHeroVisibleRef = useRef<boolean>(true);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
+  const isAudioConnectedRef = useRef<boolean>(false);
+
   const [isPlaying, setIsPlaying] = useState(true);
   const [heroHeight, setHeroHeight] = useState<number>(0);
   const [isScrolledPast, setIsScrolledPast] = useState<boolean>(false);
@@ -32,47 +36,78 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     isMutedRef.current = isMuted;
   }, [isMuted]);
 
-  // Smooth cinematic audio volume transition (fading between 100% and 8%)
-  const fadeVolumeTo = useCallback((targetVol: number, durationMs = 350) => {
+  // Safe lazy Web Audio API Graph Initialization (connected only once per video element)
+  const initAudioGraph = useCallback(() => {
     const video = videoRef.current;
-    if (!video || video.muted || isMutedRef.current) return;
+    if (!video) return null;
 
-    if (volumeFadeRef.current) {
-      cancelAnimationFrame(volumeFadeRef.current);
-      volumeFadeRef.current = null;
+    if (gainNodeRef.current && isAudioConnectedRef.current) {
+      return gainNodeRef.current;
     }
 
-    const startVol = video.volume;
-    const diff = targetVol - startVol;
-    if (Math.abs(diff) < 0.01) {
-      video.volume = targetVol;
-      return;
+    try {
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+
+      if (!AudioContextClass) return null;
+
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new AudioContextClass();
+      }
+      const ctx = audioCtxRef.current;
+
+      if (!sourceNodeRef.current) {
+        sourceNodeRef.current = ctx.createMediaElementSource(video);
+      }
+
+      if (!gainNodeRef.current) {
+        const gainNode = ctx.createGain();
+        const initialGain = isHeroVisibleRef.current ? 1.0 : 0.08;
+        gainNode.gain.setValueAtTime(initialGain, ctx.currentTime);
+        sourceNodeRef.current.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        gainNodeRef.current = gainNode;
+      }
+
+      isAudioConnectedRef.current = true;
+
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+
+      return gainNodeRef.current;
+    } catch (err) {
+      console.warn('Web Audio initialization:', err);
+      return gainNodeRef.current;
     }
-
-    const startTime = performance.now();
-
-    const step = (now: number) => {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / durationMs, 1);
-      // Ease out cubic transition for organic audio attenuation
-      const ease = 1 - Math.pow(1 - progress, 3);
-      const current = startVol + diff * ease;
-      if (video && !video.muted && !isMutedRef.current) {
-        video.volume = Math.max(0, Math.min(1, current));
-      }
-
-      if (progress < 1) {
-        volumeFadeRef.current = requestAnimationFrame(step);
-      } else {
-        if (video && !video.muted && !isMutedRef.current) {
-          video.volume = targetVol;
-        }
-        volumeFadeRef.current = null;
-      }
-    };
-
-    volumeFadeRef.current = requestAnimationFrame(step);
   }, []);
+
+  // Smooth Web Audio GainNode transition (1.0 when Hero is visible, 0.08 when not visible)
+  const fadeGainTo = useCallback(
+    (targetGain: number, durationMs = 350) => {
+      const gainNode = gainNodeRef.current || initAudioGraph();
+      const ctx = audioCtxRef.current;
+
+      if (gainNode && ctx) {
+        if (ctx.state === 'suspended') {
+          ctx.resume().catch(() => {});
+        }
+        const now = ctx.currentTime;
+        const durationSec = durationMs / 1000;
+        gainNode.gain.cancelScheduledValues(now);
+        gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+        gainNode.gain.linearRampToValueAtTime(targetGain, now + durationSec);
+      } else {
+        // Fallback for environments without Web Audio API support
+        const video = videoRef.current;
+        if (video && !video.muted && !isMutedRef.current) {
+          video.volume = targetGain;
+        }
+      }
+    },
+    [initAudioGraph]
+  );
 
   // Callback ref to configure synchronous DOM properties on mount
   const setVideoRef = useCallback((node: HTMLVideoElement | null) => {
@@ -82,7 +117,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       const shouldMute = pref === 'muted';
       node.muted = shouldMute;
       node.defaultMuted = shouldMute;
-      node.volume = shouldMute ? 0 : 1.0;
+      node.volume = 1.0;
       node.playsInline = true;
       node.autoplay = true;
       node.loop = true;
@@ -134,7 +169,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     };
   }, []);
 
-  // Dynamic Viewport Visibility-Based Audio Volume Control (100% when Hero is visible, 8% when not visible)
+  // Dynamic Viewport Visibility-Based Audio Volume Control (100% Gain when Hero is visible, 8% Gain when not visible)
   useEffect(() => {
     const heroEl = containerRef.current;
     if (!heroEl) return;
@@ -146,9 +181,9 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
         const isVisible = entry.isIntersecting && entry.intersectionRatio > 0.05;
         isHeroVisibleRef.current = isVisible;
 
-        // Smoothly adjust volume according to viewport presence
-        const targetVolume = isVisible ? 1.0 : 0.08;
-        fadeVolumeTo(targetVolume, 380);
+        // Smoothly adjust audio GainNode according to viewport presence
+        const targetGain = isVisible ? 1.0 : 0.08;
+        fadeGainTo(targetGain, 350);
       },
       {
         threshold: [0, 0.05, 0.15],
@@ -161,7 +196,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     return () => {
       observer.disconnect();
     };
-  }, [fadeVolumeTo]);
+  }, [fadeGainTo]);
 
   // Autoplay with Audio ON by default, graceful fallback if restricted by browser policy
   useEffect(() => {
@@ -174,7 +209,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     video.playsInline = true;
     video.autoplay = true;
     video.loop = true;
-    video.volume = explicitlyMuted ? 0 : (isHeroVisibleRef.current ? 1.0 : 0.08);
+    video.volume = 1.0;
     video.muted = explicitlyMuted;
 
     const tryAutoplay = async () => {
@@ -185,6 +220,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
         if (!explicitlyMuted) {
           video.muted = false;
           setIsMuted(false);
+          initAudioGraph();
         }
       } catch {
         // If unmuted autoplay is blocked by browser policy, fallback to muted autoplay
@@ -211,11 +247,20 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
         const userPref = sessionStorage.getItem(AUDIO_PREF_KEY);
         if (userPref !== 'muted' && video.muted) {
           video.muted = false;
-          video.volume = isHeroVisibleRef.current ? 1.0 : 0.08;
           setIsMuted(false);
         }
         if (video.paused) {
           video.play().then(() => setIsPlaying(true)).catch(() => {});
+        }
+      }
+
+      // Initialize Web Audio pipeline and resume AudioContext on gesture
+      const gainNode = initAudioGraph();
+      if (gainNode && audioCtxRef.current) {
+        const targetGain = isHeroVisibleRef.current ? 1.0 : 0.08;
+        gainNode.gain.setValueAtTime(targetGain, audioCtxRef.current.currentTime);
+        if (audioCtxRef.current.state === 'suspended') {
+          audioCtxRef.current.resume().catch(() => {});
         }
       }
     };
@@ -227,7 +272,18 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       window.removeEventListener('touchstart', handleFirstGesture);
       window.removeEventListener('click', handleFirstGesture);
     };
-  }, [videoSrc]);
+  }, [videoSrc, initAudioGraph]);
+
+  // Clean up Web Audio graph on unmount
+  useEffect(() => {
+    return () => {
+      if (gainNodeRef.current && audioCtxRef.current) {
+        try {
+          gainNodeRef.current.gain.cancelScheduledValues(audioCtxRef.current.currentTime);
+        } catch {}
+      }
+    };
+  }, []);
 
   const togglePlay = () => {
     const video = videoRef.current;
@@ -247,9 +303,17 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
 
     if (isMuted || video.muted) {
       video.muted = false;
-      video.volume = isHeroVisibleRef.current ? 1.0 : 0.08;
       setIsMuted(false);
       sessionStorage.setItem(AUDIO_PREF_KEY, 'unmuted');
+
+      const gainNode = initAudioGraph();
+      if (gainNode && audioCtxRef.current) {
+        const targetGain = isHeroVisibleRef.current ? 1.0 : 0.08;
+        gainNode.gain.setValueAtTime(targetGain, audioCtxRef.current.currentTime);
+        if (audioCtxRef.current.state === 'suspended') {
+          audioCtxRef.current.resume().catch(() => {});
+        }
+      }
 
       const playPromise = video.play();
       if (playPromise !== undefined) {
