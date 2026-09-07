@@ -71,6 +71,15 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
+      {/* Temporary Deployment Verification Marker */}
+      <div
+        id="debug-version-marker"
+        className="fixed top-2 left-2 z-[99999] pointer-events-none px-2.5 py-1 rounded bg-black/90 text-[#FF7B1C] border border-[#FF7B1C] font-mono text-xs font-bold tracking-wider shadow-lg select-none"
+        aria-hidden="true"
+      >
+        DEBUG v1
+      </div>
+
       <header
         ref={headerRef}
         className={`fixed top-0 inset-x-0 z-50 transition-colors duration-300 bg-[#0B0C0E] border-b ${
