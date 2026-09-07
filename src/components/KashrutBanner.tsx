@@ -19,44 +19,48 @@ export const KashrutBanner: React.FC<KashrutBannerProps> = ({ lang }) => {
           onClick={() => setIsOpen((prev) => !prev)}
           aria-expanded={isOpen}
           aria-controls="kashrut-expandable-content"
-          className="group inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-lg bg-[#14171C] hover:bg-[#1C2026] border border-[#252A32] hover:border-[#FF7B1C]/50 text-[#FAF9F6] text-xs sm:text-sm font-semibold tracking-wide transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C]"
+          className="group inline-flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-lg bg-[#14171C] hover:bg-[#1C2026] border border-[#252A32] hover:border-[#FF7B1C]/50 text-[#FAF9F6] text-xs sm:text-sm font-semibold tracking-wide transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C]"
           aria-label={
             isOpen
               ? (lang === 'he' ? 'סגור פירוט כשרות למהדרין' : 'Close strict kosher details')
               : (lang === 'he' ? 'פתח פירוט כשר למהדרין' : 'Open strict kosher details')
           }
         >
-          {/* Animated Touch / Pointer Finger Icon with Soft Tap Glow */}
-          <div className="relative flex items-center justify-center w-4 h-4 text-[#FFFFFF] shrink-0">
-            {/* Soft Subtle Glow Ring */}
+          {/* Animated Touch / Pointer Finger Icon with Soft Tap Glow (ABOVE text, pointing down) */}
+          <div className="relative flex items-center justify-center w-5 h-5 text-[#FFFFFF] shrink-0">
+            {/* Circle: Scale only grow/shrink animation */}
             <span className="absolute inset-0 rounded-full bg-white/20 finger-tap-glow motion-reduce:hidden" />
-            {/* Touch Index Finger Icon */}
-            <svg
-              className="w-3.5 h-3.5 text-[#FFFFFF] relative z-10 finger-tap-motion"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M12 2a2 2 0 0 0-2 2v9.5l-1.5-1.5a2.12 2.12 0 0 0-3 3L10 19.5a6 6 0 0 0 6 2.5h1a6 6 0 0 0 6-6V13a2 2 0 0 0-2-2 2 2 0 0 0-2 2v-1a2 2 0 0 0-2-2 2 2 0 0 0-2 2V4a2 2 0 0 0-2-2z" />
-            </svg>
+            {/* Finger: Horizontal movement only, fixed size, pointing downward toward text */}
+            <div className="relative z-10 flex items-center justify-center finger-horizontal-motion">
+              <svg
+                className="w-3.5 h-3.5 text-[#FFFFFF] rotate-180"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 2a2 2 0 0 0-2 2v9.5l-1.5-1.5a2.12 2.12 0 0 0-3 3L10 19.5a6 6 0 0 0 6 2.5h1a6 6 0 0 0 6-6V13a2 2 0 0 0-2-2 2 2 0 0 0-2 2v-1a2 2 0 0 0-2-2 2 2 0 0 0-2 2V4a2 2 0 0 0-2-2z" />
+              </svg>
+            </div>
           </div>
 
-          <span className="text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors">
-            {lang === 'he' ? 'כשר למהדרין' : 'Strict Mehadrin Kosher'}
-          </span>
+          <div className="inline-flex items-center gap-1.5">
+            <span className="text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors">
+              {lang === 'he' ? 'כשר למהדרין' : 'Strict Mehadrin Kosher'}
+            </span>
 
-          {/* Reverse / Close Upward Arrow (Appears ONLY in open state, tailless chevron) */}
-          {isOpen && (
-            <ChevronUp
-              className="w-3.5 h-3.5 text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors shrink-0"
-              strokeWidth={2.4}
-              aria-hidden="true"
-            />
-          )}
+            {/* Reverse / Close Upward Arrow (Appears ONLY in open state, tailless chevron) */}
+            {isOpen && (
+              <ChevronUp
+                className="w-3.5 h-3.5 text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors shrink-0"
+                strokeWidth={2.4}
+                aria-hidden="true"
+              />
+            )}
+          </div>
         </button>
 
         {/* Expandable Kashrut Banner */}
@@ -134,14 +138,14 @@ export const KashrutBanner: React.FC<KashrutBannerProps> = ({ lang }) => {
         </AnimatePresence>
       </div>
 
-      {/* Lightweight CSS Keyframes for Touch Finger Tap Motion and Soft Glow */}
+      {/* Lightweight CSS Keyframes for Touch Finger Horizontal Motion and Soft Circle Scale Glow */}
       <style>{`
-        @keyframes finger-tap-anim {
+        @keyframes finger-horizontal-anim {
           0%, 100% {
-            transform: translateY(0) scale(1);
+            transform: translateX(-3.5px);
           }
           50% {
-            transform: translateY(-1.2px) scale(0.96);
+            transform: translateX(3.5px);
           }
         }
         @keyframes finger-glow-anim {
@@ -154,8 +158,8 @@ export const KashrutBanner: React.FC<KashrutBannerProps> = ({ lang }) => {
             opacity: 0.75;
           }
         }
-        .finger-tap-motion {
-          animation: finger-tap-anim 1.8s ease-in-out infinite;
+        .finger-horizontal-motion {
+          animation: finger-horizontal-anim 1.8s ease-in-out infinite;
         }
         .finger-tap-glow {
           animation: finger-glow-anim 1.8s ease-in-out infinite;
