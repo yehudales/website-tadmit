@@ -35,7 +35,13 @@ export const Header: React.FC<HeaderProps> = ({
     const updateHeaderHeight = () => {
       if (baseHeaderRef.current) {
         const height = baseHeaderRef.current.offsetHeight;
-        document.documentElement.style.setProperty('--header-height', `${height}px`);
+        if (height > 0) {
+          document.documentElement.style.setProperty('--header-height', `${height}px`);
+        }
+      } else {
+        // Calibrated baseline fallback based on responsive layout (mobile: ~104px, desktop: ~88px)
+        const fallback = window.innerWidth >= 640 ? 88 : 104;
+        document.documentElement.style.setProperty('--header-height', `${fallback}px`);
       }
     };
     updateHeaderHeight();

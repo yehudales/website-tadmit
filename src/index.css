@@ -22,6 +22,9 @@
     /* Fonts */
     --font-primary: 'Outfit', 'Assistant', 'Arimo', system-ui, -apple-system, sans-serif;
     --font-numeric: 'Rubik', 'Outfit', 'Assistant', system-ui, sans-serif;
+
+    /* Header clearance baseline to prevent layout jump before JS measurement */
+    --header-height: 98px;
   }
 
   html {
