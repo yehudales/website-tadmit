@@ -354,7 +354,6 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
             ref={setVideoRef}
             src="/assets/videos/hero.mp4"
             muted={true}
-            defaultMuted={true}
             autoPlay={true}
             playsInline={true}
             loop={true}
