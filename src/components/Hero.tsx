@@ -24,12 +24,8 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
 
   const videoSrc = BUSINESS_CONFIG.media.heroVideoUrl || '/assets/videos/hero.mp4';
 
-  // Initial state is muted until first user interaction or explicit unmute
-  const [isMuted, setIsMuted] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return true;
-    const pref = sessionStorage.getItem(AUDIO_PREF_KEY);
-    return pref !== 'unmuted';
-  });
+  // Initial state is always muted on initial load to ensure reliable, unblocked mobile autoplay
+  const [isMuted, setIsMuted] = useState<boolean>(true);
 
   const isMutedRef = useRef<boolean>(isMuted);
   useEffect(() => {
@@ -110,7 +106,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     [initAudioGraph]
   );
 
-  // Callback ref to configure synchronous DOM properties on mount
+  // Callback ref to configure synchronous native DOM attributes on mount (no duplicate play calls)
   const setVideoRef = useCallback((node: HTMLVideoElement | null) => {
     (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = node;
     if (node) {
@@ -125,12 +121,6 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       node.setAttribute('x5-playsinline', '');
       node.setAttribute('muted', '');
       node.removeAttribute('controls');
-
-      // Attempt immediate synchronous native playback as soon as node binds to DOM
-      const playPromise = node.play();
-      if (playPromise !== undefined) {
-        playPromise.then(() => setIsPlaying(true)).catch(() => {});
-      }
     }
   }, []);
 
@@ -363,10 +353,11 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
           <video
             ref={setVideoRef}
             src="/assets/videos/hero.mp4"
-            playsInline
-            muted={isMuted}
-            autoPlay
-            loop
+            muted={true}
+            defaultMuted={true}
+            autoPlay={true}
+            playsInline={true}
+            loop={true}
             preload="auto"
             controlsList="nodownload nofullscreen noremoteplayback noplaybackrate"
             disablePictureInPicture
@@ -375,11 +366,6 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
             aria-label={lang === 'he' ? 'סרטון אווירה של יהודלס' : 'Yehudales atmosphere video'}
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
-            onVolumeChange={() => {
-              if (videoRef.current) {
-                setIsMuted(videoRef.current.muted);
-              }
-            }}
             className="w-full h-full object-cover object-center block pointer-events-none select-none"
           />
 
