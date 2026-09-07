@@ -19,6 +19,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
   const isHeroVisibleRef = useRef<boolean>(true);
   const desiredGainRef = useRef<number>(1.0);
   const hasUnlockedAudioRef = useRef<boolean>(false);
+  const playPromiseRef = useRef<Promise<void> | null>(null);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
   const [heroHeight, setHeroHeight] = useState<number>(0);
@@ -140,18 +141,32 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       return;
     }
 
-    if (video.readyState < 2) {
-      // Media not ready yet, wait for loadeddata / canplay events
+    // Guard against concurrent in-flight play attempts while Promise is actively pending
+    if (playPromiseRef.current) {
       return;
     }
 
-    const p = video.play();
-    if (p !== undefined) {
-      p.then(() => {
+    // Media not ready yet; wait for loadeddata / canplay / canplaythrough events
+    if (video.readyState < 2) {
+      return;
+    }
+
+    try {
+      const p = video.play();
+      if (p !== undefined && typeof p.then === 'function') {
+        playPromiseRef.current = p;
+        p.then(() => {
+          playPromiseRef.current = null;
+          setIsPlaying(true);
+        }).catch(() => {
+          // Clear tracking on rejection so later native readiness events or user interactions can retry
+          playPromiseRef.current = null;
+        });
+      } else {
         setIsPlaying(true);
-      }).catch(() => {
-        // Allow later native events or user interaction to retry
-      });
+      }
+    } catch {
+      playPromiseRef.current = null;
     }
   }, []);
 
@@ -383,12 +398,29 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     if (!video) return;
 
     if (video.paused) {
-      video.play().then(() => {
-        setIsPlaying(true);
-        if (hasUnlockedAudioRef.current && !isMutedRef.current) {
-          applyGain(desiredGainRef.current, 200);
+      if (playPromiseRef.current) return;
+      try {
+        const p = video.play();
+        if (p !== undefined && typeof p.then === 'function') {
+          playPromiseRef.current = p;
+          p.then(() => {
+            playPromiseRef.current = null;
+            setIsPlaying(true);
+            if (hasUnlockedAudioRef.current && !isMutedRef.current) {
+              applyGain(desiredGainRef.current, 200);
+            }
+          }).catch(() => {
+            playPromiseRef.current = null;
+          });
+        } else {
+          setIsPlaying(true);
+          if (hasUnlockedAudioRef.current && !isMutedRef.current) {
+            applyGain(desiredGainRef.current, 200);
+          }
         }
-      }).catch(() => {});
+      } catch {
+        playPromiseRef.current = null;
+      }
     } else {
       video.pause();
       setIsPlaying(false);
