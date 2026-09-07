@@ -21,16 +21,48 @@ export default function App() {
   const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
-  // Configure manual scroll restoration on initial mount so page and refresh always start at top (scrollY 0)
+  // Configure manual scroll restoration on initial mount so page and refresh reliably start at top (scrollY 0)
   useEffect(() => {
     if (typeof window !== 'undefined' && 'scrollRestoration' in history) {
       history.scrollRestoration = 'manual';
     }
-    try {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    } catch {
-      window.scrollTo(0, 0);
-    }
+
+    const resetToTop = () => {
+      try {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      } catch {
+        window.scrollTo(0, 0);
+      }
+      if (document.documentElement) {
+        document.documentElement.scrollTop = 0;
+      }
+      if (document.body) {
+        document.body.scrollTop = 0;
+      }
+    };
+
+    // Immediate synchronous reset
+    resetToTop();
+
+    // Secondary post-layout stabilization reset (frame-bounded, does NOT permanently lock scrolling)
+    const rafId = requestAnimationFrame(() => {
+      resetToTop();
+    });
+
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        resetToTop();
+      }
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+    window.addEventListener('load', resetToTop, { once: true });
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('pageshow', handlePageShow);
+      window.removeEventListener('load', resetToTop);
+    };
   }, []);
 
   // Synchronize document direction and lang attribute

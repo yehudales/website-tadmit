@@ -35,8 +35,13 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
   });
 
   const isMutedRef = useRef<boolean>(isMuted);
+  // Synchronize native video.muted attribute directly with isMuted state
   useEffect(() => {
     isMutedRef.current = isMuted;
+    const video = videoRef.current;
+    if (video) {
+      video.muted = isMuted;
+    }
   }, [isMuted]);
 
   // Immediate audio stop helper: cancels all scheduled values and zeros GainNode instantly
@@ -110,6 +115,11 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       // Priority 2: Manual Mute -> Gain = 0 immediately
       if (isMutedRef.current || isPaused) {
         stopAudioImmediately();
+        return;
+      }
+
+      // Do not prematurely initialize the Web Audio graph before audio has been unlocked
+      if (!hasUnlockedAudioRef.current && !gainNodeRef.current) {
         return;
       }
 
@@ -446,7 +456,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
           <video
             ref={setVideoRef}
             src="/assets/videos/hero.mp4"
-            muted={true}
+            muted={isMuted}
             autoPlay={true}
             playsInline={true}
             loop={true}
