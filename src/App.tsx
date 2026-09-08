@@ -62,8 +62,21 @@ export default function App() {
   }, []);
 
   // Precise Geometric Shop Mode Trigger & Upward Scroll Lock
-  // ONLY triggers when Shop Category Navigation Bar physically reaches the bottom edge of the fixed top banner
+  // Calculates EXACT physical contact point (categoryBarDocTop - fixedHeaderHeight)
+  // NEVER locks to an overshot window.scrollY during fast flings
   useEffect(() => {
+    const getExactLockScrollY = (): number | null => {
+      const headerEl = document.getElementById('topmost-header-row');
+      const shopEl = document.getElementById('shop-experience') || document.getElementById('shop-category-bar');
+      if (!headerEl || !shopEl) return null;
+
+      const headerHeight = headerEl.getBoundingClientRect().height;
+      const shopRect = shopEl.getBoundingClientRect();
+      const shopDocTop = shopRect.top + window.scrollY;
+
+      return Math.max(0, shopDocTop - headerHeight);
+    };
+
     const getHeaderBottom = () => {
       const headerEl = document.getElementById('topmost-header-row');
       if (headerEl) {
@@ -87,12 +100,12 @@ export default function App() {
       if (!isShopModeRef.current) {
         // Geometric condition: Category bar touches or passes bottom of fixed top banner
         if (categoryBarRect.top <= headerBottom + 0.5) {
-          const currentScrollY = Math.max(0, window.scrollY);
-          lockScrollYRef.current = currentScrollY;
+          const exactLock = getExactLockScrollY();
+          lockScrollYRef.current = exactLock !== null ? exactLock : Math.max(0, categoryBarRect.top + window.scrollY - headerBottom);
           setIsShopMode(true);
         }
       } else {
-        // In Shop Mode: block upward scrolling above the lock boundary point
+        // In Shop Mode: block upward scrolling above the exact lock boundary point
         if (lockScrollYRef.current !== null && window.scrollY < lockScrollYRef.current) {
           window.scrollTo({ top: lockScrollYRef.current, left: 0, behavior: 'instant' });
         }
@@ -100,10 +113,11 @@ export default function App() {
     };
 
     const handleWheel = (e: WheelEvent) => {
-      if (isShopModeRef.current && lockScrollYRef.current !== null) {
-        if (window.scrollY <= lockScrollYRef.current + 0.5 && e.deltaY < 0) {
+      if (isShopModeRef.current) {
+        const exactLock = lockScrollYRef.current ?? getExactLockScrollY();
+        if (exactLock !== null && window.scrollY <= exactLock + 0.5 && e.deltaY < 0) {
           e.preventDefault();
-          window.scrollTo(0, lockScrollYRef.current);
+          window.scrollTo({ top: exactLock, left: 0, behavior: 'instant' });
         }
       }
     };
@@ -116,23 +130,25 @@ export default function App() {
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (isShopModeRef.current && lockScrollYRef.current !== null && e.touches.length > 0) {
+      if (isShopModeRef.current && e.touches.length > 0) {
+        const exactLock = lockScrollYRef.current ?? getExactLockScrollY();
         const currentY = e.touches[0].clientY;
         const deltaY = currentY - touchStartY; // positive when dragging downward -> user trying to scroll upward
-        if (window.scrollY <= lockScrollYRef.current + 0.5 && deltaY > 0) {
+        if (exactLock !== null && window.scrollY <= exactLock + 0.5 && deltaY > 0) {
           if (e.cancelable) {
             e.preventDefault();
           }
-          window.scrollTo(0, lockScrollYRef.current);
+          window.scrollTo({ top: exactLock, left: 0, behavior: 'instant' });
         }
       }
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isShopModeRef.current && lockScrollYRef.current !== null) {
-        if ((e.key === 'ArrowUp' || e.key === 'PageUp') && window.scrollY <= lockScrollYRef.current + 2) {
+      if (isShopModeRef.current) {
+        const exactLock = lockScrollYRef.current ?? getExactLockScrollY();
+        if (exactLock !== null && (e.key === 'ArrowUp' || e.key === 'PageUp' || e.key === 'Home') && window.scrollY <= exactLock + 2) {
           e.preventDefault();
-          window.scrollTo(0, lockScrollYRef.current);
+          window.scrollTo({ top: exactLock, left: 0, behavior: 'instant' });
         }
       }
     };
@@ -224,7 +240,7 @@ export default function App() {
         className="fixed top-2 left-2 z-[9999] pointer-events-none w-6 h-6 rounded-full bg-[#1A1D22]/80 border border-white/20 text-[#FAF9F6]/80 text-[10px] font-mono font-bold flex items-center justify-center select-none shadow-sm"
         aria-hidden="true"
       >
-        79
+        80
       </div>
 
       {/* Accessible Skip Link */}
