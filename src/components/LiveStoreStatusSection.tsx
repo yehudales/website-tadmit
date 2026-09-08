@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import {
   Clock,
   MapPin,
@@ -10,6 +10,7 @@ import { useStoreStatus } from '../hooks/useStoreStatus';
 import { Language } from '../types';
 import { BUSINESS_CONFIG } from '../config/businessConfig';
 import { InteractiveDisclosureTrigger } from './InteractiveDisclosureTrigger';
+import { getDrawerAnimationConfig } from '../utils/drawerAnimation';
 
 interface LiveStoreStatusSectionProps {
   lang: Language;
@@ -19,6 +20,8 @@ interface LiveStoreStatusSectionProps {
 export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
   lang,
 }) => {
+  const shouldReduceMotion = useReducedMotion();
+  const drawerAnim = getDrawerAnimationConfig(shouldReduceMotion);
   const status = useStoreStatus();
   const [isHoursOpen, setIsHoursOpen] = useState(false);
 
@@ -140,9 +143,8 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
               <motion.div
                 id="opening-hours-expandable-content"
                 initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.24, ease: 'easeOut' }}
+                animate={drawerAnim.open}
+                exit={drawerAnim.closed}
                 className="w-full overflow-hidden"
               >
                 <div className="pt-4 pb-2 text-start">

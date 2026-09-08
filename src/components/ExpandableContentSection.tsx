@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import {
   ChevronUp,
   Info,
@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { Language, NavSectionId } from '../types';
 import { BUSINESS_CONFIG, getWhatsAppOrderUrl } from '../config/businessConfig';
+import { getDrawerAnimationConfig } from '../utils/drawerAnimation';
 import { PageEntranceAnimation } from './PageEntranceAnimation';
 
 interface ExpandableContentSectionProps {
@@ -42,6 +43,8 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
   onOpenAccessibility,
   onOpenPrivacy,
 }) => {
+  const shouldReduceMotion = useReducedMotion();
+  const drawerAnim = getDrawerAnimationConfig(shouldReduceMotion);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // When active section changes, reset scroll inside panel to top
@@ -153,11 +156,19 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
           id="expandable-content-area"
           ref={containerRef}
           key={activeSection}
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.22, ease: 'easeOut' }}
-          className="w-full bg-[#0E1013]/98 backdrop-blur-2xl border-b border-[#252A32] shadow-[0_25px_60px_rgba(0,0,0,0.9)] max-h-[calc(100vh-var(--header-height,98px))] max-h-[calc(100dvh-var(--header-height,98px))] overflow-y-auto overscroll-contain relative z-40 select-text"
+          initial={{ opacity: 0, height: 0, overflow: 'hidden' }}
+          animate={{
+            ...drawerAnim.open,
+            overflowY: shouldReduceMotion ? 'auto' : undefined,
+            transitionEnd: {
+              overflowY: 'auto',
+            },
+          }}
+          exit={{
+            ...drawerAnim.closed,
+            overflow: 'hidden',
+          }}
+          className="w-full bg-[#0E1013]/98 backdrop-blur-2xl border-b border-[#252A32] shadow-[0_25px_60px_rgba(0,0,0,0.9)] max-h-[calc(100vh-var(--header-height,98px))] max-h-[calc(100dvh-var(--header-height,98px))] overscroll-contain relative z-40 select-text"
           role="region"
           aria-labelledby="expandable-heading"
         >

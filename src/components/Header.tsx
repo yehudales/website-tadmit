@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Settings, Home } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { BUSINESS_CONFIG } from '../config/businessConfig';
 import { Language, NavSectionId } from '../types';
 import { Logo } from './Logo';
@@ -8,6 +8,7 @@ import { ExpandableContentSection } from './ExpandableContentSection';
 import { KashrutTabContent } from './KashrutBanner';
 import { InteractiveDisclosureTrigger } from './InteractiveDisclosureTrigger';
 import { hasToolbarShimmerPlayed, markToolbarShimmerAsPlayed } from '../utils/sessionShimmer';
+import { getDrawerAnimationConfig } from '../utils/drawerAnimation';
 
 interface HeaderProps {
   lang: Language;
@@ -38,6 +39,8 @@ export const Header: React.FC<HeaderProps> = ({
   onCloseKashrut,
   onToggleKashrut,
 }) => {
+  const shouldReduceMotion = useReducedMotion();
+  const drawerAnim = getDrawerAnimationConfig(shouldReduceMotion);
   const [scrolled, setScrolled] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const baseHeaderRef = useRef<HTMLDivElement>(null);
@@ -215,9 +218,8 @@ export const Header: React.FC<HeaderProps> = ({
                 <motion.div
                   id="kashrut-drawer-container"
                   initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.22, ease: 'easeOut' }}
+                  animate={drawerAnim.open}
+                  exit={drawerAnim.closed}
                   className="w-full overflow-hidden"
                 >
                   <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-3 pt-1">
