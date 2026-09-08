@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Settings, Home, CheckCircle2, ChevronUp } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { Settings, Home } from 'lucide-react';
 import { BUSINESS_CONFIG } from '../config/businessConfig';
 import { Language, NavSectionId } from '../types';
 import { Logo } from './Logo';
 import { ExpandableContentSection } from './ExpandableContentSection';
-import { InteractiveDisclosureTrigger } from './InteractiveDisclosureTrigger';
 
 interface HeaderProps {
   lang: Language;
@@ -31,11 +29,10 @@ export const Header: React.FC<HeaderProps> = ({
   onGoHome,
 }) => {
   const [scrolled, setScrolled] = useState(false);
-  const [isKashrutOpen, setIsKashrutOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const baseHeaderRef = useRef<HTMLDivElement>(null);
 
-  // Measure base header height (row 1 + row 2 + kashrut panel) and keep --header-height CSS variable synchronized
+  // Measure base header height (row 1 + row 2) and keep --header-height CSS variable synchronized
   useEffect(() => {
     const updateHeaderHeight = () => {
       if (baseHeaderRef.current) {
@@ -46,7 +43,7 @@ export const Header: React.FC<HeaderProps> = ({
     updateHeaderHeight();
     window.addEventListener('resize', updateHeaderHeight);
     return () => window.removeEventListener('resize', updateHeaderHeight);
-  }, [isKashrutOpen]);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -114,20 +111,8 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
               </div>
 
-              {/* Center: Kashrut trigger (TOP) + Brand Logo (BELOW) */}
-              <div className="relative flex flex-col items-center justify-center -space-y-0.5 sm:space-y-0">
-                <InteractiveDisclosureTrigger
-                  isOpen={isKashrutOpen}
-                  onToggle={() => setIsKashrutOpen((prev) => !prev)}
-                  label={lang === 'he' ? 'כשר למהדרין' : 'Strict Mehadrin Kosher'}
-                  emojiColor="#E6BB6E"
-                  circleColor="#E6BB6E"
-                  accentColor="#E6BB6E"
-                  textClassName="font-['Frank_Ruhl_Libre',serif] text-[11px] sm:text-xs md:text-sm font-bold tracking-wide"
-                  ariaControls="kashrut-expandable-content"
-                  ariaLabelOpen={lang === 'he' ? 'סגור פירוט כשרות למהדרין' : 'Close strict kosher details'}
-                  ariaLabelClosed={lang === 'he' ? 'פתח פירוט כשר למהדרין' : 'Open strict kosher details'}
-                />
+              {/* Center: Brand Logo / Wordmark (Center Col) */}
+              <div className="flex items-center justify-center">
                 <button
                   type="button"
                   onClick={() => {
@@ -141,101 +126,8 @@ export const Header: React.FC<HeaderProps> = ({
                   className="flex items-center justify-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] rounded-lg transition-transform duration-300 hover:scale-105"
                   aria-label={`${BUSINESS_CONFIG.name[lang]} - דף הבית`}
                 >
-                  <Logo className="h-[64px] sm:h-7 md:h-8 w-auto" />
+                  <Logo className="h-[89.6px] sm:h-8 md:h-9 w-auto" />
                 </button>
-
-                {/* Expandable Kashrut Details Panel rendered as topmost layer above all page contents */}
-                <AnimatePresence>
-                  {isKashrutOpen && (
-                    <>
-                      {/* Backdrop */}
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        onClick={() => setIsKashrutOpen(false)}
-                        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[99998]"
-                        aria-hidden="true"
-                      />
-
-                      {/* Topmost Dialog Box */}
-                      <motion.div
-                        id="kashrut-expandable-content"
-                        initial={{ opacity: 0, y: -16, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -16, scale: 0.95 }}
-                        transition={{ duration: 0.24, ease: 'easeOut' }}
-                        className="fixed top-16 sm:top-20 left-1/2 -translate-x-1/2 w-[92vw] max-w-lg z-[99999] bg-[#14171C] border border-[#252A32] rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] p-5 sm:p-7 text-start"
-                      >
-                        <div className="flex items-center justify-between pb-3.5 border-b border-[#252A32]">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#E6BB6E] px-2.5 py-1 rounded-md bg-[#0B0C0E] border border-[#252A32]">
-                              {lang === 'he' ? 'פיקוח וכשרות מהודרת' : 'Strict Kosher Supervision'}
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setIsKashrutOpen(false)}
-                            className="p-1.5 rounded-lg bg-[#0B0C0E] border border-[#252A32] text-[#94A3B8] hover:text-white cursor-pointer transition-colors"
-                            aria-label={lang === 'he' ? 'סגור' : 'Close'}
-                          >
-                            <ChevronUp className="w-4 h-4" />
-                          </button>
-                        </div>
-
-                        <div className="pt-4 space-y-3.5">
-                          <h3 className="text-lg sm:text-xl font-black text-[#FAF9F6] font-['Frank_Ruhl_Libre',serif]">
-                            {lang === 'he' ? 'כשרות מהודרת למהדרין' : 'Strict Mehadrin Kosher'}
-                          </h3>
-                          <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-                            {lang === 'he'
-                              ? 'אנו ביהודלס מקפידים על סטנדרט כשרות למהדרין מן המהדרין, עם הפרדה ובהירות מלאה לשמירה על שקט נפשי וביטחון מושלם של לקוחותינו:'
-                              : 'At Yehudales, we uphold rigorous kosher standards with strict clarity and full transparency for our customers:'}
-                          </p>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                            {/* Badge 1: בשרים ועופות */}
-                            <div className="p-3.5 rounded-xl bg-[#0B0C0E] border border-[#252A32] flex items-center gap-3.5">
-                              <div className="w-9 h-9 rounded-lg bg-[#14171C] border border-[#252A32] flex items-center justify-center shrink-0">
-                                <CheckCircle2 className="w-4 h-4 text-[#E6BB6E]" />
-                              </div>
-                              <div>
-                                <span className="text-[10px] text-[#94A3B8] uppercase block font-medium">
-                                  {lang === 'he' ? 'בשרים ועופות' : 'Meat & Poultry'}
-                                </span>
-                                <div className="text-xs sm:text-sm font-bold text-[#FAF9F6]">
-                                  {lang === 'he' ? 'בשר: נווה ציון' : 'Meat: Neve Zion'}
-                                </div>
-                                <span className="text-[10px] text-[#E6BB6E] font-semibold block">
-                                  {lang === 'he' ? 'בשר חלק למהדרין' : 'Strict Mehadrin Glatt'}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Badge 2: שאר חומרי הגלם והמוצרים */}
-                            <div className="p-3.5 rounded-xl bg-[#0B0C0E] border border-[#252A32] flex items-center gap-3.5">
-                              <div className="w-9 h-9 rounded-lg bg-[#14171C] border border-[#252A32] flex items-center justify-center shrink-0">
-                                <CheckCircle2 className="w-4 h-4 text-[#FAF9F6]" />
-                              </div>
-                              <div>
-                                <span className="text-[10px] text-[#94A3B8] uppercase block font-medium">
-                                  {lang === 'he' ? 'שאר חומרי הגלם והמוצרים' : 'Other Ingredients'}
-                                </span>
-                                <div className="text-xs sm:text-sm font-bold text-[#FAF9F6]">
-                                  {lang === 'he' ? 'בד״ץ העדה החרדית' : 'Badatz Edah HaChareidis'}
-                                </div>
-                                <span className="text-[10px] text-[#FAF9F6] font-semibold block">
-                                  {lang === 'he' ? 'השגחה קפדנית' : 'Prestigious Supervision'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    </>
-                  )}
-                </AnimatePresence>
               </div>
 
               {/* Right / Settings Action (Right Col) */}
@@ -252,87 +144,6 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
           </div>
-
-          {/* Expandable Kashrut Information Panel (Master reference animation matching שעות פתיחה) */}
-          <AnimatePresence>
-            {isKashrutOpen && (
-              <motion.div
-                id="kashrut-expandable-content"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.24, ease: 'easeOut' }}
-                className="w-full overflow-hidden bg-[#0B0C0E]/98 border-b border-[#252A32] shadow-2xl relative z-50"
-              >
-                <div className="max-w-3xl mx-auto px-4 py-4 sm:py-6 text-start">
-                  <div className="p-5 sm:p-6 rounded-2xl bg-[#14171C] border border-[#252A32] shadow-2xl space-y-4">
-                    <div className="flex items-center justify-between pb-3 border-b border-[#252A32]">
-                      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#E6BB6E] px-2.5 py-1 rounded-md bg-[#0B0C0E] border border-[#252A32]">
-                        {lang === 'he' ? 'פיקוח וכשרות מהודרת' : 'Strict Kosher Supervision'}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setIsKashrutOpen(false)}
-                        className="p-1.5 rounded-lg bg-[#0B0C0E] border border-[#252A32] text-[#94A3B8] hover:text-white cursor-pointer transition-colors"
-                        aria-label={lang === 'he' ? 'סגור' : 'Close'}
-                      >
-                        <ChevronUp className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    <div className="space-y-3">
-                      <h3 className="text-base sm:text-lg font-black text-[#FAF9F6] font-['Frank_Ruhl_Libre',serif]">
-                        {lang === 'he' ? 'כשרות מהודרת למהדרין' : 'Strict Mehadrin Kosher'}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-                        {lang === 'he'
-                          ? 'אנו ביהודלס מקפידים על סטנדרט כשרות למהדרין מן המהדרין, עם הפרדה ובהירות מלאה לשמירה על שקט נפשי וביטחון מושלם של לקוחותינו:'
-                          : 'At Yehudales, we uphold rigorous kosher standards with strict clarity and full transparency for our customers:'}
-                      </p>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                        {/* Badge 1: בשרים ועופות */}
-                        <div className="p-3.5 rounded-xl bg-[#0B0C0E] border border-[#252A32] flex items-center gap-3.5">
-                          <div className="w-9 h-9 rounded-lg bg-[#14171C] border border-[#252A32] flex items-center justify-center shrink-0">
-                            <CheckCircle2 className="w-4 h-4 text-[#E6BB6E]" />
-                          </div>
-                          <div>
-                            <span className="text-[10px] text-[#94A3B8] uppercase block font-medium">
-                              {lang === 'he' ? 'בשרים ועופות' : 'Meat & Poultry'}
-                            </span>
-                            <div className="text-xs sm:text-sm font-bold text-[#FAF9F6]">
-                              {lang === 'he' ? 'בשר: נווה ציון' : 'Meat: Neve Zion'}
-                            </div>
-                            <span className="text-[10px] text-[#E6BB6E] font-semibold block">
-                              {lang === 'he' ? 'בשר חלק למהדרין' : 'Strict Mehadrin Glatt'}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Badge 2: שאר חומרי הגלם והמוצרים */}
-                        <div className="p-3.5 rounded-xl bg-[#0B0C0E] border border-[#252A32] flex items-center gap-3.5">
-                          <div className="w-9 h-9 rounded-lg bg-[#14171C] border border-[#252A32] flex items-center justify-center shrink-0">
-                            <CheckCircle2 className="w-4 h-4 text-[#FAF9F6]" />
-                          </div>
-                          <div>
-                            <span className="text-[10px] text-[#94A3B8] uppercase block font-medium">
-                              {lang === 'he' ? 'שאר חומרי הגלם והמוצרים' : 'Other Ingredients'}
-                            </span>
-                            <div className="text-xs sm:text-sm font-bold text-[#FAF9F6]">
-                              {lang === 'he' ? 'בד״ץ העדה החרדית' : 'Badatz Edah HaChareidis'}
-                            </div>
-                            <span className="text-[10px] text-[#FAF9F6] font-semibold block">
-                              {lang === 'he' ? 'השגחה קפדנית' : 'Prestigious Supervision'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           {/* ROW 2: VISIBLE LONG TOOLBAR (Directly above Hero Video along dividing line) */}
           <nav
