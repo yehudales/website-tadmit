@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Settings, Home } from 'lucide-react';
 import { BUSINESS_CONFIG } from '../config/businessConfig';
 import { Language, NavSectionId } from '../types';
@@ -30,17 +30,31 @@ export const Header: React.FC<HeaderProps> = ({
   const headerRef = useRef<HTMLElement>(null);
   const baseHeaderRef = useRef<HTMLDivElement>(null);
 
-  // Measure base header height (row 1 + row 2) and keep --header-height CSS variable synchronized
-  useEffect(() => {
+  // Measure base header height (row 1 + row 2) before paint and keep --header-height CSS variable synchronized
+  useLayoutEffect(() => {
     const updateHeaderHeight = () => {
       if (baseHeaderRef.current) {
         const height = baseHeaderRef.current.offsetHeight;
-        document.documentElement.style.setProperty('--header-height', `${height}px`);
+        if (height > 0) {
+          document.documentElement.style.setProperty('--header-height', `${height}px`);
+        }
       }
     };
     updateHeaderHeight();
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateHeaderHeight();
+    });
+
+    if (baseHeaderRef.current) {
+      resizeObserver.observe(baseHeaderRef.current);
+    }
+
     window.addEventListener('resize', updateHeaderHeight);
-    return () => window.removeEventListener('resize', updateHeaderHeight);
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateHeaderHeight);
+    };
   }, []);
 
   useEffect(() => {

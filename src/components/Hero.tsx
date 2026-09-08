@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react';
 import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import { BUSINESS_CONFIG } from '../config/businessConfig';
 import { Language } from '../types';
@@ -10,44 +10,122 @@ interface HeroProps {
 const AUDIO_PREF_KEY = 'yehudales_hero_sound_pref';
 
 export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // Audio Engine State & Refs
   const isHeroVisibleRef = useRef<boolean>(true);
+  const desiredGainRef = useRef<number>(1.0);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
   const isAudioConnectedRef = useRef<boolean>(false);
+  const hasUnlockedAudioRef = useRef<boolean>(false);
 
-  const [isPlaying, setIsPlaying] = useState(true);
+  // Playback & Geometry State
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
   const [heroHeight, setHeroHeight] = useState<number>(0);
   const [isScrolledPast, setIsScrolledPast] = useState<boolean>(false);
   const isPlayPendingRef = useRef<boolean>(false);
-  const hasUnlockedAudioRef = useRef<boolean>(false);
 
-  const videoSrc = BUSINESS_CONFIG.media.heroVideoUrl || '/assets/videos/hero.mp4';
-
-  // Default user audio preference is ACTIVE (unmuted / isMuted=false) unless explicitly saved as 'muted'
+  // User manual audio preference state (defaults to active sound unless explicitly set to muted)
   const [isMuted, setIsMuted] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     const pref = sessionStorage.getItem(AUDIO_PREF_KEY);
     return pref === 'muted';
   });
-
   const isMutedRef = useRef<boolean>(isMuted);
-  // Synchronize native video.muted attribute directly with isMuted state
+
+  // Synchronize ref with state without touching JSX video props
   useEffect(() => {
     isMutedRef.current = isMuted;
-    const video = videoRef.current;
-    if (video) {
-      if (hasUnlockedAudioRef.current) {
-        video.muted = isMuted;
-      } else {
-        video.muted = true;
-      }
-    }
   }, [isMuted]);
 
-  // Immediate audio stop helper: cancels all scheduled values and zeros GainNode instantly
+  // --------------------------------------------------------------------------
+  // PART 1 — VIDEO ENGINE (Muted Startup, Autonomous Lifecycle)
+  // --------------------------------------------------------------------------
+
+  // Race-safe playback initiator: tracks promise lifecycle without permanent lock
+  const attemptPlay = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (!video.paused) {
+      setIsPlaying(true);
+      return;
+    }
+
+    if (isPlayPendingRef.current) return;
+
+    // Enforce native muted & playsInline configuration before audio unlock
+    if (!hasUnlockedAudioRef.current) {
+      video.muted = true;
+      video.defaultMuted = true;
+    }
+    video.playsInline = true;
+
+    isPlayPendingRef.current = true;
+    const playPromise = video.play();
+    if (playPromise !== undefined && typeof playPromise.then === 'function') {
+      playPromise
+        .then(() => {
+          isPlayPendingRef.current = false;
+          setIsPlaying(true);
+        })
+        .catch(() => {
+          // Playback blocked or interrupted; release flag immediately to permit subsequent gesture attempt
+          isPlayPendingRef.current = false;
+        });
+    } else {
+      isPlayPendingRef.current = false;
+      setIsPlaying(true);
+    }
+  }, []);
+
+  // Callback ref: configures synchronous native DOM attributes on mount and starts playback
+  const setVideoRef = useCallback((node: HTMLVideoElement | null) => {
+    videoRef.current = node;
+    if (node) {
+      // 1. Immediately set native media attributes required for mobile autoplay compliance
+      if (!hasUnlockedAudioRef.current) {
+        node.muted = true;
+        node.defaultMuted = true;
+        node.setAttribute('muted', '');
+      }
+      node.volume = 1.0;
+      node.playsInline = true;
+      node.autoplay = true;
+      node.loop = true;
+      node.preload = 'auto';
+      node.setAttribute('playsinline', '');
+      node.setAttribute('webkit-playsinline', '');
+      node.setAttribute('x5-playsinline', '');
+      node.setAttribute('autoplay', '');
+      node.setAttribute('loop', '');
+      node.removeAttribute('controls');
+
+      // 2. Playback startup:
+      // If browser already has current data (readyState >= 2), start immediately.
+      // Otherwise, wait strictly for earliest native readiness event without artificial delay.
+      if (node.readyState >= 2) {
+        attemptPlay();
+      } else {
+        const onMediaReady = () => {
+          node.removeEventListener('canplay', onMediaReady);
+          node.removeEventListener('loadeddata', onMediaReady);
+          attemptPlay();
+        };
+        node.addEventListener('canplay', onMediaReady, { once: true });
+        node.addEventListener('loadeddata', onMediaReady, { once: true });
+      }
+    }
+  }, [attemptPlay]);
+
+  // --------------------------------------------------------------------------
+  // PART 2 — AUDIO ENGINE (Lazy Graph, Authoritative Touchstart Unlock, Gain Control)
+  // --------------------------------------------------------------------------
+
+  // Immediate audio stop helper: cancels all scheduled ramps and zeroes GainNode instantly
   const stopAudioImmediately = useCallback(() => {
     const ctx = audioCtxRef.current;
     const gainNode = gainNodeRef.current;
@@ -87,8 +165,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
 
       if (!gainNodeRef.current) {
         const gainNode = ctx.createGain();
-        const isPaused = video.paused;
-        const initialGain = (isMutedRef.current || isPaused) ? 0 : (isHeroVisibleRef.current ? 1.0 : 0.08);
+        const initialGain = isMutedRef.current || video.paused ? 0 : desiredGainRef.current;
         gainNode.gain.setValueAtTime(initialGain, ctx.currentTime);
         sourceNodeRef.current.connect(gainNode);
         gainNode.connect(ctx.destination);
@@ -96,11 +173,6 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       }
 
       isAudioConnectedRef.current = true;
-
-      if (ctx.state === 'suspended') {
-        ctx.resume().catch(() => {});
-      }
-
       return gainNodeRef.current;
     } catch (err) {
       console.warn('Web Audio initialization:', err);
@@ -108,123 +180,187 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     }
   }, []);
 
-  // Smooth Web Audio GainNode transition (1.0 when Hero is visible, 0.08 when not visible, 0 when paused or muted)
+  // Smooth Web Audio GainNode transition (1.0 when Hero is visible, 0.08 when not visible, 350ms duration)
   const fadeGainTo = useCallback(
     (targetGain: number, durationMs = 350) => {
       const video = videoRef.current;
       const isPaused = !video || video.paused;
 
-      // Priority 1: Paused -> Gain = 0 immediately
-      // Priority 2: Manual Mute -> Gain = 0 immediately
       if (isMutedRef.current || isPaused) {
         stopAudioImmediately();
         return;
       }
 
-      // Do not prematurely initialize the Web Audio graph before audio has been unlocked
-      if (!hasUnlockedAudioRef.current && !gainNodeRef.current) {
+      if (!hasUnlockedAudioRef.current || !gainNodeRef.current || !audioCtxRef.current) {
         return;
       }
 
       const ctx = audioCtxRef.current;
-      const gainNode = gainNodeRef.current || initAudioGraph();
-
-      if (gainNode && ctx) {
-        const now = ctx.currentTime;
-        if (ctx.state === 'suspended') {
-          ctx.resume().catch(() => {});
-        }
-        const durationSec = durationMs / 1000;
-        gainNode.gain.cancelScheduledValues(now);
-        gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-        gainNode.gain.linearRampToValueAtTime(targetGain, now + durationSec);
-      }
+      const gainNode = gainNodeRef.current;
+      const now = ctx.currentTime;
+      const durationSec = durationMs / 1000;
+      gainNode.gain.cancelScheduledValues(now);
+      gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+      gainNode.gain.linearRampToValueAtTime(targetGain, now + durationSec);
     },
-    [initAudioGraph, stopAudioImmediately]
+    [stopAudioImmediately]
   );
 
-  // Single authoritative race-safe play initiation function
-  const attemptPlay = useCallback(() => {
-    const video = videoRef.current;
-    if (!video) return;
+  // Authoritative first-touch mobile audio activation
+  // Primary trigger: touchstart (non-blocking, passive, does NOT prevent scrolling)
+  // Secondary fallback: click (for desktop interactions)
+  useEffect(() => {
+    let isListenerActive = true;
 
-    if (!video.paused) {
-      setIsPlaying(true);
-      return;
-    }
+    const removeListeners = () => {
+      if (!isListenerActive) return;
+      isListenerActive = false;
+      window.removeEventListener('touchstart', handleTouchActivation, { passive: true } as EventListenerOptions);
+      window.removeEventListener('click', handleClickActivation, { passive: true } as EventListenerOptions);
+    };
 
-    if (isPlayPendingRef.current) return;
+    const performAudioUnlock = () => {
+      if (hasUnlockedAudioRef.current) {
+        removeListeners();
+        return;
+      }
 
-    // Ensure native muted & playsInline configuration for full mobile policy acceptance
-    if (!hasUnlockedAudioRef.current) {
-      video.muted = true;
-      video.defaultMuted = true;
-    }
-    video.playsInline = true;
+      // Check if user previously saved manual mute
+      const userPref = sessionStorage.getItem(AUDIO_PREF_KEY);
+      if (userPref === 'muted') {
+        hasUnlockedAudioRef.current = true;
+        removeListeners();
+        return;
+      }
 
-    isPlayPendingRef.current = true;
-    const playPromise = video.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          isPlayPendingRef.current = false;
-          setIsPlaying(true);
-        })
-        .catch(() => {
-          isPlayPendingRef.current = false;
-        });
-    } else {
-      isPlayPendingRef.current = false;
-      setIsPlaying(true);
-    }
+      const currentVideo = videoRef.current;
+      if (!currentVideo) return;
+
+      const gainNode = initAudioGraph();
+      const ctx = audioCtxRef.current;
+      if (!ctx || !gainNode) return;
+
+      const completeUnlock = () => {
+        if (ctx.state === 'running') {
+          hasUnlockedAudioRef.current = true;
+          currentVideo.muted = false;
+          setIsMuted(false);
+          isMutedRef.current = false;
+          sessionStorage.setItem(AUDIO_PREF_KEY, 'unmuted');
+
+          const now = ctx.currentTime;
+          const targetGain = !currentVideo.paused ? desiredGainRef.current : 0;
+          gainNode.gain.cancelScheduledValues(now);
+          gainNode.gain.setValueAtTime(targetGain, now);
+
+          if (currentVideo.paused) {
+            currentVideo.play().then(() => setIsPlaying(true)).catch(() => {});
+          }
+
+          removeListeners();
+        }
+      };
+
+      if (ctx.state === 'running') {
+        completeUnlock();
+      } else {
+        ctx.resume()
+          .then(() => {
+            completeUnlock();
+          })
+          .catch(() => {
+            // If resume failed, leave listeners active for subsequent interaction
+          });
+      }
+    };
+
+    const handleTouchActivation = (e: TouchEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target?.closest?.('#hero-video-controls')) {
+        return; // Handled directly by control buttons
+      }
+      performAudioUnlock();
+    };
+
+    const handleClickActivation = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target?.closest?.('#hero-video-controls')) {
+        return;
+      }
+      performAudioUnlock();
+    };
+
+    window.addEventListener('touchstart', handleTouchActivation, { passive: true });
+    window.addEventListener('click', handleClickActivation, { passive: true });
+
+    return () => {
+      removeListeners();
+    };
+  }, [initAudioGraph]);
+
+  // Viewport-based gain calculation: stores desiredGain only when locked; applies fade when unlocked
+  useEffect(() => {
+    const heroEl = containerRef.current;
+    if (!heroEl) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        const isVisible = entry.isIntersecting && entry.intersectionRatio > 0.05;
+        isHeroVisibleRef.current = isVisible;
+        const targetGain = isVisible ? 1.0 : 0.08;
+        desiredGainRef.current = targetGain;
+
+        // Strictly do NOT initialize or resume AudioContext here
+        if (!hasUnlockedAudioRef.current) {
+          return;
+        }
+
+        const video = videoRef.current;
+        const isPaused = !video || video.paused;
+
+        if (isMutedRef.current || isPaused) {
+          stopAudioImmediately();
+        } else {
+          fadeGainTo(targetGain, 350);
+        }
+      },
+      {
+        threshold: [0, 0.05, 0.15],
+        rootMargin: '0px',
+      }
+    );
+
+    observer.observe(heroEl);
+    return () => {
+      observer.disconnect();
+    };
+  }, [fadeGainTo, stopAudioImmediately]);
+
+  // Clean up Web Audio graph on unmount
+  useEffect(() => {
+    return () => {
+      if (gainNodeRef.current && audioCtxRef.current) {
+        try {
+          gainNodeRef.current.gain.cancelScheduledValues(audioCtxRef.current.currentTime);
+        } catch {}
+      }
+    };
   }, []);
 
-  // Callback ref to configure synchronous native DOM attributes on mount and start playback as soon as media data is ready
-  const setVideoRef = useCallback((node: HTMLVideoElement | null) => {
-    (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = node;
-    if (node) {
-      // 1. Immediately apply native media attributes required for mobile autoplay compliance
-      if (!hasUnlockedAudioRef.current) {
-        node.muted = true;
-        node.defaultMuted = true;
-        node.setAttribute('muted', '');
-      }
-      node.volume = 1.0;
-      node.playsInline = true;
-      node.autoplay = true;
-      node.loop = true;
-      node.preload = 'auto';
-      node.setAttribute('playsinline', '');
-      node.setAttribute('webkit-playsinline', '');
-      node.setAttribute('x5-playsinline', '');
-      node.setAttribute('autoplay', '');
-      node.setAttribute('loop', '');
-      node.removeAttribute('controls');
+  // --------------------------------------------------------------------------
+  // PART 3 — HERO GEOMETRY & SCROLL POSITION
+  // --------------------------------------------------------------------------
 
-      // 2. Playback startup:
-      // If browser already has sufficient media data (readyState >= 2: HAVE_CURRENT_DATA+),
-      // attempt playback immediately. Otherwise, wait strictly for earliest readiness event.
-      if (node.readyState >= 2) {
-        attemptPlay();
-      } else {
-        const onMediaReady = () => {
-          node.removeEventListener('canplay', onMediaReady);
-          node.removeEventListener('loadeddata', onMediaReady);
-          attemptPlay();
-        };
-        node.addEventListener('canplay', onMediaReady, { once: true });
-        node.addEventListener('loadeddata', onMediaReady, { once: true });
-      }
-    }
-  }, [attemptPlay]);
-
-  // Measure 16:9 hero container height and track scroll position for the shutter curtain effect
-  useEffect(() => {
+  // Pre-paint measurement of Hero container height using useLayoutEffect and ResizeObserver
+  useLayoutEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
         const height = containerRef.current.offsetHeight;
-        setHeroHeight(height);
-        document.documentElement.style.setProperty('--hero-height', `${height}px`);
+        if (height > 0) {
+          setHeroHeight(height);
+          document.documentElement.style.setProperty('--hero-height', `${height}px`);
+        }
       }
     };
 
@@ -240,6 +376,14 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
 
     window.addEventListener('resize', updateDimensions);
 
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateDimensions);
+    };
+  }, []);
+
+  // Scroll listener for shutter curtain transition
+  useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       const threshold = containerRef.current?.offsetHeight || 350;
@@ -247,164 +391,12 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener('resize', updateDimensions);
-      window.removeEventListener('scroll', handleScroll);
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Dynamic Viewport Visibility-Based Audio Volume Control (100% Gain when Hero is visible, 8% Gain when not visible)
-  useEffect(() => {
-    const heroEl = containerRef.current;
-    if (!heroEl) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        // Hero is considered visible if it intersects with the viewport
-        const isVisible = entry.isIntersecting && entry.intersectionRatio > 0.05;
-        isHeroVisibleRef.current = isVisible;
-
-        const video = videoRef.current;
-        const isPaused = !video || video.paused;
-
-        // Smoothly adjust audio GainNode according to viewport presence only if not manually muted and not paused
-        if (!isMutedRef.current && !isPaused) {
-          const targetGain = isVisible ? 1.0 : 0.08;
-          fadeGainTo(targetGain, 350);
-        } else {
-          stopAudioImmediately();
-        }
-      },
-      {
-        threshold: [0, 0.05, 0.15],
-        rootMargin: '0px',
-      }
-    );
-
-    observer.observe(heroEl);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [fadeGainTo, stopAudioImmediately]);
-
-  // Unified multi-gesture unlock handler triggered on genuine user interaction anywhere on the page
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const events = [
-      'touchstart',
-      'touchend',
-      'pointerdown',
-      'mousedown',
-      'click',
-      'keydown',
-      'wheel',
-    ] as const;
-
-    let isListenerActive = true;
-
-    const removeGestureListeners = () => {
-      if (!isListenerActive) return;
-      isListenerActive = false;
-      events.forEach((evt) => {
-        window.removeEventListener(evt, handleFirstGesture, { capture: true } as EventListenerOptions);
-        document.removeEventListener(evt, handleFirstGesture, { capture: true } as EventListenerOptions);
-      });
-    };
-
-    const handleFirstGesture = (e: Event) => {
-      // If the interaction happened directly on video controls, speaker/play button handler takes absolute priority
-      const target = e.target as HTMLElement | null;
-      if (target && target.closest && target.closest('#hero-video-controls')) {
-        return;
-      }
-
-      if (hasUnlockedAudioRef.current) {
-        removeGestureListeners();
-        return;
-      }
-
-      const userPref = sessionStorage.getItem(AUDIO_PREF_KEY);
-      if (userPref === 'muted') {
-        hasUnlockedAudioRef.current = true;
-        removeGestureListeners();
-        return; // Explicit manual mute preference is preserved
-      }
-
-      if (video) {
-        video.muted = false;
-        video.volume = 1.0;
-        setIsMuted(false);
-        isMutedRef.current = false;
-        sessionStorage.setItem(AUDIO_PREF_KEY, 'unmuted');
-
-        const gainNode = initAudioGraph();
-        const ctx = audioCtxRef.current;
-
-        const applyRunningGain = (audioContext: AudioContext, gain: GainNode) => {
-          hasUnlockedAudioRef.current = true;
-          removeGestureListeners();
-
-          const now = audioContext.currentTime;
-          const isPaused = video.paused;
-          const targetGain = !isPaused ? (isHeroVisibleRef.current ? 1.0 : 0.08) : 0;
-          gain.gain.cancelScheduledValues(now);
-          gain.gain.setValueAtTime(targetGain, now);
-
-          if (video.paused) {
-            video.play().then(() => setIsPlaying(true)).catch(() => {});
-          }
-        };
-
-        if (gainNode && ctx) {
-          if (ctx.state === 'running') {
-            applyRunningGain(ctx, gainNode);
-          } else {
-            // Attempt synchronous resume inside user activation context
-            const resumePromise = ctx.resume();
-            if (ctx.state === 'running') {
-              applyRunningGain(ctx, gainNode);
-            } else if (resumePromise && typeof resumePromise.then === 'function') {
-              resumePromise
-                .then(() => {
-                  if (ctx.state === 'running') {
-                    applyRunningGain(ctx, gainNode);
-                  }
-                })
-                .catch(() => {
-                  // If resume failed or was rejected on early pointerdown, leave listeners active for touchstart/touchend/click!
-                });
-            }
-          }
-        }
-      }
-    };
-
-    events.forEach((evt) => {
-      window.addEventListener(evt, handleFirstGesture, { capture: true, passive: true });
-      document.addEventListener(evt, handleFirstGesture, { capture: true, passive: true });
-    });
-
-    return () => {
-      removeGestureListeners();
-    };
-  }, [initAudioGraph]);
-
-  // Clean up Web Audio graph on unmount
-  useEffect(() => {
-    return () => {
-      if (gainNodeRef.current && audioCtxRef.current) {
-        try {
-          gainNodeRef.current.gain.cancelScheduledValues(audioCtxRef.current.currentTime);
-        } catch {}
-      }
-    };
-  }, []);
+  // --------------------------------------------------------------------------
+  // CONTROL HANDLERS
+  // --------------------------------------------------------------------------
 
   const togglePlay = () => {
     const video = videoRef.current;
@@ -412,13 +404,12 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
 
     if (video.paused) {
       const playPromise = video.play();
-      if (playPromise !== undefined) {
+      if (playPromise !== undefined && typeof playPromise.then === 'function') {
         playPromise
           .then(() => {
             setIsPlaying(true);
-            if (!isMutedRef.current) {
-              const targetGain = isHeroVisibleRef.current ? 1.0 : 0.08;
-              fadeGainTo(targetGain, 200);
+            if (!isMutedRef.current && hasUnlockedAudioRef.current) {
+              fadeGainTo(desiredGainRef.current, 200);
             }
           })
           .catch(() => {});
@@ -434,11 +425,11 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Mark audio unlocked to prevent any competing global gesture overrides
+    // Mark audio unlocked to prevent global gesture listeners from overriding explicit choice
     hasUnlockedAudioRef.current = true;
 
     if (isMuted || video.muted) {
-      // Immediate unmute with immediate target gain
+      // Immediate unmute
       video.muted = false;
       setIsMuted(false);
       isMutedRef.current = false;
@@ -451,20 +442,16 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
           ctx.resume().catch(() => {});
         }
         const now = ctx.currentTime;
-        const isPaused = video.paused;
-        const targetGain = !isPaused ? (isHeroVisibleRef.current ? 1.0 : 0.08) : 0;
+        const targetGain = !video.paused ? desiredGainRef.current : 0;
         gainNode.gain.cancelScheduledValues(now);
         gainNode.gain.setValueAtTime(targetGain, now);
       }
 
       if (video.paused) {
-        const playPromise = video.play();
-        if (playPromise !== undefined) {
-          playPromise.then(() => setIsPlaying(true)).catch(() => {});
-        }
+        video.play().then(() => setIsPlaying(true)).catch(() => {});
       }
     } else {
-      // Immediate manual mute: cancel any pending ramps and instantly zero out GainNode
+      // Immediate manual mute
       video.muted = true;
       setIsMuted(true);
       isMutedRef.current = true;
@@ -482,9 +469,9 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     >
       {/* 
         Stationary Fixed Cinematic 16:9 Video Layer
-        Locks directly below the locked top banner.
+        Locks directly below the locked top navigation bar.
         Does NOT move when user scrolls.
-        The scrolling content slides over this layer like a curtain/shutter.
+        The scrolling foreground slides over this layer like a curtain/shutter.
       */}
       <div
         className={`fixed inset-x-0 z-10 overflow-hidden bg-[#0B0C0E] select-none flex items-center justify-center transition-opacity duration-200 ${
@@ -499,10 +486,9 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
           <video
             ref={setVideoRef}
             src="/assets/videos/hero.mp4"
-            muted={!hasUnlockedAudioRef.current ? true : isMuted}
-            autoPlay={true}
-            playsInline={true}
-            loop={true}
+            autoPlay
+            playsInline
+            loop
             preload="auto"
             controlsList="nodownload nofullscreen noremoteplayback noplaybackrate"
             disablePictureInPicture
@@ -512,16 +498,14 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
             onCanPlay={() => attemptPlay()}
             onPlaying={() => {
               setIsPlaying(true);
-              if (!isMutedRef.current) {
-                const targetGain = isHeroVisibleRef.current ? 1.0 : 0.08;
-                fadeGainTo(targetGain, 200);
+              if (!isMutedRef.current && hasUnlockedAudioRef.current) {
+                fadeGainTo(desiredGainRef.current, 200);
               }
             }}
             onPlay={() => {
               setIsPlaying(true);
-              if (!isMutedRef.current) {
-                const targetGain = isHeroVisibleRef.current ? 1.0 : 0.08;
-                fadeGainTo(targetGain, 200);
+              if (!isMutedRef.current && hasUnlockedAudioRef.current) {
+                fadeGainTo(desiredGainRef.current, 200);
               }
             }}
             onPause={() => {
@@ -534,12 +518,12 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
           {/* Subtle top vignette gradient for header readability */}
           <div className="absolute top-0 inset-x-0 h-20 bg-gradient-to-b from-black/70 via-black/20 to-transparent pointer-events-none" />
 
-          {/* Two independent small circular glass video controls (no shared banner/container) */}
+          {/* Two independent small circular glass video controls */}
           <div
             id="hero-video-controls"
             className="absolute z-20 start-4 sm:start-6 bottom-4 sm:bottom-6 flex items-center gap-3"
           >
-            {/* Independent Play / Pause Glass Bubble */}
+            {/* Play / Pause Glass Bubble */}
             <button
               onClick={togglePlay}
               type="button"
@@ -554,7 +538,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
               )}
             </button>
 
-            {/* Independent Mute / Unmute Glass Bubble */}
+            {/* Mute / Unmute Glass Bubble (Colors: inactive = gray, active = white. Never orange) */}
             <button
               onClick={toggleMute}
               type="button"
@@ -574,4 +558,3 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     </section>
   );
 };
-
