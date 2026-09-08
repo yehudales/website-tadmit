@@ -157,7 +157,7 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.22, ease: 'easeOut' }}
-          className="w-full bg-[#0E1013]/98 backdrop-blur-2xl border-b border-[#252A32] shadow-[0_25px_60px_rgba(0,0,0,0.9)] max-h-[calc(100vh-var(--header-height,98px))] overflow-y-auto overscroll-contain relative z-40 select-text"
+          className="w-full bg-[#0E1013]/98 backdrop-blur-2xl border-b border-[#252A32] shadow-[0_25px_60px_rgba(0,0,0,0.9)] relative z-30 select-text overflow-hidden"
           role="region"
           aria-labelledby="expandable-heading"
         >

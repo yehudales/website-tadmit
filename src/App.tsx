@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Language, NavSectionId } from './types';
 import { Header } from './components/Header';
+import { ExpandableContentSection } from './components/ExpandableContentSection';
 import { Hero } from './components/Hero';
 import { KashrutBanner } from './components/KashrutBanner';
 import { LiveStoreStatusSection } from './components/LiveStoreStatusSection';
@@ -55,15 +56,7 @@ export default function App() {
       const target = pathToSection(window.location.hash) || pathToSection(window.location.pathname);
       if (target) {
         setActiveSection(target);
-        setTimeout(() => {
-          const el = document.getElementById('expandable-content-area');
-          if (el) {
-            const headerOffset = 110;
-            const elementPosition = el.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-          }
-        }, 150);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         setActiveSection(null);
       }
@@ -95,16 +88,8 @@ export default function App() {
         window.history.pushState({ section: next }, '', nextUrl);
       }
       if (next) {
-        // Smoothly scroll down so the expandable content section below the Hero is in view
-        setTimeout(() => {
-          const el = document.getElementById('expandable-content-area');
-          if (el) {
-            const headerOffset = 110;
-            const elementPosition = el.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-          }
-        }, 120);
+        // Smoothly scroll window to top so the open section is positioned cleanly below the fixed header
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       return next;
     });
@@ -128,7 +113,7 @@ export default function App() {
         className="fixed top-2 left-2 z-[9999] pointer-events-none w-6 h-6 rounded-full bg-[#1A1D22]/80 border border-white/20 text-[#FAF9F6]/80 text-[10px] font-mono font-bold flex items-center justify-center select-none shadow-sm"
         aria-hidden="true"
       >
-        6
+        7
       </div>
 
       {/* Accessible Skip Link */}
@@ -144,7 +129,7 @@ export default function App() {
         lang={lang}
         activeSection={activeSection}
         onSelectSection={handleSelectSection}
-        onCloseSection={() => setActiveSection(null)}
+        onCloseSection={handleCloseSection}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenWhatsApp={() => setIsWhatsAppOpen(true)}
         onOpenAccessibility={() => setIsAccessibilityOpen(true)}
@@ -158,6 +143,16 @@ export default function App() {
         className="focus:outline-none"
         style={{ paddingTop: 'var(--header-height, 98px)' }}
       >
+        {/* Dynamic Tab Page Section (renders smoothly below the fixed header when a tab is active) */}
+        <ExpandableContentSection
+          lang={lang}
+          activeSection={activeSection}
+          onClose={handleCloseSection}
+          onOpenWhatsApp={() => setIsWhatsAppOpen(true)}
+          onOpenAccessibility={() => setIsAccessibilityOpen(true)}
+          onOpenPrivacy={() => setIsPrivacyOpen(true)}
+        />
+
         {/* Stationary Fixed Cinematic 16:9 Hero Video */}
         <Hero lang={lang} />
 
