@@ -109,14 +109,6 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
   const [isOpenNow, setIsOpenNow] = useState(false);
   const [isSparkBurst, setIsSparkBurst] = useState(false);
 
-  // Press Counter System from 0 (Clean Idle) to 50 (Maximum Boiling & Floor Spill)
-  const [pressCount, setPressCount] = useState<number>(0);
-  const pressCountRef = useRef<number>(0);
-  const isPressingRef = useRef<boolean>(false);
-  const holdIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const decayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const decayIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
   // Calculate real-time Israel day and discrete daily position (00:00 midnight calendar day)
   const updateTimelinePosition = useCallback(() => {
     const { day, hours } = getIsraelTime();
@@ -138,27 +130,21 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
     return () => clearInterval(interval);
   }, [updateTimelinePosition]);
 
-  // Clean up all timers on unmount
+  // Persistent Accumulated Liquid State (Monotonic: never decreases or retracts back to pot)
+  const [pressCount, setPressCount] = useState<number>(0);
+  const pressCountRef = useRef<number>(0);
+  const isPressingRef = useRef<boolean>(false);
+  const holdIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clean up timers on unmount
   useEffect(() => {
     return () => {
       if (holdIntervalRef.current) clearInterval(holdIntervalRef.current);
-      if (decayTimeoutRef.current) clearTimeout(decayTimeoutRef.current);
-      if (decayIntervalRef.current) clearInterval(decayIntervalRef.current);
     };
   }, []);
 
-  // Increment press count (1 to 50)
+  // Increment press count monotonically (0 to 50)
   const incrementPress = useCallback((amount: number = 1) => {
-    // Cancel any active decay immediately
-    if (decayTimeoutRef.current) {
-      clearTimeout(decayTimeoutRef.current);
-      decayTimeoutRef.current = null;
-    }
-    if (decayIntervalRef.current) {
-      clearInterval(decayIntervalRef.current);
-      decayIntervalRef.current = null;
-    }
-
     const nextCount = Math.min(50, Math.max(0, pressCountRef.current + amount));
     pressCountRef.current = nextCount;
     setPressCount(nextCount);
@@ -179,34 +165,13 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
     }, 75);
   }, [incrementPress]);
 
-  // Stop Press / Release interaction with smooth organic decay
+  // Stop Press / Release interaction (Persistent: liquid remains in place permanently, never returns to pot)
   const stopPotActivation = useCallback(() => {
     isPressingRef.current = false;
     if (holdIntervalRef.current) {
       clearInterval(holdIntervalRef.current);
       holdIntervalRef.current = null;
     }
-
-    // Schedule smooth decay after a short natural pause
-    if (decayTimeoutRef.current) clearTimeout(decayTimeoutRef.current);
-    decayTimeoutRef.current = setTimeout(() => {
-      if (decayIntervalRef.current) clearInterval(decayIntervalRef.current);
-      decayIntervalRef.current = setInterval(() => {
-        if (isPressingRef.current) {
-          if (decayIntervalRef.current) clearInterval(decayIntervalRef.current);
-          decayIntervalRef.current = null;
-          return;
-        }
-
-        if (pressCountRef.current > 0) {
-          pressCountRef.current -= 1;
-          setPressCount(pressCountRef.current);
-        } else {
-          if (decayIntervalRef.current) clearInterval(decayIntervalRef.current);
-          decayIntervalRef.current = null;
-        }
-      }, 65);
-    }, 320);
   }, []);
 
   const handleTimelineClick = () => {
@@ -498,21 +463,45 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
                   '0 0 12px rgba(255, 123, 28, 0.75), 0 0 24px rgba(255, 123, 28, 0.35), inset 0 0.5px 0.5px rgba(255, 255, 255, 0.6)',
               }}
             >
-              {/* Internal Filament Hot Core Stripe */}
-              <div className="absolute top-1/2 -translate-y-1/2 inset-x-1 h-[1.5px] rounded-full bg-white/70 shadow-[0_0_3px_#FFF]" />
-
-              {/* Internal Liquid Flow: Continuous back-and-forth fluid wave strictly clipped inside the line */}
+              {/* Internal Liquid Flow: Continuous One-Way Fluid Waves strictly clipped inside the line (Back/Right -> Front/Left) */}
               <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
+                {/* Primary Illuminated Liquid Wave */}
                 <div
-                  className="timeline-liquid-stream absolute top-0 right-0 bottom-0 rounded-full pointer-events-none"
+                  className="timeline-liquid-wave-1 absolute top-0 right-0 bottom-0 rounded-full pointer-events-none"
                   style={{
-                    width: '42%',
+                    width: '60%',
                     background:
-                      'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,225,160,0.18) 22%, rgba(255,255,255,0.48) 50%, rgba(255,225,160,0.18) 78%, rgba(255,255,255,0) 100%)',
+                      'linear-gradient(90deg, rgba(255,123,28,0) 0%, rgba(255,145,55,0.35) 25%, rgba(255,195,120,0.85) 50%, rgba(255,145,55,0.35) 75%, rgba(255,123,28,0) 100%)',
                   }}
                 >
                   {/* Concentrated Liquid Core Highlight */}
-                  <div className="absolute top-1/2 -translate-y-1/2 inset-x-2 h-[1.5px] rounded-full bg-white/65 shadow-[0_0_4px_rgba(255,255,255,0.8)]" />
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 inset-x-2 h-[2px] rounded-full"
+                    style={{
+                      background:
+                        'linear-gradient(90deg, rgba(255,123,28,0) 0%, #FFD6A4 45%, #FFE2C2 50%, #FFD6A4 55%, rgba(255,123,28,0) 100%)',
+                      boxShadow: '0 0 6px rgba(255, 123, 28, 0.9), 0 0 2px #FFA85C',
+                    }}
+                  />
+                </div>
+
+                {/* Secondary Trailing Liquid Ripple / Pulse */}
+                <div
+                  className="timeline-liquid-wave-2 absolute top-0 right-0 bottom-0 rounded-full pointer-events-none"
+                  style={{
+                    width: '45%',
+                    background:
+                      'linear-gradient(90deg, rgba(255,123,28,0) 0%, rgba(255,135,40,0.3) 30%, rgba(255,180,95,0.7) 50%, rgba(255,135,40,0.3) 70%, rgba(255,123,28,0) 100%)',
+                  }}
+                >
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 inset-x-3 h-[1.5px] rounded-full"
+                    style={{
+                      background:
+                        'linear-gradient(90deg, rgba(255,123,28,0) 0%, #FFC488 50%, rgba(255,123,28,0) 100%)',
+                      boxShadow: '0 0 4px rgba(255, 123, 28, 0.8)',
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -696,6 +685,39 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
                     <stop offset="100%" stopColor="#475569" />
                   </linearGradient>
 
+                  {/* Light neutral silver knob gradient for pot lid handle */}
+                  <linearGradient id="emojiPotKnobGrad" x1="20" y1="0.5" x2="24" y2="3.5" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#FFFFFF" />
+                    <stop offset="35%" stopColor="#F1F5F9" />
+                    <stop offset="70%" stopColor="#CBD5E1" />
+                    <stop offset="100%" stopColor="#94A3B8" />
+                  </linearGradient>
+
+                  {/* Translucent water stream volumetric gradient */}
+                  <linearGradient id="emojiWaterTranslucentBody" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#FF9636" stopOpacity="0.88" />
+                    <stop offset="35%" stopColor="#FF7B1C" stopOpacity="0.82" />
+                    <stop offset="75%" stopColor="#E65A00" stopOpacity="0.85" />
+                    <stop offset="100%" stopColor="#FF9636" stopOpacity="0.9" />
+                  </linearGradient>
+
+                  {/* Translucent water stream core refraction */}
+                  <linearGradient id="emojiWaterStreamCore" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#FF8220" stopOpacity="0.4" />
+                    <stop offset="30%" stopColor="#FFAA58" stopOpacity="0.85" />
+                    <stop offset="50%" stopColor="#FFDDB4" stopOpacity="0.95" />
+                    <stop offset="70%" stopColor="#FFAA58" stopOpacity="0.85" />
+                    <stop offset="100%" stopColor="#FF8220" stopOpacity="0.4" />
+                  </linearGradient>
+
+                  {/* Water specular caustic highlight */}
+                  <linearGradient id="emojiWaterCausticHighlight" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.95" />
+                    <stop offset="25%" stopColor="#FFE8D0" stopOpacity="0.85" />
+                    <stop offset="65%" stopColor="#FFC890" stopOpacity="0.7" />
+                    <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.9" />
+                  </linearGradient>
+
                   {/* Hot stew orange gradient */}
                   <linearGradient id="emojiStewGrad" x1="22" y1="6" x2="22" y2="34" gradientUnits="userSpaceOnUse">
                     <stop offset="0%" stopColor="#FFC285" />
@@ -814,175 +836,247 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
                 {/* down the body, cascading to the floor without gaps.       */}
                 {/* ========================================================= */}
 
-                {/* Level 3-5: Initial watery crest over right rim lip */}
+                {/* Level 3-5: Initial thick watery crest rolling over right rim lip */}
                 {pressCount >= 3 && (
-                  <path
-                    d="M 26 7 C 27.2 8, 28 9.5, 27.5 11.2 C 27 10.2, 26.2 8.2, 25.2 7 Z"
-                    fill="url(#emojiStewGrad)"
-                    stroke="#C2410C"
-                    strokeWidth="0.25"
-                    className="liquid-stream-pulse-1"
-                  />
-                )}
-
-                {/* Level 6-9: Stream 1 (Right Front) flows down upper-body (y=7 to 16) with watery fluid wave */}
-                {pressCount >= 6 && (
-                  <path
-                    d="M 26 7 C 27.4 9.8, 28.2 12.8, 27.7 16.2 C 26.9 15.4, 25.8 12.2, 25.2 7 Z"
-                    fill="url(#emojiStewGrad)"
-                    stroke="#C2410C"
-                    strokeWidth="0.3"
-                    className="liquid-stream-pulse-1"
-                  />
-                )}
-
-                {/* Level 10-13: Stream 2 (Left Front) crests rim and flows down to y=16 */}
-                {pressCount >= 10 && (
-                  <path
-                    d="M 15.2 7 C 14.1 9.8, 13.3 12.8, 13.9 16.2 C 14.7 15.4, 15.7 12.2, 16 7 Z"
-                    fill="url(#emojiStewGrad)"
-                    stroke="#C2410C"
-                    strokeWidth="0.3"
-                    className="liquid-stream-pulse-2"
-                  />
-                )}
-
-                {/* Level 14-17: Stream 1 advances to mid-lower body (y=7 to 21) */}
-                {pressCount >= 14 && (
                   <g className="liquid-stream-pulse-1">
                     <path
-                      d="M 26 7 C 27.6 11, 28.7 16.2, 28.1 21.2 C 27.2 21, 26 16, 25.2 7 Z"
-                      fill="url(#emojiStewHighlight)"
-                      stroke="#C2410C"
-                      strokeWidth="0.35"
+                      d="M 24.5 7 C 26.5 7.8, 29.2 9.2, 28.5 12.5 C 27.5 12.8, 25.8 10.8, 23.8 7.5 Z"
+                      fill="url(#emojiWaterTranslucentBody)"
                     />
-                    <ellipse cx="27.4" cy="18" rx="0.6" ry="1.2" fill="#FFFFFF" opacity="0.75" />
+                    <path
+                      d="M 25.2 7.2 C 26.8 8.2, 28.5 9.8, 27.8 11.8 C 27.2 11.2, 26 9.5, 24.6 7.5 Z"
+                      fill="url(#emojiWaterStreamCore)"
+                    />
+                    <path
+                      d="M 25.5 7.4 C 26.8 8.4, 28 9.8, 27.6 11.2"
+                      stroke="url(#emojiWaterCausticHighlight)"
+                      strokeWidth="0.75"
+                      strokeLinecap="round"
+                      fill="none"
+                    />
                   </g>
                 )}
 
-                {/* Level 18-21: Stream 2 advances to y=21 + Center front tongue crests rim (y=7 to 15) */}
+                {/* Level 6-9: Stream 1 (Right Front) flows down upper-body (y=7 to 17) as a thick, organic water column */}
+                {pressCount >= 6 && (
+                  <g className="liquid-stream-pulse-1">
+                    <path
+                      d="M 24.2 7 C 26.8 9.5, 29.5 13.2, 28.8 17.5 C 27.2 17.8, 25.4 13.5, 23.5 7 Z"
+                      fill="url(#emojiWaterTranslucentBody)"
+                    />
+                    <path
+                      d="M 25 7.2 C 27.2 10.2, 28.8 13.8, 28.2 16.8 C 27 16.2, 25.8 12.5, 24.4 7.2 Z"
+                      fill="url(#emojiWaterStreamCore)"
+                    />
+                    <path
+                      d="M 25.4 7.8 C 27.2 10.8, 28.4 14.2, 27.8 16.5"
+                      stroke="url(#emojiWaterCausticHighlight)"
+                      strokeWidth="0.9"
+                      strokeLinecap="round"
+                      fill="none"
+                    />
+                    <ellipse cx="27.2" cy="14" rx="0.7" ry="1.6" fill="#FFFFFF" opacity="0.8" />
+                  </g>
+                )}
+
+                {/* Level 10-13: Stream 2 (Left Front) crests rim and flows down to y=17 as a thick, realistic stream */}
+                {pressCount >= 10 && (
+                  <g className="liquid-stream-pulse-2">
+                    <path
+                      d="M 14.2 7 C 12.2 9.5, 10.2 13.2, 11.2 17.5 C 12.8 17.8, 14.6 13.5, 15.8 7 Z"
+                      fill="url(#emojiWaterTranslucentBody)"
+                    />
+                    <path
+                      d="M 14.5 7.2 C 12.8 10.2, 11.2 13.8, 12 16.8 C 13.2 16.2, 14.4 12.5, 15.2 7.2 Z"
+                      fill="url(#emojiWaterStreamCore)"
+                    />
+                    <path
+                      d="M 14.2 7.8 C 12.6 10.8, 11.5 14.2, 12.2 16.5"
+                      stroke="url(#emojiWaterCausticHighlight)"
+                      strokeWidth="0.9"
+                      strokeLinecap="round"
+                      fill="none"
+                    />
+                    <ellipse cx="12.5" cy="14" rx="0.7" ry="1.6" fill="#FFFFFF" opacity="0.8" />
+                  </g>
+                )}
+
+                {/* Level 14-17: Stream 1 advances to mid-lower body (y=7 to 22) with abundant translucent water volume */}
+                {pressCount >= 14 && (
+                  <g className="liquid-stream-pulse-1">
+                    <path
+                      d="M 24.2 7 C 27.2 11, 30.2 16.5, 29.2 22.5 C 27.4 22.8, 25.2 16.5, 23.5 7 Z"
+                      fill="url(#emojiWaterTranslucentBody)"
+                    />
+                    <path
+                      d="M 25 7.2 C 27.6 11.5, 29.5 17.2, 28.5 21.8 C 27.2 21.2, 25.8 15.5, 24.4 7.2 Z"
+                      fill="url(#emojiWaterStreamCore)"
+                    />
+                    <path
+                      d="M 25.5 8 C 27.8 12.5, 29.2 17.8, 28.2 21.5"
+                      stroke="url(#emojiWaterCausticHighlight)"
+                      strokeWidth="1.1"
+                      strokeLinecap="round"
+                      fill="none"
+                    />
+                    <ellipse cx="28" cy="18" rx="0.8" ry="1.8" fill="#FFFFFF" opacity="0.85" />
+                  </g>
+                )}
+
+                {/* Level 18-21: Stream 2 advances to y=22 + Center front water tongue crests rim (y=7 to 16) */}
                 {pressCount >= 18 && (
                   <g>
                     <g className="liquid-stream-pulse-2">
                       <path
-                        d="M 15.2 7 C 13.6 11, 12.8 16.2, 13.6 21.2 C 14.4 21, 15.4 16, 16 7 Z"
-                        fill="url(#emojiStewHighlight)"
-                        stroke="#C2410C"
-                        strokeWidth="0.35"
+                        d="M 14.2 7 C 11.8 11, 9.5 16.5, 10.8 22.5 C 12.6 22.8, 14.8 16.5, 15.8 7 Z"
+                        fill="url(#emojiWaterTranslucentBody)"
                       />
-                      <ellipse cx="14.3" cy="18" rx="0.6" ry="1.2" fill="#FFFFFF" opacity="0.75" />
+                      <path
+                        d="M 14.5 7.2 C 12.4 11.5, 10.5 17.2, 11.5 21.8 C 12.8 21.2, 14.2 15.5, 15.2 7.2 Z"
+                        fill="url(#emojiWaterStreamCore)"
+                      />
+                      <path
+                        d="M 14 8 C 12.2 12.5, 10.8 17.8, 11.8 21.5"
+                        stroke="url(#emojiWaterCausticHighlight)"
+                        strokeWidth="1.1"
+                        strokeLinecap="round"
+                        fill="none"
+                      />
+                      <ellipse cx="11.8" cy="18" rx="0.8" ry="1.8" fill="#FFFFFF" opacity="0.85" />
                     </g>
-                    <path
-                      d="M 20.4 7 C 21 10.2, 23.2 10.2, 23.6 7 C 23.8 11.2, 23.2 15.2, 22 15.2 C 20.8 15.2, 20.2 11.2, 20.4 7 Z"
-                      fill="url(#emojiStewGrad)"
-                      stroke="#C2410C"
-                      strokeWidth="0.3"
-                      className="liquid-stream-pulse-center"
-                    />
+                    {/* Center Water Tongue */}
+                    <g className="liquid-stream-pulse-center">
+                      <path
+                        d="M 19 7 C 19.5 10.5, 24.5 10.5, 25 7 C 25.5 12, 24.5 16.5, 22 16.5 C 19.5 16.5, 18.5 12, 19 7 Z"
+                        fill="url(#emojiWaterTranslucentBody)"
+                      />
+                      <path
+                        d="M 20 7.2 C 20.5 10.5, 23.5 10.5, 24 7.2 C 24.5 11.5, 23.8 15.5, 22 15.5 C 20.2 15.5, 19.5 11.5, 20 7.2 Z"
+                        fill="url(#emojiWaterStreamCore)"
+                      />
+                    </g>
                   </g>
                 )}
 
-                {/* Level 22-24: Stream 1 reaches pot bottom (y=26) and forms a heavy pendant drop */}
+                {/* Level 22-24: Stream 1 reaches pot bottom (y=26) with realistic bulging water meniscus */}
                 {pressCount >= 22 && (
                   <g className="liquid-stream-pulse-1">
                     <path
-                      d="M 26 7 C 27.8 12, 28.7 19, 28.1 26.2 C 27 26.2, 25.9 19, 25.2 7 Z"
-                      fill="url(#emojiStewGrad)"
-                      stroke="#C2410C"
-                      strokeWidth="0.4"
+                      d="M 24.2 7 C 27.5 12, 30.5 19.5, 29.5 26.5 C 26.8 26.8, 25.2 19, 23.5 7 Z"
+                      fill="url(#emojiWaterTranslucentBody)"
                     />
                     <path
-                      d="M 28.1 26.2 C 28.6 27.6, 27.9 28.8, 27.5 29.3 C 27.1 28.8, 26.5 27.6, 27 26.2 Z"
-                      fill="url(#emojiStewHighlight)"
+                      d="M 25 7.2 C 28 12.5, 29.8 19.8, 28.8 25.8 C 26.8 25.8, 25.6 18.5, 24.4 7.2 Z"
+                      fill="url(#emojiWaterStreamCore)"
+                    />
+                    <path
+                      d="M 29.5 26.5 C 30.2 28.2, 29.2 29.8, 28.5 30.4 C 27.8 29.8, 27 28.2, 27.8 26.5 Z"
+                      fill="url(#emojiWaterTranslucentBody)"
                       className="droplet-stretch-wobble"
                     />
-                    <circle cx="27.5" cy="28.4" r="0.4" fill="#FFFFFF" opacity="0.8" />
+                    <circle cx="28.5" cy="29.2" r="0.65" fill="#FFFFFF" opacity="0.9" />
                   </g>
                 )}
 
-                {/* Level 25-27: Stream 2 reaches pot bottom (y=26) and forms pendant drop + Center tongue reaches y=22 */}
+                {/* Level 25-27: Stream 2 reaches pot bottom (y=26) + Center stream surges down to y=24 */}
                 {pressCount >= 25 && (
                   <g>
                     <g className="liquid-stream-pulse-2">
                       <path
-                        d="M 15.2 7 C 13.4 12, 12.6 19, 13.6 26.2 C 14.6 26.2, 15.6 19, 16 7 Z"
-                        fill="url(#emojiStewGrad)"
-                        stroke="#C2410C"
-                        strokeWidth="0.4"
+                        d="M 14.2 7 C 11.5 12, 9.2 19.5, 10.5 26.5 C 13.2 26.8, 14.8 19, 15.8 7 Z"
+                        fill="url(#emojiWaterTranslucentBody)"
                       />
                       <path
-                        d="M 13.6 26.2 C 13.1 27.6, 13.7 28.8, 14.1 29.3 C 14.5 28.8, 15.1 27.6, 14.6 26.2 Z"
-                        fill="url(#emojiStewHighlight)"
+                        d="M 14.5 7.2 C 12 12.5, 10.2 19.8, 11.2 25.8 C 13.2 25.8, 14.4 18.5, 15.2 7.2 Z"
+                        fill="url(#emojiWaterStreamCore)"
+                      />
+                      <path
+                        d="M 10.5 26.5 C 9.8 28.2, 10.8 29.8, 11.5 30.4 C 12.2 29.8, 13 28.2, 12.2 26.5 Z"
+                        fill="url(#emojiWaterTranslucentBody)"
                         className="droplet-stretch-wobble"
                       />
-                      <circle cx="14.1" cy="28.4" r="0.4" fill="#FFFFFF" opacity="0.8" />
+                      <circle cx="11.5" cy="29.2" r="0.65" fill="#FFFFFF" opacity="0.9" />
                     </g>
-                    <path
-                      d="M 20.4 7 C 21 12, 23.6 12, 23.6 7 C 24 13, 23.6 18.2, 22.4 22.2 C 21.4 22.2, 20.6 17.2, 20.4 7 Z"
-                      fill="url(#emojiStewHighlight)"
-                      stroke="#C2410C"
-                      strokeWidth="0.35"
-                      className="liquid-stream-pulse-center"
-                    />
+                    <g className="liquid-stream-pulse-center">
+                      <path
+                        d="M 19 7 C 19.8 13, 24.2 13, 25 7 C 25.8 14.5, 25 23.5, 22 23.5 C 19 23.5, 18.2 14.5, 19 7 Z"
+                        fill="url(#emojiWaterTranslucentBody)"
+                      />
+                      <path
+                        d="M 20 7.2 C 20.6 13, 23.4 13, 24 7.2 C 24.8 14, 24.2 22.5, 22 22.5 C 19.8 22.5, 19.2 14, 20 7.2 Z"
+                        fill="url(#emojiWaterStreamCore)"
+                      />
+                    </g>
                   </g>
                 )}
 
-                {/* Level 28-34: Continuous Right Gravity Cascade touches floor (from pot bottom y=26 straight to floor y=38) */}
+                {/* Level 28-34: Continuous Thick Right Water Cascade touches floor (from pot rim/bottom down to floor y=38) */}
                 {pressCount >= 28 && (
                   <g className="gravity-drip-flow">
+                    {/* Volumetric Falling Water Column */}
                     <path
-                      d="M 27.5 26 C 27.9 29.8, 27.1 34.2, 27.5 38"
-                      stroke="url(#emojiStewGrad)"
-                      strokeWidth="1.8"
+                      d="M 26 25 C 29.5 27.5, 29.8 33.5, 29 38 L 26.2 38 C 26.8 33.5, 26.5 27.5, 24.5 25 Z"
+                      fill="url(#emojiWaterTranslucentBody)"
+                    />
+                    <path
+                      d="M 26.8 25.5 C 29 28, 29.2 33, 28.5 38 L 27 38 C 27.5 33, 27.2 28, 25.5 25.5 Z"
+                      fill="url(#emojiWaterStreamCore)"
+                    />
+                    <path
+                      d="M 28 26 C 29.2 29.5, 28.8 34, 28.2 38"
+                      stroke="url(#emojiWaterCausticHighlight)"
+                      strokeWidth="1.2"
                       strokeLinecap="round"
                       fill="none"
                     />
-                    <path
-                      d="M 27.5 26 C 27.9 29.8, 27.1 34.2, 27.5 38"
-                      stroke="url(#emojiStewHighlight)"
-                      strokeWidth="0.6"
-                      strokeLinecap="round"
-                      fill="none"
-                    />
-                    <circle cx="27.5" cy="32" r="0.95" fill="#FFC285" className="drip-droplet-bead-1" />
-                    <circle cx="27.5" cy="37" r="0.75" fill="#FFF7ED" className="drip-droplet-bead-2" />
+                    <circle cx="28.2" cy="30" r="1.3" fill="#FFE2C2" className="drip-droplet-bead-1" />
+                    <circle cx="28" cy="35.5" r="1.0" fill="#FFFFFF" className="drip-droplet-bead-2" />
                   </g>
                 )}
 
-                {/* Level 35-41: Continuous Left Gravity Cascade touches floor (from pot bottom y=26 straight to floor y=38) */}
+                {/* Level 35-41: Continuous Thick Left Water Cascade touches floor (from pot rim/bottom down to floor y=38) */}
                 {pressCount >= 35 && (
                   <g className="gravity-drip-flow-2">
                     <path
-                      d="M 14 26 C 13.6 29.8, 14.4 34.2, 14 38"
-                      stroke="url(#emojiStewGrad)"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      fill="none"
+                      d="M 12 25 C 8.5 27.5, 8.2 33.5, 9 38 L 11.8 38 C 11.2 33.5, 11.5 27.5, 13.5 25 Z"
+                      fill="url(#emojiWaterTranslucentBody)"
                     />
                     <path
-                      d="M 14 26 C 13.6 29.8, 14.4 34.2, 14 38"
-                      stroke="url(#emojiStewHighlight)"
-                      strokeWidth="0.6"
+                      d="M 11.2 25.5 C 9 28, 8.8 33, 9.5 38 L 11 38 C 10.5 33, 10.8 28, 12.5 25.5 Z"
+                      fill="url(#emojiWaterStreamCore)"
+                    />
+                    <path
+                      d="M 10 26 C 8.8 29.5, 9.2 34, 9.8 38"
+                      stroke="url(#emojiWaterCausticHighlight)"
+                      strokeWidth="1.2"
                       strokeLinecap="round"
                       fill="none"
                     />
-                    <circle cx="14" cy="32" r="0.95" fill="#FFC285" className="drip-droplet-bead-1" />
-                    <circle cx="14" cy="37" r="0.75" fill="#FFF7ED" className="drip-droplet-bead-2" />
+                    <circle cx="9.8" cy="30" r="1.3" fill="#FFE2C2" className="drip-droplet-bead-1" />
+                    <circle cx="10" cy="35.5" r="1.0" fill="#FFFFFF" className="drip-droplet-bead-2" />
                   </g>
                 )}
 
-                {/* Level 42-45: Center Heavy Waterfall plunges continuously from rim down front to floor (y=38) */}
+                {/* Level 42-45: Center Massive Water Torrent plunges continuously from rim down front to floor (y=38) */}
                 {pressCount >= 42 && (
                   <g className="gravity-drip-flow-center">
                     <path
-                      d="M 22 15 C 22.4 22, 21.6 30, 22 38"
-                      stroke="url(#emojiStewHighlight)"
-                      strokeWidth="2.4"
+                      d="M 18.5 15 C 19.5 22, 18 30, 18.5 38 L 25.5 38 C 26 30, 24.5 22, 25.5 15 Z"
+                      fill="url(#emojiWaterTranslucentBody)"
+                    />
+                    <path
+                      d="M 20 15.5 C 20.8 22, 19.5 30, 20 38 L 24 38 C 24.5 30, 23.2 22, 24 15.5 Z"
+                      fill="url(#emojiWaterStreamCore)"
+                    />
+                    <path
+                      d="M 22 16 C 22.8 23, 21.5 31, 22.2 38"
+                      stroke="url(#emojiWaterCausticHighlight)"
+                      strokeWidth="1.6"
                       strokeLinecap="round"
                       fill="none"
                     />
-                    <circle cx="22" cy="28" r="1.1" fill="#FFF7ED" className="drip-droplet-bead-1" />
-                    <circle cx="22" cy="35" r="0.9" fill="#FFE4CC" className="drip-droplet-bead-2" />
+                    <circle cx="22" cy="26" r="1.5" fill="#FFFFFF" className="drip-droplet-bead-1" />
+                    <circle cx="21.8" cy="34" r="1.2" fill="#FFE2C2" className="drip-droplet-bead-2" />
                   </g>
                 )}
 
@@ -990,13 +1084,10 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
                 {pressCount >= 46 && (
                   <g className="gravity-drip-flow">
                     <path
-                      d="M 34 8 C 35.1 14, 35.6 22, 34.6 28 C 34.1 32, 34.6 36, 34 38"
-                      stroke="url(#emojiStewGrad)"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      fill="none"
+                      d="M 33 8 C 36 14, 37 22, 36 28 C 35.2 32, 36 36, 35 38 L 32.5 38 C 33.5 34, 33 28, 33 22 C 33 16, 31 11, 31 8 Z"
+                      fill="url(#emojiWaterTranslucentBody)"
                     />
-                    <circle cx="34.3" cy="33" r="0.7" fill="#FFC285" className="drip-droplet-bead-1" />
+                    <circle cx="34.5" cy="32" r="1.0" fill="#FFFFFF" className="drip-droplet-bead-1" />
                   </g>
                 )}
 
@@ -1004,13 +1095,10 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
                 {pressCount >= 48 && (
                   <g className="gravity-drip-flow-2">
                     <path
-                      d="M 10 8 C 8.9 14, 8.4 22, 9.4 28 C 9.9 32, 9.4 36, 10 38"
-                      stroke="url(#emojiStewGrad)"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      fill="none"
+                      d="M 11 8 C 8 14, 7 22, 8 28 C 8.8 32, 8 36, 9 38 L 11.5 38 C 10.5 34, 11 28, 11 22 C 11 16, 13 11, 13 8 Z"
+                      fill="url(#emojiWaterTranslucentBody)"
                     />
-                    <circle cx="9.7" cy="33" r="0.7" fill="#FFC285" className="drip-droplet-bead-2" />
+                    <circle cx="9.5" cy="32" r="1.0" fill="#FFFFFF" className="drip-droplet-bead-2" />
                   </g>
                 )}
 
@@ -1022,9 +1110,10 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
                     transformOrigin: '22px 6px',
                   }}
                 >
-                  {/* Symmetrical Knob centered at cx = 22 */}
-                  <ellipse cx="22" cy="2" rx="2.5" ry="1.6" fill="#1E293B" stroke="#475569" strokeWidth="0.6" />
-                  <rect x="21" y="2.5" width="2" height="2" fill="#334155" />
+                  {/* Symmetrical Light Neutral Knob centered at cx = 22 */}
+                  <ellipse cx="22" cy="2" rx="2.5" ry="1.6" fill="url(#emojiPotKnobGrad)" stroke="#CBD5E1" strokeWidth="0.6" />
+                  <rect x="21" y="2.5" width="2" height="2" fill="#E2E8F0" />
+                  <ellipse cx="22" cy="1.6" rx="1.6" ry="0.7" fill="#FFFFFF" opacity="0.8" />
 
                   {/* Symmetrical Lid Dome centered from x = 6 to x = 38 (center = 22) */}
                   <path
@@ -1374,57 +1463,55 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
           transform-origin: 21px 7.8px;
         }
 
-        /* Watery Stew Surface Wobble & Bounce under bubbling */
+        /* Liquid Surface Simmer Flow */
         @keyframes stew-wobble-fluid {
-          0% { transform: scale(1, 1) translateY(0); }
-          25% { transform: scale(1.02, 1.1) translateY(-0.3px); }
-          50% { transform: scale(0.98, 0.92) translateY(0.2px); }
-          75% { transform: scale(1.01, 1.05) translateY(-0.15px); }
-          100% { transform: scale(1, 1) translateY(0); }
-        }
-
-        .stew-surface-wobble {
-          animation: stew-wobble-fluid 0.65s infinite ease-in-out;
-          transform-origin: 22px 8.5px;
-        }
-
-        /* Fluid Stream Stretching & Pulsing */
-        @keyframes liquid-pulse-1 {
-          0% { transform: scaleY(1) skewX(0deg); opacity: 0.9; }
-          50% { transform: scaleY(1.04) skewX(0.5deg); opacity: 1; }
-          100% { transform: scaleY(1) skewX(0deg); opacity: 0.9; }
-        }
-
-        @keyframes liquid-pulse-2 {
-          0% { transform: scaleY(1) skewX(0deg); opacity: 0.9; }
-          50% { transform: scaleY(1.04) skewX(-0.5deg); opacity: 1; }
-          100% { transform: scaleY(1) skewX(0deg); opacity: 0.9; }
-        }
-
-        .liquid-stream-pulse-1 {
-          animation: liquid-pulse-1 0.75s infinite ease-in-out;
-          transform-origin: 26px 7px;
-        }
-        .liquid-stream-pulse-2 {
-          animation: liquid-pulse-2 0.85s infinite ease-in-out;
-          animation-delay: 0.2s;
-          transform-origin: 15px 7px;
-        }
-        .liquid-stream-pulse-center {
-          animation: liquid-pulse-1 0.6s infinite ease-in-out;
-          animation-delay: 0.1s;
-          transform-origin: 22px 7px;
-        }
-
-        /* Pendant Droplet Stretch & Wobble */
-        @keyframes droplet-wobble {
           0% { transform: scale(1, 1); }
-          50% { transform: scale(1.1, 1.25) translateY(0.4px); }
+          50% { transform: scale(1.02, 1.05); }
           100% { transform: scale(1, 1); }
         }
 
+        .stew-surface-wobble {
+          animation: stew-wobble-fluid 0.8s infinite ease-in-out;
+          transform-origin: 22px 8.5px;
+        }
+
+        /* Continuous Downward Flow along Pot Wall (Strictly 1-Way, No Rebound) */
+        @keyframes liquid-downward-flow-1 {
+          0% { opacity: 0.85; transform: translateY(0); }
+          50% { opacity: 1; transform: translateY(0.4px); }
+          100% { opacity: 0.85; transform: translateY(0); }
+        }
+
+        @keyframes liquid-downward-flow-2 {
+          0% { opacity: 0.85; transform: translateY(0); }
+          50% { opacity: 1; transform: translateY(0.4px); }
+          100% { opacity: 0.85; transform: translateY(0); }
+        }
+
+        .liquid-stream-pulse-1 {
+          animation: liquid-downward-flow-1 0.9s infinite ease-in-out;
+          transform-origin: 26px 7px;
+        }
+        .liquid-stream-pulse-2 {
+          animation: liquid-downward-flow-2 0.95s infinite ease-in-out;
+          animation-delay: 0.25s;
+          transform-origin: 15px 7px;
+        }
+        .liquid-stream-pulse-center {
+          animation: liquid-downward-flow-1 0.8s infinite ease-in-out;
+          animation-delay: 0.15s;
+          transform-origin: 22px 7px;
+        }
+
+        /* Pendant Meniscus Fluid Descent */
+        @keyframes droplet-meniscus-swell {
+          0% { transform: translateY(0) scaleY(1); }
+          50% { transform: translateY(0.3px) scaleY(1.08); }
+          100% { transform: translateY(0) scaleY(1); }
+        }
+
         .droplet-stretch-wobble {
-          animation: droplet-wobble 0.5s infinite ease-in-out;
+          animation: droplet-meniscus-swell 0.6s infinite ease-in-out;
           transform-origin: center top;
         }
 
@@ -1441,68 +1528,68 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
           transform-origin: 22px 6px;
         }
 
-        /* Gravity Drip Flow downwards with fluid stretch & bead travel */
-        @keyframes drip-flow-down {
-          0% { transform: scaleY(0.96) translateY(0); opacity: 0.85; }
-          50% { transform: scaleY(1.04) translateY(1.2px); opacity: 1; }
-          100% { transform: scaleY(0.96) translateY(0); opacity: 0.85; }
+        /* Gravity Waterfall Plunge: Continuous One-Way Flow down to floor */
+        @keyframes gravity-cascade-plunge {
+          0% { opacity: 0.88; }
+          50% { opacity: 1; }
+          100% { opacity: 0.88; }
         }
 
         .gravity-drip-flow {
-          animation: drip-flow-down 0.42s infinite ease-in-out;
+          animation: gravity-cascade-plunge 0.5s infinite ease-in-out;
           transform-origin: 27.5px 26px;
         }
         .gravity-drip-flow-2 {
-          animation: drip-flow-down 0.48s infinite ease-in-out;
+          animation: gravity-cascade-plunge 0.55s infinite ease-in-out;
           animation-delay: 0.15s;
           transform-origin: 14px 26px;
         }
         .gravity-drip-flow-center {
-          animation: drip-flow-down 0.38s infinite ease-in-out;
+          animation: gravity-cascade-plunge 0.45s infinite ease-in-out;
           animation-delay: 0.08s;
           transform-origin: 22px 15px;
         }
 
-        /* Falling Droplet Beads inside continuous cascade */
-        @keyframes drip-bead-fall-1 {
-          0% { transform: translateY(0); opacity: 0.9; }
-          50% { transform: translateY(2.5px); opacity: 1; }
-          100% { transform: translateY(5px); opacity: 0.7; }
+        /* Downward Falling Water Drops inside continuous stream: strictly One-Way Pot -> Floor */
+        @keyframes water-bead-fall-1 {
+          0% { transform: translateY(0); opacity: 0.95; }
+          50% { transform: translateY(4px); opacity: 0.95; }
+          100% { transform: translateY(8px); opacity: 0.3; }
         }
-        @keyframes drip-bead-fall-2 {
-          0% { transform: translateY(0); opacity: 0.8; }
-          50% { transform: translateY(3px); opacity: 1; }
-          100% { transform: translateY(6px); opacity: 0.6; }
+        @keyframes water-bead-fall-2 {
+          0% { transform: translateY(0); opacity: 0.95; }
+          50% { transform: translateY(4.5px); opacity: 0.95; }
+          100% { transform: translateY(9px); opacity: 0.3; }
         }
 
         .drip-droplet-bead-1 {
-          animation: drip-bead-fall-1 0.45s infinite linear;
-          transform-origin: center;
+          animation: water-bead-fall-1 0.42s infinite linear;
+          transform-origin: center top;
         }
         .drip-droplet-bead-2 {
-          animation: drip-bead-fall-2 0.45s infinite linear;
-          animation-delay: 0.22s;
-          transform-origin: center;
+          animation: water-bead-fall-2 0.42s infinite linear;
+          animation-delay: 0.21s;
+          transform-origin: center top;
         }
 
-        /* Puddle Concentric Impact Ripples */
-        @keyframes puddle-impact-expand-1 {
-          0% { transform: scale(0.35); opacity: 0.95; }
-          100% { transform: scale(1.9); opacity: 0; }
+        /* Floor Impact Point Outward Spreading Rings: Strictly Outward from stream impact */
+        @keyframes puddle-outward-ripple-1 {
+          0% { transform: scaleX(0.5) scaleY(0.6); opacity: 0.95; }
+          100% { transform: scaleX(1.7) scaleY(1.3); opacity: 0; }
         }
 
-        @keyframes puddle-impact-expand-2 {
-          0% { transform: scale(0.45); opacity: 0.9; }
-          100% { transform: scale(2.0); opacity: 0; }
+        @keyframes puddle-outward-ripple-2 {
+          0% { transform: scaleX(0.6) scaleY(0.7); opacity: 0.9; }
+          100% { transform: scaleX(1.8) scaleY(1.4); opacity: 0; }
         }
 
         .puddle-ripple-1 {
-          animation: puddle-impact-expand-1 0.8s infinite cubic-bezier(0.1, 0.7, 0.4, 1);
+          animation: puddle-outward-ripple-1 0.85s infinite cubic-bezier(0.1, 0.6, 0.3, 1);
           transform-origin: center;
         }
         .puddle-ripple-2 {
-          animation: puddle-impact-expand-2 0.9s infinite cubic-bezier(0.1, 0.7, 0.4, 1);
-          animation-delay: 0.28s;
+          animation: puddle-outward-ripple-2 0.95s infinite cubic-bezier(0.1, 0.6, 0.3, 1);
+          animation-delay: 0.3s;
           transform-origin: center;
         }
 
@@ -1612,38 +1699,65 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
           100% { transform: translate(calc(50% - 18px), -20px) scale(0.2); opacity: 0; }
         }
 
-        /* Subtle Internal Liquid Flow along Loading Line: BACK -> FRONT -> BACK continuous fluid motion */
-        @keyframes timeline-liquid-flow {
+        /* Continuous One-Way Liquid Flow along Loading Line: BACK (Right) -> FRONT (Left) */
+        @keyframes timeline-liquid-flow-1 {
           0% {
-            transform: translateX(35%) scaleX(0.94);
-            opacity: 0.65;
+            transform: translateX(110%) scaleY(0.9) scaleX(0.95);
+            opacity: 0;
           }
-          25% {
-            transform: translateX(-72%) scaleX(1.06);
-            opacity: 0.95;
+          8% {
+            opacity: 0.85;
           }
-          50% {
-            transform: translateX(-180%) scaleX(0.94);
-            opacity: 0.65;
+          45% {
+            transform: translateX(-65%) scaleY(1.18) scaleX(1.08);
+            opacity: 1;
           }
-          75% {
-            transform: translateX(-72%) scaleX(1.06);
-            opacity: 0.95;
+          85% {
+            opacity: 0.9;
           }
           100% {
-            transform: translateX(35%) scaleX(0.94);
-            opacity: 0.65;
+            transform: translateX(-240%) scaleY(0.9) scaleX(0.95);
+            opacity: 0;
           }
         }
 
-        .timeline-liquid-stream {
-          animation: timeline-liquid-flow 5.8s ease-in-out infinite;
+        @keyframes timeline-liquid-flow-2 {
+          0% {
+            transform: translateX(110%) scaleY(0.85) scaleX(0.9);
+            opacity: 0;
+          }
+          10% {
+            opacity: 0.7;
+          }
+          50% {
+            transform: translateX(-70%) scaleY(1.12) scaleX(1.05);
+            opacity: 0.85;
+          }
+          90% {
+            opacity: 0.7;
+          }
+          100% {
+            transform: translateX(-240%) scaleY(0.85) scaleX(0.9);
+            opacity: 0;
+          }
+        }
+
+        .timeline-liquid-wave-1 {
+          animation: timeline-liquid-flow-1 2.5s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+          transform-origin: center center;
+          will-change: transform, opacity;
+        }
+
+        .timeline-liquid-wave-2 {
+          animation: timeline-liquid-flow-2 2.5s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+          animation-delay: 1.2s;
           transform-origin: center center;
           will-change: transform, opacity;
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .timeline-liquid-stream {
+          .timeline-liquid-wave-1,
+          .timeline-liquid-wave-2 {
             animation: none !important;
             opacity: 0.4 !important;
           }

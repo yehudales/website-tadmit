@@ -20,6 +20,26 @@ export interface MenuItem {
     en: string;
   };
   isSpecialty?: boolean;
+  availability?: 'in_stock' | 'out_of_stock' | 'hidden';
+  ingredients?: {
+    he: string[];
+    en: string[];
+  };
+}
+
+export interface CartItem {
+  id: string;
+  name: {
+    he: string;
+    en: string;
+  };
+  price: number;
+  quantity: number;
+  category: string;
+  kashrutNote?: {
+    he: string;
+    en: string;
+  };
 }
 
 export interface MenuCategory {

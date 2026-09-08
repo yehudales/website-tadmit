@@ -4,6 +4,7 @@ import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { LiveStoreStatusSection } from './components/LiveStoreStatusSection';
 import { GallerySection } from './components/GallerySection';
+import { ShopSection } from './components/shop/ShopSection';
 import { Footer } from './components/Footer';
 import { WhatsAppModal } from './components/WhatsAppModal';
 import { AccessibilityModal } from './components/AccessibilityModal';
@@ -30,6 +31,7 @@ const pathToSection = (pathOrHash: string): NavSectionId | null => {
 export default function App() {
   const [lang, setLang] = useState<Language>('he');
   const [activeSection, setActiveSection] = useState<NavSectionId | null>(null);
+  const [isShopMode, setIsShopMode] = useState<boolean>(false);
   const [isKashrutOpen, setIsKashrutOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isWhatsAppOpen, setIsWhatsAppOpen] = useState(false);
@@ -96,7 +98,9 @@ export default function App() {
     }
   };
 
+  // Exit Shop Mode, close drawers/modals, restore normal scrolling and return smoothly/instantly to Home/Hero
   const handleGoHome = () => {
+    setIsShopMode(false);
     setActiveSection(null);
     setIsKashrutOpen(false);
     if (typeof window !== 'undefined') {
@@ -122,7 +126,7 @@ export default function App() {
         className="fixed top-2 left-2 z-[9999] pointer-events-none w-6 h-6 rounded-full bg-[#1A1D22]/80 border border-white/20 text-[#FAF9F6]/80 text-[10px] font-mono font-bold flex items-center justify-center select-none shadow-sm"
         aria-hidden="true"
       >
-        57
+        73
       </div>
 
       {/* Accessible Skip Link */}
@@ -168,6 +172,13 @@ export default function App() {
 
           {/* Visual Gallery */}
           <GallerySection lang={lang} />
+
+          {/* Complete YEHUDALES Shop Experience */}
+          <ShopSection
+            lang={lang}
+            isShopMode={isShopMode}
+            onShopModeChange={setIsShopMode}
+          />
 
           {/* Legal and Brand Footer */}
           <Footer

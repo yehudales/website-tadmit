@@ -189,26 +189,57 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
         >
           {/* Touch Indicator Composition: lowered 2.5px to align with text, container position static */}
           <div className="relative top-[2.5px] flex items-center justify-center w-5 h-5 shrink-0 select-none [isolation:isolate]">
-            {/* 1. LAYER: BACK -> Locked Static Orange Circle on layer z-0 (+30% size: 6.5px x 6.5px), center point permanently fixed, offset X: -2px, Y: -3px */}
+            {/* 1. LAYER: BACK -> Locked Static Orange Circle on layer z-0 (+30% size: 6.5px x 6.5px), center point permanently fixed, offset X: -2px, Y: -3px, perfectly circular */}
             <div
-              className="absolute -translate-y-1/2 w-[6.5px] h-[6.5px] flex items-center justify-center pointer-events-none z-0"
-              style={{ zIndex: 0, left: '-1.5px', top: 'calc(56% - 3px)' }}
+              className="absolute -translate-y-1/2 flex items-center justify-center pointer-events-none z-0 overflow-hidden shrink-0"
+              style={{
+                zIndex: 0,
+                left: '-1.5px',
+                top: 'calc(56% - 3px)',
+                width: '6.5px',
+                height: '6.5px',
+                minWidth: '6.5px',
+                minHeight: '6.5px',
+                maxWidth: '6.5px',
+                maxHeight: '6.5px',
+                borderRadius: '50%',
+                aspectRatio: '1 / 1',
+                clipPath: 'circle(50% at 50% 50%)',
+                WebkitClipPath: 'circle(50% at 50% 50%)',
+                boxSizing: 'border-box',
+                padding: 0,
+                margin: 0,
+              }}
               aria-hidden="true"
             >
               <span
-                className="w-full h-full rounded-full motion-reduce:hidden finger-circle-pulse"
+                className="block motion-reduce:hidden finger-circle-wave shrink-0"
                 style={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
+                  aspectRatio: '1 / 1',
+                  clipPath: 'circle(50% at 50% 50%)',
+                  WebkitClipPath: 'circle(50% at 50% 50%)',
                   backgroundColor: circleColor,
-                  transformOrigin: 'center center',
+                  boxSizing: 'border-box',
+                  padding: 0,
+                  margin: 0,
                 }}
               />
             </div>
 
-            {/* 2. LAYER: FRONT -> Hand / Finger with opaque fill on layer z-10, vertically mirrored, shifted upward by 3px, animated independently without moving the circle */}
+            {/* 2. LAYER: FRONT -> Hand / Finger with opaque fill on layer z-10, vertically mirrored, anchored at index fingertip (8.33% 45.83%) with further proportional size reduction, shifted left 1px (left: 1px) and top: -1px, animated independently without moving the circle */}
             <div className="finger-hand-motion flex items-center justify-center">
               <div
                 className="relative z-10 flex items-center justify-center"
-                style={{ zIndex: 10, transform: 'scaleY(-1)', top: '-3px' }}
+                style={{
+                  zIndex: 10,
+                  transform: 'scaleY(-1) scale(0.70)',
+                  transformOrigin: '8.33% 45.83%',
+                  top: '-1px',
+                  left: '1px',
+                }}
               >
                 <div className="flex items-center justify-center rotate-[-90deg]">
                   <svg
@@ -265,24 +296,38 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
           animation: finger-hand-anim 2.2s ease-in-out infinite;
         }
 
-        @keyframes finger-circle-pulse-anim {
-          0%, 100% {
-            transform: scale(0.9);
-            opacity: 0.65;
+        @keyframes finger-circle-wave-anim {
+          0% {
+            background-position: -20px 0;
           }
-          50% {
-            transform: scale(1.2);
-            opacity: 1;
+          100% {
+            background-position: 7px 0;
           }
         }
-        .finger-circle-pulse {
-          transform-origin: center center;
-          animation: finger-circle-pulse-anim 2.2s ease-in-out infinite;
+        .finger-circle-wave {
+          border-radius: 50%;
+          aspect-ratio: 1 / 1;
+          clip-path: circle(50% at 50% 50%);
+          -webkit-clip-path: circle(50% at 50% 50%);
+          background: linear-gradient(
+            110deg,
+            #FF7B1C 0%,
+            #FF7B1C 28%,
+            #FF8D32 40%,
+            #FFA04D 50%,
+            #FF8D32 60%,
+            #FF7B1C 72%,
+            #FF7B1C 100%
+          );
+          background-size: 28px 100%;
+          background-repeat: no-repeat;
+          background-color: #FF7B1C;
+          animation: finger-circle-wave-anim 3.0s linear infinite;
         }
 
         @media (prefers-reduced-motion: reduce) {
           .finger-hand-motion,
-          .finger-circle-pulse {
+          .finger-circle-wave {
             animation: none !important;
           }
         }

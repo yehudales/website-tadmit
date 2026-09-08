@@ -330,49 +330,61 @@ export const MENU_CATEGORIES: MenuCategory[] = [
   {
     id: 'cholent',
     name: {
-      he: 'צ\'ולנט מובחר',
-      en: 'Prime Cholent'
+      he: 'צ\'ולנט',
+      en: 'Cholent'
     },
     iconName: 'Soup',
     description: {
-      he: 'מנת הדגל של יהודלס בבישול איטי של שעות ארוכות',
-      en: 'Yehudales signature dish, slow-cooked for rich depth'
+      he: 'תבשילי צ\'ולנט עשירים בבישול לילה איטי ומסורתי',
+      en: 'Rich slow-simmered overnight cholent pots'
     }
   },
   {
-    id: 'meats',
+    id: 'special-thursday',
     name: {
-      he: 'בשרים ומנות מיוחדות',
-      en: 'Meats & Specialties'
+      he: 'חמישי שמח',
+      en: 'Thursday Specials'
+    },
+    iconName: 'Sparkles',
+    description: {
+      he: 'דילים ומנות ספיישל מיוחדות לליל שישי',
+      en: 'Special Thursday night combos & cuts'
+    }
+  },
+  {
+    id: 'kishke',
+    name: {
+      he: 'קישקע',
+      en: 'Kishke'
     },
     iconName: 'Utensils',
     description: {
-      he: 'בשרים איכותיים בכשרות נווה ציון',
-      en: 'Select meats under Neve Zion kosher standard'
+      he: 'קישקע מסורתי עמוס טעם וניחוח ביתי',
+      en: 'Traditional savory handcrafted kishke'
     }
   },
   {
     id: 'sides',
     name: {
-      he: 'תוספות מסורתיות',
-      en: 'Traditional Sides'
+      he: 'תוספות',
+      en: 'Sides'
     },
     iconName: 'Salad',
     description: {
-      he: 'קיגל, קישקע, תפוחי אדמה ומטעמי שבת',
-      en: 'Kugel, Kishke, seasoned potatoes and Shabbat treats'
+      he: 'קוגלים זהובים, חלות שבת ומטבלי הבית',
+      en: 'Golden kugels, challah, and house dips'
     }
   },
   {
     id: 'beverages',
     name: {
       he: 'שתייה וקינוחים',
-      en: 'Drinks & Desserts'
+      en: 'Drinks & Sweets'
     },
     iconName: 'Coffee',
     description: {
       he: 'שתייה קרה וסיומת מתוקה לחוויה',
-      en: 'Cold beverages and sweet additions'
+      en: 'Chilled drinks and traditional sweet treats'
     }
   }
 ];
@@ -380,17 +392,37 @@ export const MENU_CATEGORIES: MenuCategory[] = [
 // Menu items template with real supplied facts & placeholders for upcoming full menu assets
 export const SAMPLE_MENU_ITEMS: MenuItem[] = [
   {
-    id: 'cholent-classic',
+    id: 'cholent-asado',
     name: {
-      he: 'צ\'ולנט הבית המלכותי',
-      en: 'Signature Royal Cholent'
+      he: 'צ\'ולנט בקר אסאדו',
+      en: 'Asado Beef Cholent'
     },
     description: {
-      he: 'תבשיל צ\'ולנט עשיר ומסורתי עם בשר בקר מובחר (נווה ציון), קטניות מובחרות, תפוחי אדמה נימוחים וביצה חומה.',
-      en: 'Traditional rich cholent with prime beef (Neve Zion), slow-braised legumes, tender potatoes, and hard-boiled egg.'
+      he: 'מורכב מ: תפוחי אדמה • שעועית • גריסים • בשר בקר משובח "אסאדו" • ביצה חומה',
+      en: 'Potatoes • Beans • Barley • Prime Asado Beef • Hard-boiled egg'
     },
+    price: 30,
     category: 'cholent',
     isSpecialty: true,
+    availability: 'in_stock',
+    kashrutNote: {
+      he: 'בשר נווה ציון | בד״ץ העדה החרדית',
+      en: 'Neve Zion Beef | Badatz Edah HaChareidis'
+    }
+  },
+  {
+    id: 'cholent-classic',
+    name: {
+      he: 'צ\'ולנט בקר רגיל',
+      en: 'Classic Beef Cholent'
+    },
+    description: {
+      he: 'מורכב מ: תפוחי אדמה • שעועית • גריסים • בשר בקר מובחר • ביצה חומה',
+      en: 'Potatoes • Beans • Barley • Select Tender Beef • Hard-boiled egg'
+    },
+    price: 34,
+    category: 'cholent',
+    availability: 'in_stock',
     kashrutNote: {
       he: 'בשר נווה ציון | בד״ץ העדה החרדית',
       en: 'Neve Zion Beef | Badatz Edah HaChareidis'
@@ -399,51 +431,93 @@ export const SAMPLE_MENU_ITEMS: MenuItem[] = [
   {
     id: 'cholent-kishke',
     name: {
-      he: 'צ\'ולנט פרימיום עם קישקע',
-      en: 'Premium Cholent with Kishke'
+      he: 'צ\'ולנט מובחר עם קישקע',
+      en: 'Prime Cholent with Kishke'
     },
     description: {
-      he: 'מנת צ\'ולנט עמוסת בשר בקר רך, בליווי קישקע מסורתי עשיר בתבלינים וניחוח ביתי.',
-      en: 'Generous serving of slow-simmered beef cholent served with traditional spiced savory kishke.'
+      he: 'מנת צ\'ולנט עמוסת בשר רך בליווי קישקע מסורתי עשיר בתבלינים',
+      en: 'Generous beef cholent portion served with traditional spiced kishke'
     },
+    price: 42,
     category: 'cholent',
     isSpecialty: true,
+    availability: 'in_stock',
     kashrutNote: {
       he: 'בשר נווה ציון | בד״ץ העדה החרדית',
       en: 'Neve Zion Beef | Badatz Edah HaChareidis'
     }
   },
   {
-    id: 'meat-asado',
+    id: 'thursday-combo-deluxe',
     name: {
-      he: 'נתחי אסאדו מובחרים לשבת',
-      en: 'Prime Shabbat Asado Cuts'
+      he: 'קומבו חמישי שמח מורחב',
+      en: 'Thursday Night Combo Deluxe'
     },
     description: {
-      he: 'בשר אסאדו עסיסי הנימוח בפה, מתובל בעדינות ונצלה בצלייה איטית ומבוקרת.',
-      en: 'Succulent slow-roasted asado beef with gentle seasoning that melts in your mouth.'
+      he: 'מנת צ\'ולנט בקר גדולה + קוגל ירושלמי חם + פחית שתייה קרה לבחירה',
+      en: 'Large beef cholent + warm Yerushalmi kugel + cold drink of choice'
     },
-    category: 'meats',
+    price: 48,
+    category: 'special-thursday',
     isSpecialty: true,
+    availability: 'in_stock',
+    kashrutNote: {
+      he: 'מהדרין מן המהדרין',
+      en: 'Strict Mehadrin'
+    }
+  },
+  {
+    id: 'thursday-asado-ribs',
+    name: {
+      he: 'נתחי אסאדו מובחרים ברוטב ביתי',
+      en: 'Prime Asado Beef Ribs'
+    },
+    description: {
+      he: 'בשר אסאדו עסיסי הנימוח בפה, מתובל בעדינות ונצלה בצלייה איטית ומבוקרת',
+      en: 'Succulent slow-roasted asado beef that melts in your mouth'
+    },
+    price: 68,
+    category: 'special-thursday',
+    availability: 'in_stock',
     kashrutNote: {
       he: 'בשר נווה ציון',
       en: 'Neve Zion Beef'
     }
   },
   {
-    id: 'meat-brisket',
+    id: 'kishke-portion',
     name: {
-      he: 'בריסקט בקר מובחר ברוטב ביתי',
-      en: 'Prime Beef Brisket in House Sauce'
+      he: 'קישקע ביתי מסורתי (מנה)',
+      en: 'Traditional Handcrafted Kishke'
     },
     description: {
-      he: 'פרוסות בקר רכות במיוחד ברוטב עמוק של בצל מקורמל וירקות שורש.',
-      en: 'Tender beef brisket slices bathed in a rich caramelized onion and root vegetable reduction.'
+      he: 'קישקע אותנטי אפוי בתנור עם ניחוח שבת עמוק המושלם לצד הצ\'ולנט',
+      en: 'Authentic oven-baked savory kishke prepared to perfection'
     },
-    category: 'meats',
+    price: 18,
+    category: 'kishke',
+    availability: 'in_stock',
     kashrutNote: {
-      he: 'בשר נווה ציון',
-      en: 'Neve Zion Beef'
+      he: 'בד״ץ העדה החרדית',
+      en: 'Badatz Edah HaChareidis'
+    }
+  },
+  {
+    id: 'kishke-double-platter',
+    name: {
+      he: 'צמד קישקע מתובל לשבת',
+      en: 'Double Kishke Shabbat Platter'
+    },
+    description: {
+      he: 'מנה כפולה של קישקע פרימיום בתוספת רוטב צ\'ולנט עשיר',
+      en: 'Double portion of premium kishke topped with rich cholent sauce'
+    },
+    price: 32,
+    category: 'kishke',
+    availability: 'in_stock',
+    kashrutNote: {
+      he: 'בד״ץ העדה החרדית',
+      en: 'Badatz Edah HaChareidis'
     }
   },
   {
@@ -453,10 +527,12 @@ export const SAMPLE_MENU_ITEMS: MenuItem[] = [
       en: 'Spiced Yerushalmi Kugel'
     },
     description: {
-      he: 'קוגל אטריות ירושלמי קלאסי בניחוח פלפל שחור חריף-מתוק, נאפה בזהירות לשלמות.',
-      en: 'Authentic caramelized noodle kugel with a balanced sweet and peppery kick.'
+      he: 'קוגל אטריות ירושלמי קלאסי בניחוח פלפל שחור חריף-מתוק, נאפה בזהירות לשלמות',
+      en: 'Authentic caramelized noodle kugel with a balanced sweet and peppery kick'
     },
+    price: 24,
     category: 'sides',
+    availability: 'in_stock',
     kashrutNote: {
       he: 'בד״ץ העדה החרדית',
       en: 'Badatz Edah HaChareidis'
@@ -469,26 +545,12 @@ export const SAMPLE_MENU_ITEMS: MenuItem[] = [
       en: 'Golden Potato Kugel'
     },
     description: {
-      he: 'מאפה תפוחי אדמה זהוב ופריך מבחוץ, רך וטעים מבפנים, בדיוק כמו בבית אמא.',
-      en: 'Crispy golden exterior with a melt-in-the-mouth center, baked with traditional care.'
+      he: 'מאפה תפוחי אדמה זהוב ופריך מבחוץ, רך וטעים מבפנים',
+      en: 'Crispy golden exterior with a melt-in-the-mouth center'
     },
+    price: 24,
     category: 'sides',
-    kashrutNote: {
-      he: 'בד״ץ העדה החרדית',
-      en: 'Badatz Edah HaChareidis'
-    }
-  },
-  {
-    id: 'side-kishke',
-    name: {
-      he: 'קישקע ביתי מובחר',
-      en: 'Handcrafted Traditional Kishke'
-    },
-    description: {
-      he: 'תוספת קישקע אותנטית עם ניחוח שבת עמוק המושלם לצד הצ\'ולנט.',
-      en: 'Authentic savory kishke prepared to complement the rich cholent taste.'
-    },
-    category: 'sides',
+    availability: 'in_stock',
     kashrutNote: {
       he: 'בד״ץ העדה החרדית',
       en: 'Badatz Edah HaChareidis'
@@ -501,10 +563,66 @@ export const SAMPLE_MENU_ITEMS: MenuItem[] = [
       en: 'Fresh Challah & Shabbat Dips'
     },
     description: {
-      he: 'חלת שבת אוורירית וטרייה בליווי מטבוחה חריפה וטחינה עשירה.',
-      en: 'Fluffy fresh Shabbat challah accompanied by house matbucha and creamy tahini.'
+      he: 'חלת שבת אוורירית וטרייה בליווי מטבוחה חריפה וטחינה עשירה',
+      en: 'Fluffy fresh Shabbat challah accompanied by house matbucha and tahini'
     },
+    price: 18,
     category: 'sides',
+    availability: 'in_stock',
+    kashrutNote: {
+      he: 'בד״ץ העדה החרדית',
+      en: 'Badatz Edah HaChareidis'
+    }
+  },
+  {
+    id: 'beverage-cola',
+    name: {
+      he: 'קוקה קולה קר (1.5 ליטר)',
+      en: 'Chilled Coca-Cola (1.5L)'
+    },
+    description: {
+      he: 'בקבוק קוקה קולה קלאסי קר ומרענן',
+      en: 'Classic chilled refreshing 1.5L bottle'
+    },
+    price: 14,
+    category: 'beverages',
+    availability: 'in_stock',
+    kashrutNote: {
+      he: 'כשר למהדרין',
+      en: 'Kosher Mehadrin'
+    }
+  },
+  {
+    id: 'beverage-zero',
+    name: {
+      he: 'קוקה קולה זירו קר (1.5 ליטר)',
+      en: 'Chilled Coca-Cola Zero (1.5L)'
+    },
+    description: {
+      he: 'בקבוק קוקה קולה זירו קר ללא סוכר',
+      en: 'Zero sugar chilled refreshing 1.5L bottle'
+    },
+    price: 14,
+    category: 'beverages',
+    availability: 'in_stock',
+    kashrutNote: {
+      he: 'כשר למהדרין',
+      en: 'Kosher Mehadrin'
+    }
+  },
+  {
+    id: 'dessert-compote',
+    name: {
+      he: 'קומפוט פירות מסורתי עשיר',
+      en: 'Traditional Fruit Compote'
+    },
+    description: {
+      he: 'קינוח פירות מבושל מסורתי עם שזיפים, תפוחים וקינמון',
+      en: 'Traditional slow-cooked fruit compote with plums, apples, and cinnamon'
+    },
+    price: 20,
+    category: 'beverages',
+    availability: 'in_stock',
     kashrutNote: {
       he: 'בד״ץ העדה החרדית',
       en: 'Badatz Edah HaChareidis'
