@@ -69,7 +69,7 @@ export default function App() {
         className="fixed top-2.5 left-2.5 z-[99999] pointer-events-none w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#FF7B1C] text-[#0B0C0E] border-2 border-white shadow-[0_4px_12px_rgba(0,0,0,0.6)] flex flex-col items-center justify-center font-mono select-none"
       >
         <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider leading-none">DEBUG</span>
-        <span className="text-[11px] sm:text-[12px] font-black leading-none mt-0.5">v11</span>
+        <span className="text-[11px] sm:text-[12px] font-black leading-none mt-0.5">v12</span>
       </div>
 
       {/* Accessible Skip Link */}
