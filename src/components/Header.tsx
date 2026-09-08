@@ -1,14 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Settings, Home } from 'lucide-react';
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { BUSINESS_CONFIG } from '../config/businessConfig';
 import { Language, NavSectionId } from '../types';
 import { Logo } from './Logo';
 import { ExpandableContentSection } from './ExpandableContentSection';
-import { KashrutTabContent } from './KashrutBanner';
-import { InteractiveDisclosureTrigger } from './InteractiveDisclosureTrigger';
 import { hasToolbarShimmerPlayed, markToolbarShimmerAsPlayed } from '../utils/sessionShimmer';
-import { getDrawerAnimationConfig } from '../utils/drawerAnimation';
 
 interface HeaderProps {
   lang: Language;
@@ -20,9 +16,6 @@ interface HeaderProps {
   onOpenPrivacy: () => void;
   onCloseSection?: () => void;
   onGoHome?: () => void;
-  isKashrutOpen?: boolean;
-  onCloseKashrut?: () => void;
-  onToggleKashrut?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -35,12 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenPrivacy,
   onCloseSection,
   onGoHome,
-  isKashrutOpen = false,
-  onCloseKashrut,
-  onToggleKashrut,
 }) => {
-  const shouldReduceMotion = useReducedMotion();
-  const drawerAnim = getDrawerAnimationConfig(shouldReduceMotion);
   const [scrolled, setScrolled] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const baseHeaderRef = useRef<HTMLDivElement>(null);
@@ -100,16 +88,6 @@ export const Header: React.FC<HeaderProps> = ({
     };
   }, []);
 
-  // Instantly re-synchronize header height when Kashrut drawer state toggles
-  useEffect(() => {
-    window.requestAnimationFrame(() => {
-      if (baseHeaderRef.current) {
-        const height = baseHeaderRef.current.offsetHeight;
-        document.documentElement.style.setProperty('--header-height', `${height}px`);
-      }
-    });
-  }, [isKashrutOpen]);
-
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -143,8 +121,8 @@ export const Header: React.FC<HeaderProps> = ({
       >
         {/* Base Locked Header Container (Row 1 + Row 2 measured for page clearance) */}
         <div ref={baseHeaderRef} className="w-full shrink-0 relative z-50 bg-[#0B0C0E]">
-          {/* ROW 1: Top Header Area (Brand Title, "כשר למהדרין" & Settings Action) */}
-          <div className="border-b border-[#252A32]/60 py-2 sm:py-2.5 bg-[#0B0C0E]/95 flex flex-col justify-center min-h-[104px]">
+          {/* ROW 1: Top Header Area (Brand Title/Logo, Home & Settings Action) */}
+          <div className="border-b border-[#252A32]/60 py-2 sm:py-2.5 bg-[#0B0C0E]/95 flex flex-col justify-center min-h-[96px]">
             <div
               id="header-row1-grid"
               className="max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 grid grid-cols-3 items-center shrink-0 -mt-4 pl-3 ml-0 pt-0"
@@ -158,7 +136,6 @@ export const Header: React.FC<HeaderProps> = ({
                       onGoHome();
                     } else {
                       if (onCloseSection) onCloseSection();
-                      if (onCloseKashrut) onCloseKashrut();
                       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
                     }
                   }}
@@ -169,7 +146,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
               </div>
 
-              {/* Center: Brand Logo & "כשר למהדרין" directly below (Center Col) */}
+              {/* Center: Brand Logo (Center Col) */}
               <div className="flex flex-col items-center justify-center">
                 <button
                   type="button"
@@ -178,7 +155,6 @@ export const Header: React.FC<HeaderProps> = ({
                       onGoHome();
                     } else {
                       if (onCloseSection) onCloseSection();
-                      if (onCloseKashrut) onCloseKashrut();
                       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
                     }
                   }}
@@ -187,19 +163,6 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   <Logo className="h-[89.6px] sm:h-8 md:h-9 w-auto" />
                 </button>
-
-                {/* "כשר למהדרין" - precisely aligned directly below the logo */}
-                <div className="mt-0.5 sm:mt-1 flex items-center justify-center">
-                  <InteractiveDisclosureTrigger
-                    variant="kashrut-arrow"
-                    isOpen={!!isKashrutOpen}
-                    onToggle={onToggleKashrut || (() => {})}
-                    label={lang === 'he' ? 'כשר למהדרין' : 'Strict Mehadrin Kosher'}
-                    ariaControls="kashrut-drawer-container"
-                    ariaLabelOpen={lang === 'he' ? 'סגור פירוט כשרות למהדרין' : 'Close strict kosher details'}
-                    ariaLabelClosed={lang === 'he' ? 'פתח פירוט כשר למהדרין' : 'Open strict kosher details'}
-                  />
-                </div>
               </div>
 
               {/* Right / Settings Action (Right Col) */}
@@ -215,24 +178,6 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
               </div>
             </div>
-
-            {/* When "כשר למהדרין" is opened: Drawer expands directly from existing banner area, pushing all content below DOWN */}
-            <AnimatePresence>
-              {isKashrutOpen && (
-                <motion.div
-                  id="kashrut-drawer-container"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={drawerAnim.open}
-                  exit={drawerAnim.closed}
-                  style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden', willChange: 'height' }}
-                  className="w-full overflow-hidden"
-                >
-                  <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-3 pt-1">
-                    <KashrutTabContent lang={lang} onClose={onCloseKashrut} />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
 
           {/* ROW 2: VISIBLE LONG TOOLBAR (Directly above Hero Video along dividing line) */}

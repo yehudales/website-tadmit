@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Language, NavSectionId } from './types';
-import { Header } from './components/Header';
+import { TopmostHeaderRow } from './components/TopmostHeaderRow';
+import { KashrutSection } from './components/KashrutSection';
+import { HeaderToolbar } from './components/HeaderToolbar';
 import { Hero } from './components/Hero';
 import { LiveStoreStatusSection } from './components/LiveStoreStatusSection';
 import { GallerySection } from './components/GallerySection';
@@ -38,6 +40,10 @@ export default function App() {
   const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
+  const isShopModeRef = useRef<boolean>(false);
+  isShopModeRef.current = isShopMode;
+  const lockScrollYRef = useRef<number | null>(null);
+
   // ALWAYS open Home at the top (scrollY 0) upon fresh load / refresh
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -53,6 +59,97 @@ export default function App() {
         window.scrollTo(0, 0);
       }
     }
+  }, []);
+
+  // Precise Geometric Shop Mode Trigger & Upward Scroll Lock
+  // ONLY triggers when Shop Category Navigation Bar physically reaches the bottom edge of the fixed top banner
+  useEffect(() => {
+    const getHeaderBottom = () => {
+      const headerEl = document.getElementById('topmost-header-row');
+      if (headerEl) {
+        return headerEl.getBoundingClientRect().bottom;
+      }
+      return 96;
+    };
+
+    const getCategoryBar = () => {
+      return document.getElementById('shop-category-bar');
+    };
+
+    const handleScroll = () => {
+      const categoryBarEl = getCategoryBar();
+      const headerBottom = getHeaderBottom();
+
+      if (!categoryBarEl) return;
+
+      const categoryBarRect = categoryBarEl.getBoundingClientRect();
+
+      if (!isShopModeRef.current) {
+        // Geometric condition: Category bar touches or passes bottom of fixed top banner
+        if (categoryBarRect.top <= headerBottom + 0.5) {
+          const currentScrollY = Math.max(0, window.scrollY);
+          lockScrollYRef.current = currentScrollY;
+          setIsShopMode(true);
+        }
+      } else {
+        // In Shop Mode: block upward scrolling above the lock boundary point
+        if (lockScrollYRef.current !== null && window.scrollY < lockScrollYRef.current) {
+          window.scrollTo({ top: lockScrollYRef.current, left: 0, behavior: 'instant' });
+        }
+      }
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      if (isShopModeRef.current && lockScrollYRef.current !== null) {
+        if (window.scrollY <= lockScrollYRef.current + 0.5 && e.deltaY < 0) {
+          e.preventDefault();
+          window.scrollTo(0, lockScrollYRef.current);
+        }
+      }
+    };
+
+    let touchStartY = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        touchStartY = e.touches[0].clientY;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isShopModeRef.current && lockScrollYRef.current !== null && e.touches.length > 0) {
+        const currentY = e.touches[0].clientY;
+        const deltaY = currentY - touchStartY; // positive when dragging downward -> user trying to scroll upward
+        if (window.scrollY <= lockScrollYRef.current + 0.5 && deltaY > 0) {
+          if (e.cancelable) {
+            e.preventDefault();
+          }
+          window.scrollTo(0, lockScrollYRef.current);
+        }
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isShopModeRef.current && lockScrollYRef.current !== null) {
+        if ((e.key === 'ArrowUp' || e.key === 'PageUp') && window.scrollY <= lockScrollYRef.current + 2) {
+          e.preventDefault();
+          window.scrollTo(0, lockScrollYRef.current);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: false });
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('keydown', handleKeyDown, { passive: false });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   // Listen to in-session back/forward navigation only
@@ -100,6 +197,7 @@ export default function App() {
 
   // Exit Shop Mode, close drawers/modals, restore normal scrolling and return smoothly/instantly to Home/Hero
   const handleGoHome = () => {
+    lockScrollYRef.current = null;
     setIsShopMode(false);
     setActiveSection(null);
     setIsKashrutOpen(false);
@@ -126,7 +224,7 @@ export default function App() {
         className="fixed top-2 left-2 z-[9999] pointer-events-none w-6 h-6 rounded-full bg-[#1A1D22]/80 border border-white/20 text-[#FAF9F6]/80 text-[10px] font-mono font-bold flex items-center justify-center select-none shadow-sm"
         aria-hidden="true"
       >
-        73
+        79
       </div>
 
       {/* Accessible Skip Link */}
@@ -137,20 +235,32 @@ export default function App() {
         {lang === 'he' ? 'דלג לתוכן המרכזי' : 'Skip to main content'}
       </a>
 
-      {/* Sticky Top Navigation Bar with directly attached Expandable Panels */}
-      <Header
+      {/* 1. TOPMOST EXISTING COMPONENT (Logo, Home shortcut, Settings) */}
+      <TopmostHeaderRow
+        lang={lang}
+        isShopMode={isShopMode}
+        onGoHome={handleGoHome}
+        onCloseSection={handleCloseSection}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+      />
+
+      {/* 2. "כשר למהדרין" — COMPLETE COMPONENT DIRECTLY BETWEEN TOPMOST & TOOLBAR */}
+      <KashrutSection
+        lang={lang}
+        isOpen={isKashrutOpen}
+        onToggle={() => setIsKashrutOpen((prev) => !prev)}
+        onClose={() => setIsKashrutOpen(false)}
+      />
+
+      {/* 3. TOOLBAR / סרגל הכלים (5 Tabs and Expandable Panels) */}
+      <HeaderToolbar
         lang={lang}
         activeSection={activeSection}
         onSelectSection={handleSelectSection}
         onCloseSection={handleCloseSection}
-        onGoHome={handleGoHome}
-        onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenWhatsApp={() => setIsWhatsAppOpen(true)}
         onOpenAccessibility={() => setIsAccessibilityOpen(true)}
         onOpenPrivacy={() => setIsPrivacyOpen(true)}
-        isKashrutOpen={isKashrutOpen}
-        onCloseKashrut={() => setIsKashrutOpen(false)}
-        onToggleKashrut={() => setIsKashrutOpen((prev) => !prev)}
       />
 
       {/* Main Content Landmark */}

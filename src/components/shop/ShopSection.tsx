@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Language, MenuCategory, MenuItem } from '../../types';
 import { MENU_CATEGORIES, SAMPLE_MENU_ITEMS } from '../../config/businessConfig';
-import { ShopBanner } from './ShopBanner';
 import { ShopCategoryBar } from './ShopCategoryBar';
 import { ShopProductItem } from './ShopProductItem';
 import { CartFloatingBar } from './CartFloatingBar';
@@ -73,26 +72,6 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
     return map;
   }, [filteredItems]);
 
-  // Detect when shop section enters viewport for header/navbar sync without scroll blocking
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          onShopModeChange(true);
-        } else if (entry.boundingClientRect.top > 100) {
-          onShopModeChange(false);
-        }
-      },
-      { threshold: 0.05 }
-    );
-
-    if (shopContainerRef.current) {
-      observer.observe(shopContainerRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [onShopModeChange]);
-
   // Smooth scroll to category without screen jumps
   const handleSelectCategory = (categoryId: string) => {
     setActiveCategory(categoryId);
@@ -113,11 +92,10 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
       className="relative z-20 bg-[#0B0C0E] border-t border-[#1E232B]"
     >
       {/* 
-        Sticky Shop Header (Banner + Horizontal Category Nav)
-        Uses pure CSS sticky without any synthetic scroll interception for jitter-free performance
+        Sticky Shop Header (Horizontal Category Nav)
+        Locks cleanly directly beneath the permanently fixed top header component (min-h: 96px)
       */}
-      <div className="sticky top-0 z-30 bg-[#0B0C0E]/98 backdrop-blur-md shadow-xl border-b border-[#1E232B]">
-        <ShopBanner lang={lang} isLocked={isShopMode} />
+      <div className="sticky top-[96px] z-40 bg-[#0B0C0E]/98 backdrop-blur-md shadow-xl border-b border-[#1E232B]">
         <ShopCategoryBar
           lang={lang}
           categories={MENU_CATEGORIES}
