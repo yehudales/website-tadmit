@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Settings, Home } from 'lucide-react';
 import { BUSINESS_CONFIG } from '../config/businessConfig';
 import { Language, NavSectionId } from '../types';
@@ -30,31 +30,17 @@ export const Header: React.FC<HeaderProps> = ({
   const headerRef = useRef<HTMLElement>(null);
   const baseHeaderRef = useRef<HTMLDivElement>(null);
 
-  // Measure base header height (row 1 + row 2) before paint and keep --header-height CSS variable synchronized
-  useLayoutEffect(() => {
+  // Measure base header height (row 1 + row 2) and keep --header-height CSS variable synchronized
+  useEffect(() => {
     const updateHeaderHeight = () => {
       if (baseHeaderRef.current) {
         const height = baseHeaderRef.current.offsetHeight;
-        if (height > 0) {
-          document.documentElement.style.setProperty('--header-height', `${height}px`);
-        }
+        document.documentElement.style.setProperty('--header-height', `${height}px`);
       }
     };
     updateHeaderHeight();
-
-    const resizeObserver = new ResizeObserver(() => {
-      updateHeaderHeight();
-    });
-
-    if (baseHeaderRef.current) {
-      resizeObserver.observe(baseHeaderRef.current);
-    }
-
     window.addEventListener('resize', updateHeaderHeight);
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener('resize', updateHeaderHeight);
-    };
+    return () => window.removeEventListener('resize', updateHeaderHeight);
   }, []);
 
   useEffect(() => {
@@ -101,7 +87,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#16191E] border border-[#252A32] flex items-center justify-center text-[#FAF9F6]/80 hover:text-[#FF7B1C] hover:border-[#FF7B1C]/40 transition-all">
                   <Home className="w-4 h-4" />
                 </div>
-                <span className="inline font-bold tracking-tight text-xs sm:text-sm text-[#FAF9F6]/90">
+                <span className="hidden sm:inline font-bold tracking-tight text-xs sm:text-sm text-[#FAF9F6]/90">
                   {BUSINESS_CONFIG.name[lang]}
                 </span>
               </a>
@@ -137,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="w-full bg-[#0E1116] border-b border-[#252A32] shadow-inner"
           >
             <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-              <div className="flex items-center justify-center overflow-x-auto no-scrollbar py-1.5 sm:py-2 gap-1.5 sm:gap-3 md:gap-4 lg:gap-7">
+              <div className="flex items-center justify-start md:justify-center overflow-x-auto no-scrollbar scroll-smooth py-1.5 sm:py-2 gap-1 sm:gap-2 md:gap-4 lg:gap-7">
                 {navItems.map((item, index) => {
                   const isActive = activeSection === item.id;
                   return (
@@ -145,7 +131,7 @@ export const Header: React.FC<HeaderProps> = ({
                       <button
                         type="button"
                         onClick={() => handleNavItemClick(item.id)}
-                        className={`min-h-[38px] px-2.5 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold tracking-wide transition-all whitespace-nowrap cursor-pointer flex flex-col items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] relative ${
+                        className={`min-h-[38px] px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold tracking-wide transition-all whitespace-nowrap cursor-pointer flex flex-col items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] relative ${
                           isActive
                             ? 'text-[#FF7B1C]'
                             : 'text-[#FAF9F6]/85 hover:text-white hover:bg-white/5'
@@ -164,7 +150,7 @@ export const Header: React.FC<HeaderProps> = ({
                         </span>
                       </button>
                       {index < navItems.length - 1 && (
-                        <span className="inline-block text-[#252A32] select-none text-xs" aria-hidden="true">
+                        <span className="hidden md:inline-block text-[#252A32] select-none text-xs" aria-hidden="true">
                           |
                         </span>
                       )}

@@ -21,12 +21,16 @@ export default function App() {
   const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
-  // Ensure initial page scroll starts at top (scrollY 0) on component mount
+  // Configure manual scroll restoration on initial mount so page and refresh always start at top (scrollY 0)
   useEffect(() => {
-    if ('scrollRestoration' in history) {
+    if (typeof window !== 'undefined' && 'scrollRestoration' in history) {
       history.scrollRestoration = 'manual';
     }
-    window.scrollTo(0, 0);
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    } catch {
+      window.scrollTo(0, 0);
+    }
   }, []);
 
   // Synchronize document direction and lang attribute
@@ -62,16 +66,6 @@ export default function App() {
       dir={lang === 'he' ? 'rtl' : 'ltr'}
       className="min-h-screen bg-[#0B0C0E] text-[#FAF9F6] font-sans antialiased selection:bg-[#FF7B1C] selection:text-[#0B0C0E]"
     >
-      {/* Temporary Deployment/Version Marker */}
-      <div
-        id="debug-version-marker"
-        aria-hidden="true"
-        className="fixed top-2.5 left-2.5 z-[99999] pointer-events-none w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#FF7B1C] text-[#0B0C0E] border-2 border-white shadow-[0_4px_12px_rgba(0,0,0,0.6)] flex flex-col items-center justify-center font-mono select-none"
-      >
-        <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider leading-none">DEBUG</span>
-        <span className="text-[11px] sm:text-[12px] font-black leading-none mt-0.5">v13</span>
-      </div>
-
       {/* Accessible Skip Link */}
       <a
         href="#main-content"
