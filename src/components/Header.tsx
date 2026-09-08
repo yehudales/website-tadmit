@@ -92,7 +92,7 @@ export const Header: React.FC<HeaderProps> = ({
         className="fixed top-2 left-2 z-[99999] pointer-events-none px-2.5 py-1 rounded bg-black/90 text-[#FF7B1C] border border-[#FF7B1C] font-mono text-xs font-bold tracking-wider shadow-lg select-none"
         aria-hidden="true"
       >
-        DEBUG v6
+        DEBUG v7
       </div>
 
       <header
