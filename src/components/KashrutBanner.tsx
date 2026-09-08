@@ -95,8 +95,9 @@ export const KashrutBanner: React.FC<KashrutBannerProps> = ({ lang, isOpen, onTo
   return (
     <div className="w-full bg-[#0B0C0E] pt-5 sm:pt-6 pb-2 relative z-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
-        {/* Frameless Interactive Disclosure Trigger: Same Horizontal Line [EMOJI (-45°) + SMALL CIRCLE] [TEXT] */}
+        {/* Frameless Interactive Disclosure Trigger: Text with sleek white downward arrow with reflective shimmer */}
         <InteractiveDisclosureTrigger
+          variant="kashrut-arrow"
           isOpen={isOpen}
           onToggle={onToggle}
           label={lang === 'he' ? 'כשר למהדרין' : 'Strict Mehadrin Kosher'}

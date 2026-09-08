@@ -184,6 +184,7 @@ export const Header: React.FC<HeaderProps> = ({
                 {/* "כשר למהדרין" - precisely aligned directly below the logo */}
                 <div className="mt-0.5 sm:mt-1 flex items-center justify-center">
                   <InteractiveDisclosureTrigger
+                    variant="kashrut-arrow"
                     isOpen={!!isKashrutOpen}
                     onToggle={onToggleKashrut || (() => {})}
                     label={lang === 'he' ? 'כשר למהדרין' : 'Strict Mehadrin Kosher'}

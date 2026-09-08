@@ -14,6 +14,7 @@ interface InteractiveDisclosureTriggerProps {
   circleColor?: string;
   accentColor?: string;
   textClassName?: string;
+  variant?: 'touch' | 'kashrut-arrow';
 }
 
 export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTriggerProps> = ({
@@ -28,11 +29,118 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
   circleColor = '#FF7B1C',
   accentColor = '#FF7B1C',
   textClassName = '',
+  variant = 'touch',
 }) => {
   const handleClick = () => {
     triggerMobileHaptic(15);
     onToggle();
   };
+
+  if (variant === 'kashrut-arrow') {
+    const arrowColor = isOpen ? accentColor : '#FFFFFF';
+    const fringeColor = isOpen ? '#A84805' : '#0B0C0E';
+
+    return (
+      <button
+        id={id}
+        type="button"
+        onClick={handleClick}
+        aria-expanded={isOpen}
+        aria-controls={ariaControls}
+        aria-label={isOpen ? ariaLabelOpen : ariaLabelClosed}
+        className="group inline-flex flex-col items-center justify-center py-0.5 px-2 text-xs sm:text-sm font-semibold tracking-wide transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 rounded-lg whitespace-nowrap select-none no-underline"
+      >
+        {/* Text: Normal = WHITE, Open/Active = ACCENT COLOR (#FF7B1C), NO UNDERLINE in any state */}
+        <span
+          className={`transition-colors duration-200 no-underline decoration-transparent select-none leading-tight ${textClassName} ${
+            isOpen ? '' : 'text-[#FAF9F6]'
+          }`}
+          style={isOpen ? { color: accentColor } : undefined}
+        >
+          {label}
+        </span>
+
+        {/* Clean, minimal line-style downward arrow (no triangle, no tail) directly below text with tiny visible gap */}
+        <div className="mt-[2.5px] flex items-center justify-center leading-none" aria-hidden="true">
+          <svg
+            viewBox="0 0 10 6"
+            className="w-[10px] h-[6px] block overflow-hidden select-none"
+            aria-hidden="true"
+          >
+            <defs>
+              {/* Mask strictly adhering to the 1.25px line stroke so shimmer cannot bleed */}
+              <mask id="kashrut-line-arrow-mask">
+                <path
+                  d="M1.5 1.75 L 5 4.75 L 8.5 1.75"
+                  fill="none"
+                  stroke="#FFFFFF"
+                  strokeWidth="1.25"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </mask>
+              <linearGradient id="kashrut-line-arrow-glint" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0" />
+                <stop offset="25%" stopColor="#FFFFFF" stopOpacity="0" />
+                <stop offset="42%" stopColor={fringeColor} stopOpacity={isOpen ? 0.35 : 0.25} />
+                <stop offset="50%" stopColor="#FFFFFF" stopOpacity="0.95" />
+                <stop offset="58%" stopColor={fringeColor} stopOpacity={isOpen ? 0.35 : 0.25} />
+                <stop offset="75%" stopColor="#FFFFFF" stopOpacity="0" />
+                <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+
+            {/* Base line-style downward arrow stroke: white when closed, #FF7B1C when open */}
+            <path
+              d="M1.5 1.75 L 5 4.75 L 8.5 1.75"
+              fill="none"
+              stroke={arrowColor}
+              strokeWidth="1.25"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="transition-colors duration-200"
+            />
+
+            {/* Shimmer sweep traveling strictly through the line arrow stroke */}
+            <g mask="url(#kashrut-line-arrow-mask)">
+              <rect
+                x="-14"
+                y="0"
+                width="16"
+                height="6"
+                fill="url(#kashrut-line-arrow-glint)"
+                className="kashrut-arrow-shimmer-anim"
+              />
+            </g>
+          </svg>
+        </div>
+
+        {/* Shimmer Keyframes: Slower smooth travel (~1.05s) with subtle rest, exact 1.4s total continuous loop */}
+        <style>{`
+          @keyframes kashrut-arrow-shimmer-sweep {
+            0% {
+              transform: translateX(-14px);
+            }
+            75% {
+              transform: translateX(14px);
+            }
+            100% {
+              transform: translateX(14px);
+            }
+          }
+          .kashrut-arrow-shimmer-anim {
+            animation: kashrut-arrow-shimmer-sweep 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .kashrut-arrow-shimmer-anim {
+              animation: none !important;
+              display: none !important;
+            }
+          }
+        `}</style>
+      </button>
+    );
+  }
 
   return (
     <button
