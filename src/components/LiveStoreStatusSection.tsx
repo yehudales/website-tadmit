@@ -5,12 +5,11 @@ import {
   MapPin,
   Phone,
   AlertCircle,
-  ChevronUp,
 } from 'lucide-react';
 import { useStoreStatus } from '../hooks/useStoreStatus';
 import { Language } from '../types';
 import { BUSINESS_CONFIG } from '../config/businessConfig';
-import { triggerMobileHaptic } from '../utils/haptics';
+import { InteractiveDisclosureTrigger } from './InteractiveDisclosureTrigger';
 
 interface LiveStoreStatusSectionProps {
   lang: Language;
@@ -22,11 +21,6 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
 }) => {
   const status = useStoreStatus();
   const [isHoursOpen, setIsHoursOpen] = useState(false);
-
-  const handleToggleHours = () => {
-    triggerMobileHaptic(15);
-    setIsHoursOpen((prev) => !prev);
-  };
 
   const pad = (n: number) => n.toString().padStart(2, '0');
 
@@ -131,55 +125,14 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
 
         {/* Interactive "שעות פתיחה" Trigger (Frameless, Direct on Page) */}
         <div className="mt-6 sm:mt-8 flex flex-col items-center w-full max-w-2xl">
-          <button
-            type="button"
-            onClick={handleToggleHours}
-            aria-expanded={isHoursOpen}
-            aria-controls="opening-hours-expandable-content"
-            className="group inline-flex flex-col items-center justify-center gap-1.5 py-1 text-[#FAF9F6] text-xs sm:text-sm font-bold tracking-wide transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] rounded-lg"
-            aria-label={
-              isHoursOpen
-                ? (lang === 'he' ? 'סגור פירוט שעות פתיחה' : 'Close opening hours details')
-                : (lang === 'he' ? 'פתח פירוט שעות פתיחה' : 'Open opening hours details')
-            }
-          >
-            {/* Animated Touch / Pointer Finger Indicator (ABOVE text, pointing from right toward text) */}
-            <div className="relative flex items-center justify-center w-6 h-6 text-[#FF7B1C] shrink-0">
-              {/* Circle Element: Scales gently up & down ONLY (isolated transform) */}
-              <span className="absolute inset-0 rounded-full bg-[#FF7B1C]/25 finger-circle-pulse motion-reduce:hidden pointer-events-none" />
-
-              {/* Finger Element: Fixed size, moves strictly horizontally LEFT <-> RIGHT, pointing from right */}
-              <div className="relative z-10 flex items-center justify-center finger-horizontal-motion">
-                <svg
-                  className="w-4 h-4 text-[#FF7B1C] rotate-[-90deg]"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M12 2a2 2 0 0 0-2 2v9.5l-1.5-1.5a2.12 2.12 0 0 0-3 3L10 19.5a6 6 0 0 0 6 2.5h1a6 6 0 0 0 6-6V13a2 2 0 0 0-2-2 2 2 0 0 0-2 2v-1a2 2 0 0 0-2-2 2 2 0 0 0-2 2V4a2 2 0 0 0-2-2z" />
-                </svg>
-              </div>
-            </div>
-
-            <div className="inline-flex items-center gap-1.5">
-              <span className="text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors underline-offset-4 group-hover:underline">
-                {lang === 'he' ? 'שעות פתיחה' : 'Opening Hours'}
-              </span>
-
-              {/* Reverse / Close Upward Arrow (Appears ONLY in open state, tailless chevron) */}
-              {isHoursOpen && (
-                <ChevronUp
-                  className="w-3.5 h-3.5 text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors shrink-0"
-                  strokeWidth={2.4}
-                  aria-hidden="true"
-                />
-              )}
-            </div>
-          </button>
+          <InteractiveDisclosureTrigger
+            isOpen={isHoursOpen}
+            onToggle={() => setIsHoursOpen((prev) => !prev)}
+            label={lang === 'he' ? 'שעות פתיחה' : 'Opening Hours'}
+            ariaControls="opening-hours-expandable-content"
+            ariaLabelOpen={lang === 'he' ? 'סגור פירוט שעות פתיחה' : 'Close opening hours details'}
+            ariaLabelClosed={lang === 'he' ? 'פתח פירוט שעות פתיחה' : 'Open opening hours details'}
+          />
 
           {/* Expandable Opening Hours Information */}
           <AnimatePresence>
@@ -272,34 +225,6 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
         </div>
 
       </div>
-
-      {/* Lightweight CSS Keyframes: Separate Circle Scaling & Strictly Horizontal-Only Finger Movement */}
-      <style>{`
-        @keyframes finger-horizontal-anim {
-          0%, 100% {
-            transform: translateX(3px);
-          }
-          50% {
-            transform: translateX(-3px);
-          }
-        }
-        @keyframes finger-circle-pulse-anim {
-          0%, 100% {
-            transform: scale(0.85);
-            opacity: 0.2;
-          }
-          50% {
-            transform: scale(1.35);
-            opacity: 0.7;
-          }
-        }
-        .finger-horizontal-motion {
-          animation: finger-horizontal-anim 1.8s ease-in-out infinite;
-        }
-        .finger-circle-pulse {
-          animation: finger-circle-pulse-anim 1.8s ease-in-out infinite;
-        }
-      `}</style>
     </section>
   );
 };
