@@ -27,8 +27,12 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
 
   const videoSrc = BUSINESS_CONFIG.media.heroVideoUrl || '/assets/videos/hero.mp4';
 
-  // Hero video begins MUTED by default on every fresh page entry
-  const [isMuted, setIsMuted] = useState<boolean>(true);
+  // Default user audio preference is ACTIVE (unmuted / isMuted=false) unless explicitly saved as 'muted'
+  const [isMuted, setIsMuted] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    const pref = sessionStorage.getItem(AUDIO_PREF_KEY);
+    return pref === 'muted';
+  });
 
   const isMutedRef = useRef<boolean>(isMuted);
   useEffect(() => {
@@ -243,7 +247,60 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     } else {
       safeAutoplay();
     }
-  }, [videoSrc, safeAutoplay]);
+
+    // On user's first document activation gesture, seamlessly unlock AudioContext and enable sound if active
+    const handleFirstGesture = (e: Event) => {
+      // If the interaction happened directly on video controls, speaker button handler takes absolute priority
+      const target = e.target as HTMLElement | null;
+      if (target && target.closest('#hero-video-controls')) {
+        return;
+      }
+
+      if (hasUnlockedAudioRef.current) {
+        return;
+      }
+      hasUnlockedAudioRef.current = true;
+
+      const userPref = sessionStorage.getItem(AUDIO_PREF_KEY);
+      if (userPref === 'muted') {
+        return; // Explicit manual mute preference is preserved
+      }
+
+      if (video) {
+        video.muted = false;
+        setIsMuted(false);
+        isMutedRef.current = false;
+        sessionStorage.setItem(AUDIO_PREF_KEY, 'unmuted');
+
+        const gainNode = initAudioGraph();
+        if (gainNode && audioCtxRef.current) {
+          const now = audioCtxRef.current.currentTime;
+          const targetGain = isHeroVisibleRef.current ? 1.0 : 0.08;
+          gainNode.gain.cancelScheduledValues(now);
+          gainNode.gain.setValueAtTime(targetGain, now);
+          if (audioCtxRef.current.state === 'suspended') {
+            audioCtxRef.current.resume().catch(() => {});
+          }
+        }
+
+        if (video.paused) {
+          video.play().then(() => setIsPlaying(true)).catch(() => {});
+        }
+      }
+    };
+
+    window.addEventListener('pointerdown', handleFirstGesture, { once: true, passive: true });
+    window.addEventListener('touchstart', handleFirstGesture, { once: true, passive: true });
+    window.addEventListener('click', handleFirstGesture, { once: true, passive: true });
+    window.addEventListener('keydown', handleFirstGesture, { once: true, passive: true });
+
+    return () => {
+      window.removeEventListener('pointerdown', handleFirstGesture);
+      window.removeEventListener('touchstart', handleFirstGesture);
+      window.removeEventListener('click', handleFirstGesture);
+      window.removeEventListener('keydown', handleFirstGesture);
+    };
+  }, [videoSrc, initAudioGraph, safeAutoplay]);
 
   // Clean up Web Audio graph on unmount
   useEffect(() => {

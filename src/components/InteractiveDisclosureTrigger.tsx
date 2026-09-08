@@ -37,17 +37,17 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
       className="group inline-flex flex-row items-center justify-center gap-2 py-1.5 px-2 text-xs sm:text-sm font-semibold tracking-wide transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] rounded-lg whitespace-nowrap select-none no-underline"
     >
       {/* Animated Touch Indicator Composition: Positioned to the RIGHT of text and lowered 2.5px to align with text */}
-      <div className="relative top-[2.5px] flex items-center justify-center w-5 h-5 shrink-0 select-none [isolation:isolate]">
-        {/* 1. LAYER: BACK -> Completely Stationary Solid Orange Circle on layer z-0, lowered ~1.5px (top-[62%]), centered pulse only */}
+      <div className="relative top-[2.5px] flex items-center justify-center w-5 h-5 shrink-0 select-none finger-combined-motion [isolation:isolate]">
+        {/* 1. LAYER: BACK -> Simple Solid Orange Circle on layer z-0 (+30% size: 6.5px x 6.5px), raised slightly UP to sit precisely in front of fingertip */}
         <span
-          className="absolute left-[0.5px] top-[62%] -translate-y-1/2 w-[6.5px] h-[6.5px] rounded-full bg-[#FF7B1C] z-0 pointer-events-none motion-reduce:hidden finger-circle-pulse origin-center"
+          className="absolute left-[0.5px] top-[56%] -translate-y-1/2 w-[6.5px] h-[6.5px] rounded-full bg-[#FF7B1C] z-0 pointer-events-none motion-reduce:hidden finger-circle-pulse"
           style={{ zIndex: 0 }}
           aria-hidden="true"
         />
 
-        {/* 2. LAYER: FRONT -> Hand / Finger with micro-motion on layer z-10, physically overlapping and occluding the stationary circle underneath */}
+        {/* 2. LAYER: FRONT -> Hand / Finger with opaque fill on layer z-10, physically overlapping and occluding the circle underneath */}
         <div
-          className="relative z-10 flex items-center justify-center rotate-[-90deg] finger-hand-motion"
+          className="relative z-10 flex items-center justify-center rotate-[-90deg]"
           style={{ zIndex: 10 }}
         >
           <svg
@@ -83,9 +83,9 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
         />
       )}
 
-      {/* Lightweight CSS Keyframes: Hand Micro-Motion & Stationary Fingertip Circle Pulse */}
+      {/* Lightweight CSS Keyframes: Synchronized Hand + Circle Micro-Motion & Fingertip Circle Pulse */}
       <style>{`
-        @keyframes finger-hand-anim {
+        @keyframes finger-combined-anim {
           0%, 100% {
             transform: translateX(1.5px);
           }
@@ -93,17 +93,17 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
             transform: translateX(-2.5px);
           }
         }
-        .finger-hand-motion {
-          animation: finger-hand-anim 2.2s ease-in-out infinite;
+        .finger-combined-motion {
+          animation: finger-combined-anim 2.2s ease-in-out infinite;
         }
 
         @keyframes finger-circle-pulse-anim {
           0%, 100% {
-            transform: translateY(-50%) scale(1.0);
-            opacity: 0.85;
+            transform: translateY(-50%) scale(0.9);
+            opacity: 0.65;
           }
           50% {
-            transform: translateY(-50%) scale(1.12);
+            transform: translateY(-50%) scale(1.2);
             opacity: 1;
           }
         }
@@ -112,7 +112,7 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .finger-hand-motion,
+          .finger-combined-motion,
           .finger-circle-pulse {
             animation: none !important;
           }
