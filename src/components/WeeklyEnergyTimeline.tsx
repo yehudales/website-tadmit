@@ -500,6 +500,21 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
             >
               {/* Internal Filament Hot Core Stripe */}
               <div className="absolute top-1/2 -translate-y-1/2 inset-x-1 h-[1.5px] rounded-full bg-white/70 shadow-[0_0_3px_#FFF]" />
+
+              {/* Internal Liquid Flow: Continuous back-and-forth fluid wave strictly clipped inside the line */}
+              <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
+                <div
+                  className="timeline-liquid-stream absolute top-0 right-0 bottom-0 rounded-full pointer-events-none"
+                  style={{
+                    width: '42%',
+                    background:
+                      'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,225,160,0.18) 22%, rgba(255,255,255,0.48) 50%, rgba(255,225,160,0.18) 78%, rgba(255,255,255,0) 100%)',
+                  }}
+                >
+                  {/* Concentrated Liquid Core Highlight */}
+                  <div className="absolute top-1/2 -translate-y-1/2 inset-x-2 h-[1.5px] rounded-full bg-white/65 shadow-[0_0_4px_rgba(255,255,255,0.8)]" />
+                </div>
+              </div>
             </div>
 
             {/* 7 Day Marker Nodes on the timeline */}
@@ -1595,6 +1610,43 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
           0% { transform: translate(50%, 0) scale(1); opacity: 1; }
           50% { opacity: 0.85; }
           100% { transform: translate(calc(50% - 18px), -20px) scale(0.2); opacity: 0; }
+        }
+
+        /* Subtle Internal Liquid Flow along Loading Line: BACK -> FRONT -> BACK continuous fluid motion */
+        @keyframes timeline-liquid-flow {
+          0% {
+            transform: translateX(35%) scaleX(0.94);
+            opacity: 0.65;
+          }
+          25% {
+            transform: translateX(-72%) scaleX(1.06);
+            opacity: 0.95;
+          }
+          50% {
+            transform: translateX(-180%) scaleX(0.94);
+            opacity: 0.65;
+          }
+          75% {
+            transform: translateX(-72%) scaleX(1.06);
+            opacity: 0.95;
+          }
+          100% {
+            transform: translateX(35%) scaleX(0.94);
+            opacity: 0.65;
+          }
+        }
+
+        .timeline-liquid-stream {
+          animation: timeline-liquid-flow 5.8s ease-in-out infinite;
+          transform-origin: center center;
+          will-change: transform, opacity;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .timeline-liquid-stream {
+            animation: none !important;
+            opacity: 0.4 !important;
+          }
         }
       `}</style>
     </aside>
