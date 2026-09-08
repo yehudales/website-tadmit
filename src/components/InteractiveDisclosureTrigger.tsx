@@ -38,40 +38,13 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
     >
       {/* Animated Touch Indicator Composition: Positioned to the RIGHT of text */}
       <div className="relative flex items-center justify-center w-5 h-5 shrink-0 select-none finger-combined-motion [isolation:isolate]">
-        {/* 1. Orange Touch Ring: Independent upright front-facing screen angle, Layered UNDER the fingertip (z-0), positioned downward to meet fingertip center */}
-        <div
-          className="absolute -left-0.5 top-[68%] -translate-y-1/2 z-0 pointer-events-none motion-reduce:hidden finger-ring-pulse"
+        {/* 1. Simple Solid Orange Circle: Filled ONLY, Layered UNDER the fingertip (z-0), aligned to fingertip center */}
+        <span
+          className="absolute -left-0.5 top-[68%] -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-[#FF7B1C] z-0 pointer-events-none motion-reduce:hidden finger-circle-pulse"
           aria-hidden="true"
-        >
-          <svg
-            className="w-3.5 h-4.5 overflow-visible"
-            viewBox="0 0 14 18"
-            fill="none"
-          >
-            {/* Outer Glow & Ring */}
-            <ellipse
-              cx="7"
-              cy="9"
-              rx="5.8"
-              ry="8"
-              stroke="#FF7B1C"
-              strokeWidth="1.3"
-              className="drop-shadow-[0_0_3px_#FF7B1C]"
-            />
-            {/* Inner Concentric Ring */}
-            <ellipse
-              cx="7"
-              cy="9"
-              rx="3"
-              ry="4.4"
-              stroke="#FF7B1C"
-              strokeWidth="1.1"
-              strokeOpacity="0.85"
-            />
-          </svg>
-        </div>
+        />
 
-        {/* 2. Hand Emoji: Layered in FRONT of the ring (z-10) with fingertip overlapping the ring */}
+        {/* 2. Hand Emoji: Layered in FRONT of the solid circle (z-10) with fingertip overlapping the circle */}
         <div className="relative z-10 flex items-center justify-center rotate-[-90deg]">
           <svg
             className="w-4 h-4 text-[#FF7B1C]"
@@ -120,23 +93,23 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
           animation: finger-combined-anim 2.2s ease-in-out infinite;
         }
 
-        @keyframes finger-ring-pulse-anim {
+        @keyframes finger-circle-pulse-anim {
           0%, 100% {
             transform: translateY(-50%) scale(0.9);
-            opacity: 0.6;
+            opacity: 0.65;
           }
           50% {
             transform: translateY(-50%) scale(1.2);
             opacity: 1;
           }
         }
-        .finger-ring-pulse {
-          animation: finger-ring-pulse-anim 2.2s ease-in-out infinite;
+        .finger-circle-pulse {
+          animation: finger-circle-pulse-anim 2.2s ease-in-out infinite;
         }
 
         @media (prefers-reduced-motion: reduce) {
           .finger-combined-motion,
-          .finger-ring-pulse {
+          .finger-circle-pulse {
             animation: none !important;
           }
         }
