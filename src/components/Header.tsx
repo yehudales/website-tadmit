@@ -145,7 +145,10 @@ export const Header: React.FC<HeaderProps> = ({
         <div ref={baseHeaderRef} className="w-full shrink-0 relative z-50 bg-[#0B0C0E]">
           {/* ROW 1: Top Header Area (Brand Title, "כשר למהדרין" & Settings Action) */}
           <div className="border-b border-[#252A32]/60 py-2 sm:py-2.5 bg-[#0B0C0E]/95 flex flex-col justify-center min-h-[104px]">
-            <div className="max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 grid grid-cols-3 items-center shrink-0">
+            <div
+              id="header-row1-grid"
+              className="max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 grid grid-cols-3 items-center shrink-0 -mt-4 pl-3 ml-0 pt-0"
+            >
               {/* Left / Home shortcut (Left Col) */}
               <div className="flex items-center justify-start">
                 <button
