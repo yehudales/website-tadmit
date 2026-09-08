@@ -185,7 +185,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <h2 id="settings-dialog-title" className="text-lg font-bold text-[#FAF9F6]">
                 {lang === 'he' ? 'הגדרות' : 'Settings'}
               </h2>
-              <p className="text-xs text-[#94A3B8]">
+              <p className="text-[13.8px] text-[#94A3B8]">
                 {lang === 'he' ? 'שפה והתאמות נגישות' : 'Language & Accessibility options'}
               </p>
             </div>

@@ -69,7 +69,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ lang }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-16">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#E0BE55] mb-2 inline-block px-3 py-1 rounded-lg bg-[#1A1D22] border border-[#252A32]">
+          <span className="text-[13.8px] font-bold uppercase tracking-widest text-[#E0BE55] mb-2 inline-block px-3 py-1 rounded-lg bg-[#1A1D22] border border-[#252A32]">
             {lang === 'he' ? 'גלריית תמונות' : 'Visual Gallery'}
           </span>
           <h2
@@ -80,7 +80,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ lang }) => {
               {lang === 'he' ? 'חוויה לעיניים ולחיך' : 'Flavors & Atmosphere'}
             </span>
           </h2>
-          <p className="mt-3 sm:mt-4 text-xs sm:text-base md:text-lg text-[#94A3B8] font-normal leading-relaxed">
+          <p className="mt-3 sm:mt-4 text-[13.8px] sm:text-[18.4px] md:text-[20.7px] text-[#94A3B8] font-normal leading-relaxed">
             {lang === 'he'
               ? 'הצצה לתבשילי הצ\'ולנט המהבילים, הבשרים המובחרים והאריזות המוקפדות של יהודלס'
               : 'A glimpse into slow-simmered cholent pots, prime meats, and meticulous packaging'}
@@ -113,7 +113,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ lang }) => {
                   <span className="text-sm sm:text-base font-bold text-[#FAF9F6] group-hover:text-[#E0BE55] transition-colors">
                     {item.title[lang]}
                   </span>
-                  <span className="text-[11px] sm:text-xs text-[#94A3B8] max-w-xs line-clamp-2">
+                  <span className="text-[12.65px] sm:text-[13.8px] text-[#94A3B8] max-w-xs line-clamp-2">
                     {item.caption[lang]}
                   </span>
                 </div>
@@ -132,7 +132,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ lang }) => {
                 <span className="font-semibold text-[#FAF9F6] truncate">
                   {item.title[lang]}
                 </span>
-                <span className="text-[#94A3B8] font-medium shrink-0 text-[11px]">
+                <span className="text-[#94A3B8] font-medium shrink-0 text-[12.65px]">
                   {BUSINESS_CONFIG.name[lang]}
                 </span>
               </div>
@@ -206,16 +206,16 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ lang }) => {
               <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FAF9F6] mb-1.5 sm:mb-2">
                 {selectedItem.title[lang]}
               </h3>
-              <p className="text-xs sm:text-sm md:text-base text-[#94A3B8] max-w-md">
+              <p className="text-[13.8px] sm:text-[16.1px] md:text-[18.4px] text-[#94A3B8] max-w-md">
                 {selectedItem.caption[lang]}
               </p>
-              <div className="mt-4 sm:mt-6 flex items-center gap-2 text-[11px] sm:text-xs text-emerald-400 font-semibold bg-[#1A1D22] px-3.5 py-1.5 rounded-xl border border-[#252A32]">
+              <div className="mt-4 sm:mt-6 flex items-center gap-2 text-[12.65px] sm:text-[13.8px] text-emerald-400 font-semibold bg-[#1A1D22] px-3.5 py-1.5 rounded-xl border border-[#252A32]">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
                 <span>{BUSINESS_CONFIG.kashrut.fullBadge[lang]}</span>
               </div>
             </div>
 
-            <div className="w-full mt-3 sm:mt-4 flex items-center justify-between text-[11px] sm:text-xs text-[#94A3B8]">
+            <div className="w-full mt-3 sm:mt-4 flex items-center justify-between text-[12.65px] sm:text-[13.8px] text-[#94A3B8]">
               <span>{BUSINESS_CONFIG.location.address[lang]}</span>
               <span className="hidden sm:inline-block text-[#94A3B8]/60">
                 {lang === 'he' ? 'ניווט במקלדת: חצים ימינה/שמאלה, ESC לסגירה' : 'Keyboard: Left/Right arrows, ESC to close'}

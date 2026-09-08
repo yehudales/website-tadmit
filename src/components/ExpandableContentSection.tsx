@@ -47,13 +47,6 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
   const drawerAnim = getDrawerAnimationConfig(shouldReduceMotion);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // When active section changes, reset scroll inside panel to top
-  useEffect(() => {
-    if (activeSection && containerRef.current) {
-      containerRef.current.scrollTop = 0;
-    }
-  }, [activeSection]);
-
   // Keyboard accessibility: Escape closes the active panel
   useEffect(() => {
     if (!activeSection) return;
@@ -156,19 +149,10 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
           id="expandable-content-area"
           ref={containerRef}
           key={activeSection}
-          initial={{ opacity: 0, height: 0, overflow: 'hidden' }}
-          animate={{
-            ...drawerAnim.open,
-            overflowY: shouldReduceMotion ? 'auto' : undefined,
-            transitionEnd: {
-              overflowY: 'auto',
-            },
-          }}
-          exit={{
-            ...drawerAnim.closed,
-            overflow: 'hidden',
-          }}
-          className="w-full bg-[#0E1013]/98 backdrop-blur-2xl border-b border-[#252A32] shadow-[0_25px_60px_rgba(0,0,0,0.9)] max-h-[calc(100vh-var(--header-height,98px))] max-h-[calc(100dvh-var(--header-height,98px))] overscroll-contain relative z-40 select-text"
+          initial={{ opacity: 0, height: 0 }}
+          animate={drawerAnim.open}
+          exit={drawerAnim.closed}
+          className="w-full overflow-hidden bg-[#0E1013] border-b border-[#252A32] relative z-20 select-text"
           role="region"
           aria-labelledby="expandable-heading"
         >
@@ -195,7 +179,7 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                   <div className="lg:col-span-8 space-y-4">
                     <div>
-                      <span className="text-xs font-bold uppercase tracking-widest text-[#FF7B1C]">
+                      <span className="text-[13.8px] font-bold uppercase tracking-widest text-[#FF7B1C]">
                         {lang === 'he' ? 'על מותג יהודלס' : 'About Yehudales'}
                       </span>
                       <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-[#FAF9F6] mt-1 leading-tight">
@@ -203,20 +187,20 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                           ? 'כ-6 שנות מומחיות ואיכות קולינרית'
                           : '~6 Years of Culinary Craft & Quality'}
                       </h3>
-                      <p className="text-sm sm:text-base font-bold text-[#FF7B1C] mt-1">
+                      <p className="text-[16.1px] sm:text-[18.4px] font-bold text-[#FF7B1C] mt-1">
                         {lang === 'he'
                           ? 'חווית ליל שישי ברמה הגבוהה ביותר'
                           : 'Friday Night Experience of the Highest Standard'}
                       </p>
                     </div>
 
-                    <p className="text-sm sm:text-base text-[#94A3B8] leading-relaxed">
+                    <p className="text-[16.1px] sm:text-[18.4px] text-[#94A3B8] leading-relaxed">
                       {lang === 'he'
                         ? 'מותג האוכל "יהודלס" פועל בעיר אשדוד כ-6 שנים, מתוך מחויבות עמוקה להביא אל שולחנכם את הטעם העמוק, העשיר והאותנטי של ליל שישי. אנו מתמחים בתבשילי צ\'ולנט מובחרים ובשרים מיוחדים המבושלים בבישול מסורתי ארוך, המעניק לכל ביס עומק טעמים שאין שני לו.'
                         : 'Yehudales has operated in Ashdod for approximately 6 years, dedicated to bringing authentic, rich Friday night food to your table. Specializing in signature slow-cooked cholent and select kosher meats.'}
                     </p>
 
-                    <p className="text-sm sm:text-base text-[#94A3B8] leading-relaxed">
+                    <p className="text-[16.1px] sm:text-[18.4px] text-[#94A3B8] leading-relaxed">
                       {lang === 'he'
                         ? 'העסק פועל במודל Takeaway והזמנות ישירות דרך WhatsApp בלבד (ללא ישיבה במקום), מתוך דגש בלתי מתפשר על שלושת עקרונות הברזל שלנו: איכות חומרי הגלם, שירות אישי ומהיר, ורמת ניקיון והיגיינה מופתית בכל שלב.'
                         : 'Operating exclusively as a takeaway and direct WhatsApp order service (no dine-in seating), focusing strictly on high-grade ingredients, attentive service, and spotless cleanliness.'}
@@ -224,15 +208,15 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
 
                     {/* Featured Quote Card */}
                     <div className="p-4 sm:p-5 rounded-2xl bg-[#14171C] border border-[#252A32] space-y-2">
-                      <h4 className="text-sm sm:text-base font-bold text-[#FAF9F6]">
+                      <h4 className="text-[16.1px] sm:text-[18.4px] font-bold text-[#FAF9F6]">
                         {lang === 'he' ? '"חווית ליל שישי טעם ברמה גבוהה"' : '"Friday Night Experience at the Highest Level"'}
                       </h4>
-                      <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
+                      <p className="text-[13.8px] sm:text-[16.1px] text-[#94A3B8] leading-relaxed">
                         {lang === 'he'
                           ? 'סיר הצ\'ולנט המסורתי שלנו מבעבע שעות ארוכות בתבלינים מדויקים, בשר בקר מובחר ותפוחי אדמה נימוחים. זו לא סתם מנה – זו חוויה שלמה של קדושת השבת והטעם המושלם.'
                           : 'Our signature cholent pot simmers for long hours with precise seasonings, choice beef, and tender potatoes. It is a complete celebratory experience of Shabbat flavors.'}
                       </p>
-                      <span className="text-xs font-bold text-[#FF7B1C] block pt-1">
+                      <span className="text-[13.8px] font-bold text-[#FF7B1C] block pt-1">
                         {lang === 'he' ? 'יהודלס • חווית ליל שישי | אשדוד' : 'Yehudales • Friday Night Experience | Ashdod'}
                       </span>
                     </div>
@@ -242,22 +226,22 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                   <div className="lg:col-span-4 space-y-4">
                     <div className="p-5 rounded-2xl bg-[#14171C] border border-[#252A32] space-y-4">
                       <div className="space-y-1">
-                        <span className="text-xs font-bold uppercase tracking-wider text-[#FF7B1C]">
+                        <span className="text-[13.8px] font-bold uppercase tracking-wider text-[#FF7B1C]">
                           {lang === 'he' ? 'פעילות מבוססת' : 'Established Business'}
                         </span>
-                        <h4 className="text-base font-black text-[#FAF9F6]">
+                        <h4 className="text-[18.4px] font-black text-[#FAF9F6]">
                           {lang === 'he' ? 'כ-6 שנות פעילות באשדוד' : '~6 Years in Ashdod'}
                         </h4>
-                        <p className="text-xs text-[#94A3B8]">
+                        <p className="text-[13.8px] text-[#94A3B8]">
                           {lang === 'he' ? 'מותג אוכל רציני ומבוסס' : 'Established culinary brand'}
                         </p>
                       </div>
 
                       <div className="pt-3 border-t border-[#252A32] space-y-1">
-                        <span className="text-xs font-bold uppercase tracking-wider text-[#FF7B1C]">
+                        <span className="text-[13.8px] font-bold uppercase tracking-wider text-[#FF7B1C]">
                           {lang === 'he' ? 'כשרות מהודרת למהדרין' : 'Strict Kosher Certification'}
                         </span>
-                        <h4 className="text-xs sm:text-sm font-bold text-[#FAF9F6]">
+                        <h4 className="text-[13.8px] sm:text-[16.1px] font-bold text-[#FAF9F6]">
                           {lang === 'he' ? 'בשר: נווה ציון | שאר המוצרים: בד״ץ העדה החרדית' : 'Meat: Neve Zion | Other: Badatz Edah HaChareidis'}
                         </h4>
                       </div>
@@ -279,13 +263,13 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                 {/* 2. Core Brand Values & Heritage ("ערכי היסוד ומסורת המותג" / "למה לבחור ביהודלס?") */}
                 <div className="pt-6 border-t border-[#252A32] space-y-6">
                   <div className="text-center max-w-2xl mx-auto space-y-1.5">
-                    <span className="text-xs font-bold uppercase tracking-widest text-[#FF7B1C] px-3 py-1 rounded-lg bg-[#14171C] border border-[#252A32] inline-block">
+                    <span className="text-[13.8px] font-bold uppercase tracking-widest text-[#FF7B1C] px-3 py-1 rounded-lg bg-[#14171C] border border-[#252A32] inline-block">
                       {lang === 'he' ? 'ערכי היסוד ומסורת המותג' : 'Our Brand Pillars & Heritage'}
                     </span>
                     <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-[#FAF9F6]">
                       {lang === 'he' ? 'למה לבחור ביהודלס?' : 'Why Choose Yehudales?'}
                     </h3>
-                    <p className="text-xs sm:text-sm text-[#94A3B8]">
+                    <p className="text-[13.8px] sm:text-[16.1px] text-[#94A3B8]">
                       {lang === 'he'
                         ? 'הסטנדרטים הקולינריים והעקרונות המובילים אותנו לאורך כ-6 שנות עשייה קולינרית באשדוד'
                         : 'The culinary standards and principles that guide us across ~6 years of cooking in Ashdod'}
@@ -305,10 +289,10 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                             </span>
                             <div className="w-2 h-2 rounded-full bg-[#FF7B1C]" aria-hidden="true" />
                           </div>
-                          <h4 className="text-sm sm:text-base font-bold text-[#FAF9F6] mb-1.5">
+                          <h4 className="text-[16.1px] sm:text-[18.4px] font-bold text-[#FAF9F6] mb-1.5">
                             {pillar.title[lang]}
                           </h4>
-                          <p className="text-xs text-[#94A3B8] leading-relaxed">
+                          <p className="text-[13.8px] text-[#94A3B8] leading-relaxed">
                             {pillar.desc[lang]}
                           </p>
                         </div>
@@ -318,12 +302,12 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
 
                   {/* Brand Tagline Strip */}
                   <div className="p-4 rounded-2xl bg-[#14171C] border border-[#252A32] text-center space-y-1">
-                    <p className="text-sm font-black text-[#FAF9F6]">
+                    <p className="text-[16.1px] font-black text-[#FAF9F6]">
                       {lang === 'he'
                         ? 'יהודלס — חווית ליל שישי טעם ברמה גבוהה'
                         : 'Yehudales — Friday Night Experience of the Highest Standard'}
                     </p>
-                    <p className="text-xs text-[#94A3B8]">
+                    <p className="text-[13.8px] text-[#94A3B8]">
                       {lang === 'he'
                         ? 'בשר נווה ציון • מוצרים בהשגחת בד״ץ העדה החרדית • כ-6 שנות ניסיון באשדוד'
                         : 'Neve Zion Meats • Badatz Edah HaChareidis • ~6 Years of Experience in Ashdod'}
@@ -334,13 +318,13 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                 {/* 3. Updates & Activity Schedule ("עדכונים ולוח פעילות") */}
                 <div className="pt-6 border-t border-[#252A32] space-y-6">
                   <div className="text-center max-w-2xl mx-auto space-y-1.5">
-                    <span className="text-xs font-bold uppercase tracking-widest text-[#FF7B1C] px-3 py-1 rounded-lg bg-[#14171C] border border-[#252A32] inline-block">
+                    <span className="text-[13.8px] font-bold uppercase tracking-widest text-[#FF7B1C] px-3 py-1 rounded-lg bg-[#14171C] border border-[#252A32] inline-block">
                       {lang === 'he' ? 'עדכונים ולוח פעילות' : 'Updates & Activity Schedule'}
                     </span>
                     <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-[#FAF9F6]">
                       {lang === 'he' ? 'מה חדש בסירים של יהודלס' : 'What is New in the Pots'}
                     </h3>
-                    <p className="text-xs sm:text-sm text-[#94A3B8]">
+                    <p className="text-[13.8px] sm:text-[16.1px] text-[#94A3B8]">
                       {lang === 'he'
                         ? 'הודעות שבועיות, זמני בישול, מנות מיוחדות ומידע עדכני להזמנות ליל שישי'
                         : 'Weekly notices, cooking times, special dishes, and live ordering details'}
@@ -352,24 +336,24 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                     <div className="p-5 rounded-2xl bg-[#14171C] border border-[#252A32] flex flex-col justify-between space-y-3">
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-2">
-                          <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#1A1D22] text-[#FF7B1C] border border-[#252A32]">
+                          <span className="text-[12.65px] font-bold px-2 py-0.5 rounded bg-[#1A1D22] text-[#FF7B1C] border border-[#252A32]">
                             {lang === 'he' ? 'טרי מהסיר' : 'Fresh from Pot'}
                           </span>
-                          <span className="text-[11px] text-[#94A3B8]">
+                          <span className="text-[12.65px] text-[#94A3B8]">
                             {lang === 'he' ? 'יום חמישי הקרוב • מ-17:00' : 'This Thursday • from 17:00'}
                           </span>
                         </div>
-                        <h4 className="text-sm font-bold text-[#FAF9F6] mb-1 leading-snug">
+                        <h4 className="text-[16.1px] font-bold text-[#FAF9F6] mb-1 leading-snug">
                           {lang === 'he'
                             ? 'הסירים מבעבעים: צ\'ולנט בקר עשיר, קישקע וקוגלים ירושלמיים'
                             : 'Simmering Pots: Prime Beef Cholent, Kishke & Yerushalmi Kugels'}
                         </h4>
-                        <p className="text-xs text-[#94A3B8] leading-relaxed mt-1">
+                        <p className="text-[13.8px] text-[#94A3B8] leading-relaxed mt-1">
                           {lang === 'he'
                             ? 'הצטרפו לחוויית ליל שישי המסורתית של יהודלס. מומלץ להזמין מראש בוואטסאפ להבטחת המנות האהובות עליכם.'
                             : 'Join the authentic Friday night experience of Yehudales. We recommend ordering ahead on WhatsApp.'}
                         </p>
-                        <span className="inline-block mt-2 text-[11px] font-bold text-[#FF7B1C]">
+                        <span className="inline-block mt-2 text-[12.65px] font-bold text-[#FF7B1C]">
                           {lang === 'he' ? 'הזמנות פתוחות' : 'Orders Open'}
                         </span>
                       </div>
@@ -388,24 +372,24 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                     <div className="p-5 rounded-2xl bg-[#14171C] border border-[#252A32] flex flex-col justify-between space-y-3">
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-2">
-                          <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#1A1D22] text-[#FF7B1C] border border-[#252A32]">
+                          <span className="text-[12.65px] font-bold px-2 py-0.5 rounded bg-[#1A1D22] text-[#FF7B1C] border border-[#252A32]">
                             {lang === 'he' ? 'כשרות מהודרת' : 'Strict Kosher'}
                           </span>
-                          <span className="text-[11px] text-[#94A3B8]">
+                          <span className="text-[12.65px] text-[#94A3B8]">
                             {lang === 'he' ? 'עדכון קבוע' : 'Ongoing Standard'}
                           </span>
                         </div>
-                        <h4 className="text-sm font-bold text-[#FAF9F6] mb-1 leading-snug">
+                        <h4 className="text-[16.1px] font-bold text-[#FAF9F6] mb-1 leading-snug">
                           {lang === 'he'
                             ? 'בשר חלק מהדרין: בקר נווה ציון ומוצרי בד״ץ העדה החרדית'
                             : 'Strict Kosher Meat: Neve Zion Beef & Badatz Edah HaChareidis'}
                         </h4>
-                        <p className="text-xs text-[#94A3B8] leading-relaxed mt-1">
+                        <p className="text-[13.8px] text-[#94A3B8] leading-relaxed mt-1">
                           {lang === 'he'
                             ? 'בכל שבוע אנו מקפידים על חומרי הגלם המובחרים והאיכותיים ביותר לשמירה על שקט נפשי וביטחון מושלם.'
                             : 'Every single week we maintain the highest-grade raw ingredients for complete peace of mind.'}
                         </p>
-                        <span className="inline-block mt-2 text-[11px] font-bold text-[#FF7B1C]">
+                        <span className="inline-block mt-2 text-[12.65px] font-bold text-[#FF7B1C]">
                           {lang === 'he' ? 'ללא פשרות' : 'No Compromises'}
                         </span>
                       </div>
@@ -424,24 +408,24 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                     <div className="p-5 rounded-2xl bg-[#14171C] border border-[#252A32] flex flex-col justify-between space-y-3">
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-2">
-                          <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#1A1D22] text-[#FF7B1C] border border-[#252A32]">
+                          <span className="text-[12.65px] font-bold px-2 py-0.5 rounded bg-[#1A1D22] text-[#FF7B1C] border border-[#252A32]">
                             {lang === 'he' ? 'אריזות חמות' : 'Hot Packaging'}
                           </span>
-                          <span className="text-[11px] text-[#94A3B8]">
+                          <span className="text-[12.65px] text-[#94A3B8]">
                             {lang === 'he' ? 'הזמנות מראש' : 'Advance Orders'}
                           </span>
                         </div>
-                        <h4 className="text-sm font-bold text-[#FAF9F6] mb-1 leading-snug">
+                        <h4 className="text-[16.1px] font-bold text-[#FAF9F6] mb-1 leading-snug">
                           {lang === 'he'
                             ? 'איסוף עצמי מסודר וחם באדמו"ר מבעלזא 7, אשדוד'
                             : 'Organized Hot Pickup at Admor MiBelz 7, Ashdod'}
                         </h4>
-                        <p className="text-xs text-[#94A3B8] leading-relaxed mt-1">
+                        <p className="text-[13.8px] text-[#94A3B8] leading-relaxed mt-1">
                           {lang === 'he'
                             ? 'כל המנות נארזות באריזות תרמיות מוקפדות השומרות על חום וטריות מקסימלית עד השולחן שלכם.'
                             : 'All dishes are sealed in specialized thermal boxes ensuring optimal warmth and freshness directly to your table.'}
                         </p>
-                        <span className="inline-block mt-2 text-[11px] font-bold text-[#FF7B1C]">
+                        <span className="inline-block mt-2 text-[12.65px] font-bold text-[#FF7B1C]">
                           {lang === 'he' ? 'טייק אווי מהיר' : 'Fast Takeaway'}
                         </span>
                       </div>
@@ -471,15 +455,15 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                     >
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-2">
-                          <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#1A1D22] text-[#FF7B1C] border border-[#252A32]">
+                          <span className="text-[12.65px] font-bold px-2 py-0.5 rounded bg-[#1A1D22] text-[#FF7B1C] border border-[#252A32]">
                             {update.tag[lang]}
                           </span>
-                          <span className="text-[11px] text-[#94A3B8]">{update.date[lang]}</span>
+                          <span className="text-[12.65px] text-[#94A3B8]">{update.date[lang]}</span>
                         </div>
-                        <h4 className="text-sm font-bold text-[#FAF9F6] mb-1.5 leading-snug">
+                        <h4 className="text-[16.1px] font-bold text-[#FAF9F6] mb-1.5 leading-snug">
                           {update.title[lang]}
                         </h4>
-                        <p className="text-xs text-[#94A3B8] leading-relaxed">{update.description[lang]}</p>
+                        <p className="text-[13.8px] text-[#94A3B8] leading-relaxed">{update.description[lang]}</p>
                       </div>
 
                       <button
@@ -502,7 +486,7 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                 {/* 1. אירועים וקייטרינג מיוחד (Event & Catering Information) */}
                 <div className="space-y-4">
                   <div>
-                    <span className="text-xs font-bold uppercase tracking-widest text-[#FF7B1C] px-3 py-1 rounded-lg bg-[#14171C] border border-[#252A32] inline-block">
+                    <span className="text-[13.8px] font-bold uppercase tracking-widest text-[#FF7B1C] px-3 py-1 rounded-lg bg-[#14171C] border border-[#252A32] inline-block">
                       {lang === 'he' ? 'אירועים וקייטרינג מיוחד' : 'Events & Catering'}
                     </span>
                     <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-[#FAF9F6] mt-2 leading-tight">
@@ -510,7 +494,7 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                         ? 'הזמנות עסקיות, שבתות חתן ואירועים מיוחדים'
                         : 'Corporate Feasts, Shabbat Chatan & Special Events'}
                     </h3>
-                    <p className="text-sm sm:text-base text-[#94A3B8] leading-relaxed mt-1">
+                    <p className="text-[16.1px] sm:text-[18.4px] text-[#94A3B8] leading-relaxed mt-1">
                       {lang === 'he'
                         ? 'תבשילי שבת מובחרים בכמויות גדולות, שירות מותאם אישית וכשרות מהודרת לאירוע בלתי נשכח.'
                         : 'Premium Shabbat cuisine for large groups, customized catering, and strict kosher standards.'}
@@ -521,11 +505,11 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                     <div className="p-5 rounded-2xl bg-[#14171C] border border-[#252A32] space-y-2">
                       <div className="flex items-center gap-2.5">
                         <CheckCircle2 className="w-4 h-4 text-[#FF7B1C] shrink-0" />
-                        <h4 className="text-sm font-bold text-[#FAF9F6]">
+                        <h4 className="text-[16.1px] font-bold text-[#FAF9F6]">
                           {lang === 'he' ? 'שבתות חתן ואירועים משפחתיים' : 'Shabbat Chatan & Family Events'}
                         </h4>
                       </div>
-                      <p className="text-xs text-[#94A3B8] leading-relaxed">
+                      <p className="text-[13.8px] text-[#94A3B8] leading-relaxed">
                         {lang === 'he'
                           ? 'סירי צ\'ולנט ענקיים, מבחר בשרים מובחרים, קוגלים, חלות ומטבלים בכמויות מותאמות אישית.'
                           : 'Generous pots of signature cholent, choice meats, kugels, and dips customized for your guests.'}
@@ -535,11 +519,11 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                     <div className="p-5 rounded-2xl bg-[#14171C] border border-[#252A32] space-y-2">
                       <div className="flex items-center gap-2.5">
                         <CheckCircle2 className="w-4 h-4 text-[#FF7B1C] shrink-0" />
-                        <h4 className="text-sm font-bold text-[#FAF9F6]">
+                        <h4 className="text-[16.1px] font-bold text-[#FAF9F6]">
                           {lang === 'he' ? 'אירועים עסקיים והרמות כוסית' : 'Corporate Feasts & Gatherings'}
                         </h4>
                       </div>
-                      <p className="text-xs text-[#94A3B8] leading-relaxed">
+                      <p className="text-[13.8px] text-[#94A3B8] leading-relaxed">
                         {lang === 'he'
                           ? 'חוויית אוכל חם וטרי במשרד או באירוע חברה, עם אריזות תרמיות מוקפדות והגשה נוחה.'
                           : 'Hot, fresh food experience for your office or company event, packed in insulated containers.'}
@@ -549,11 +533,11 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                     <div className="p-5 rounded-2xl bg-[#14171C] border border-[#252A32] space-y-2">
                       <div className="flex items-center gap-2.5">
                         <CheckCircle2 className="w-4 h-4 text-[#FF7B1C] shrink-0" />
-                        <h4 className="text-sm font-bold text-[#FAF9F6]">
+                        <h4 className="text-[16.1px] font-bold text-[#FAF9F6]">
                           {lang === 'he' ? 'קידושים ואירועי קהילה' : 'Synagogue Kiddushim & Community'}
                         </h4>
                       </div>
-                      <p className="text-xs text-[#94A3B8] leading-relaxed">
+                      <p className="text-[13.8px] text-[#94A3B8] leading-relaxed">
                         {lang === 'he'
                           ? 'כשרות מהודרת ללא פשרות (נווה ציון ובד״ץ העדה החרדית) המאפשרת לכל האורחים ליהנות בביטחון מלא.'
                           : 'Strict Kosher certification (Neve Zion & Badatz Edah HaChareidis) ensuring every guest dines with peace of mind.'}
@@ -569,7 +553,7 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                       <h4 className="text-xl sm:text-2xl font-black text-[#FAF9F6]">
                         {lang === 'he' ? 'תיאום הזמנה עסקית / קייטרינג' : 'Coordinate Corporate / Event Order'}
                       </h4>
-                      <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed max-w-lg mx-auto">
+                      <p className="text-[13.8px] sm:text-[16.1px] text-[#94A3B8] leading-relaxed max-w-lg mx-auto">
                         {lang === 'he'
                           ? 'ספרו לנו על האירוע שלכם, מספר האורחים והתאריך הרצוי, וצוות יהודלס יבנה עבורכם תפריט מושלם.'
                           : 'Tell us about your event, headcount, and preferred date, and we will tailor the perfect Shabbat menu.'}
@@ -596,7 +580,7 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                       </a>
                     </div>
 
-                    <div className="pt-3 border-t border-[#252A32] text-[11px] sm:text-xs text-[#94A3B8]">
+                    <div className="pt-3 border-t border-[#252A32] text-[12.65px] sm:text-[13.8px] text-[#94A3B8]">
                       <span>{lang === 'he' ? 'מומלץ לתאם אירועים לפחות 48 שעות מראש' : 'Recommended booking at least 48h in advance'}</span>
                     </div>
                   </div>
@@ -609,13 +593,13 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
               <div className="space-y-8">
                 {/* Header */}
                 <div className="text-start">
-                  <span className="text-xs font-bold uppercase tracking-widest text-[#FF7B1C] px-3 py-1 rounded-lg bg-[#14171C] border border-[#252A32] inline-block">
+                  <span className="text-[13.8px] font-bold uppercase tracking-widest text-[#FF7B1C] px-3 py-1 rounded-lg bg-[#14171C] border border-[#252A32] inline-block">
                     {lang === 'he' ? 'סניף וניווט' : 'Branch & Navigation'}
                   </span>
                   <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-[#FAF9F6] mt-2 leading-tight">
                     {lang === 'he' ? 'סניף יהודלס אשדוד' : 'Yehudales Ashdod Branch'}
                   </h3>
-                  <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed mt-1">
+                  <p className="text-[13.8px] sm:text-[16.1px] text-[#94A3B8] leading-relaxed mt-1">
                     {lang === 'he'
                       ? 'טייק אווי ואיסוף עצמי בתיאום מראש • ללא מקומות ישיבה • רובע ג\', אשדוד'
                       : 'Takeaway & pickup by advance arrangement • No dine-in seating • Rova Gimmel, Ashdod'}
@@ -633,13 +617,13 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                           <MapPin className="w-5 h-5 text-[#FF7B1C]" />
                         </div>
                         <div>
-                          <h4 className="text-xs sm:text-sm font-bold text-[#FAF9F6]">
+                          <h4 className="text-[13.8px] sm:text-[16.1px] font-bold text-[#FAF9F6]">
                             {lang === 'he' ? 'כתובת מלאה לאיסוף' : 'Full Pickup Address'}
                           </h4>
-                          <p className="text-sm font-bold text-[#FAF9F6] mt-0.5">
+                          <p className="text-[16.1px] font-bold text-[#FAF9F6] mt-0.5">
                             {lang === 'he' ? 'אדמו"ר מבעלזא 7, אשדוד 7730022' : 'Admor MiBelz 7, Ashdod 7730022'}
                           </p>
-                          <p className="text-xs text-[#94A3B8] mt-0.5">
+                          <p className="text-[13.8px] text-[#94A3B8] mt-0.5">
                             {lang === 'he' ? 'רובע ג\', אשדוד (מיקוד: 7730022)' : 'Rova Gimmel, Ashdod (Zip: 7730022)'}
                           </p>
                         </div>
@@ -651,15 +635,15 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                           <Clock className="w-5 h-5 text-[#FF7B1C]" />
                         </div>
                         <div>
-                          <h4 className="text-xs sm:text-sm font-bold text-[#FAF9F6]">
+                          <h4 className="text-[13.8px] sm:text-[16.1px] font-bold text-[#FAF9F6]">
                             {lang === 'he' ? 'שעות פעילות' : 'Operating Hours'}
                           </h4>
-                          <p className="text-xs sm:text-sm font-bold text-[#FF7B1C] mt-0.5">
+                          <p className="text-[13.8px] sm:text-[16.1px] font-bold text-[#FF7B1C] mt-0.5">
                             {lang === 'he'
                               ? 'ימי חמישי בלבד: 17:00 עד 01:00 בלילה (ליל שישי)'
                               : 'Thursdays only: 17:00 to 01:00 at night (Friday Eve)'}
                           </p>
-                          <p className="text-xs text-[#94A3B8] mt-0.5">
+                          <p className="text-[13.8px] text-[#94A3B8] mt-0.5">
                             {lang === 'he'
                               ? 'הזמנות מראש ובירורים דרך WhatsApp • פתוח בליל שישי בלבד'
                               : 'Advance orders & inquiries via WhatsApp • Open Friday Eve only'}
@@ -673,16 +657,16 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                           <Phone className="w-5 h-5 text-[#FF7B1C]" />
                         </div>
                         <div>
-                          <h4 className="text-xs sm:text-sm font-bold text-[#FAF9F6]">
+                          <h4 className="text-[13.8px] sm:text-[16.1px] font-bold text-[#FAF9F6]">
                             {lang === 'he' ? 'טלפון ישיר' : 'Direct Phone'}
                           </h4>
                           <a
                             href="tel:0542251438"
-                            className="text-sm sm:text-base font-bold text-[#FAF9F6] hover:text-[#FF7B1C] mt-0.5 block transition-colors underline"
+                            className="text-[16.1px] sm:text-[18.4px] font-bold text-[#FAF9F6] hover:text-[#FF7B1C] mt-0.5 block transition-colors underline"
                           >
                             054-225-1438
                           </a>
-                          <p className="text-xs text-[#94A3B8] mt-0.5">
+                          <p className="text-[13.8px] text-[#94A3B8] mt-0.5">
                             {lang === 'he'
                               ? 'מענה בשעות הפעילות ולתיאומי איסוף'
                               : 'Available during active hours for pickup coordination'}
@@ -692,7 +676,7 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                     </div>
 
                     {/* Card 4: מודל טייק אווי ואיסוף עצמי */}
-                    <div className="p-4 rounded-xl bg-[#0B0C0E] border border-[#252A32] text-xs flex items-start gap-3">
+                    <div className="p-4 rounded-xl bg-[#0B0C0E] border border-[#252A32] text-[13.8px] flex items-start gap-3">
                       <AlertCircle className="w-4 h-4 text-[#FF7B1C] shrink-0 mt-0.5" />
                       <div>
                         <span className="font-bold block text-[#FAF9F6]">
@@ -711,11 +695,11 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                   <div className="lg:col-span-7 flex flex-col justify-between p-5 sm:p-6 rounded-2xl bg-[#14171C] border border-[#252A32] space-y-4">
                     <div>
                       <div className="flex items-center justify-between gap-2 mb-3">
-                        <span className="text-xs font-bold text-[#FAF9F6] uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="text-[13.8px] font-bold text-[#FAF9F6] uppercase tracking-wider flex items-center gap-1.5">
                           <MapPin className="w-3.5 h-3.5 text-[#FF7B1C]" />
                           <span>{lang === 'he' ? 'מפת האזור והגעה' : 'Area Map & Directions'}</span>
                         </span>
-                        <span className="text-[11px] px-2.5 py-0.5 rounded-lg bg-[#0B0C0E] text-[#94A3B8] border border-[#252A32]">
+                        <span className="text-[12.65px] px-2.5 py-0.5 rounded-lg bg-[#0B0C0E] text-[#94A3B8] border border-[#252A32]">
                           {lang === 'he' ? 'אדמו"ר מבעלזא 7, אשדוד 7730022' : 'Admor MiBelz 7, Ashdod 7730022'}
                         </span>
                       </div>
@@ -735,7 +719,7 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
 
                     {/* Navigation Action Buttons (Waze + Google Maps) */}
                     <div className="pt-3 border-t border-[#252A32] flex flex-col sm:flex-row items-center justify-between gap-3">
-                      <span className="text-xs text-[#94A3B8] text-center sm:text-start font-medium">
+                      <span className="text-[13.8px] text-[#94A3B8] text-center sm:text-start font-medium">
                         {lang === 'he' ? 'בחרו אפליקציית ניווט להגעה מהירה:' : 'Choose navigation app for quick arrival:'}
                       </span>
 

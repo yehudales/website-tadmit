@@ -26,7 +26,7 @@ export const KashrutTabContent: React.FC<KashrutTabContentProps> = ({ lang, onCl
 
           {/* Top Badge & Headings */}
           <div className="space-y-1.5">
-            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#FF7B1C] px-3 py-1 rounded-md bg-[#0B0C0E] border border-[#252A32] inline-block">
+            <span className="text-[12.65px] sm:text-[13.8px] font-bold uppercase tracking-widest text-[#FF7B1C] px-3 py-1 rounded-md bg-[#0B0C0E] border border-[#252A32] inline-block">
               {lang === 'he' ? 'פיקוח וכשרות מהודרת' : 'Strict Kosher Supervision'}
             </span>
             <h3 className="text-lg sm:text-xl md:text-2xl font-black text-[#FAF9F6] pt-1">
@@ -35,7 +35,7 @@ export const KashrutTabContent: React.FC<KashrutTabContentProps> = ({ lang, onCl
           </div>
 
           {/* Introductory paragraph */}
-          <p className="text-xs sm:text-sm text-[#94A3B8] max-w-2xl mx-auto leading-relaxed font-normal">
+          <p className="text-[13.8px] sm:text-[16.1px] text-[#94A3B8] max-w-2xl mx-auto leading-relaxed font-normal">
             {lang === 'he'
               ? 'אנו ביהודלס מקפידים על סטנדרט כשרות למהדרין מן המהדרין, עם הפרדה ובהירות מלאה לשמירה על שקט נפשי וביטחון מושלם של לקוחותינו:'
               : 'At Yehudales, we uphold rigorous kosher standards with strict clarity and full transparency for our customers:'}
@@ -49,13 +49,13 @@ export const KashrutTabContent: React.FC<KashrutTabContentProps> = ({ lang, onCl
                 <CheckCircle2 className="w-5 h-5 text-[#FF7B1C]" />
               </div>
               <div>
-                <span className="text-[11px] sm:text-xs text-[#94A3B8] uppercase tracking-wider block font-medium">
+                <span className="text-[12.65px] sm:text-[13.8px] text-[#94A3B8] uppercase tracking-wider block font-medium">
                   {lang === 'he' ? 'בשרים ועופות' : 'Meat & Poultry'}
                 </span>
-                <div className="text-sm sm:text-base font-bold text-[#FAF9F6]">
+                <div className="text-[16.1px] sm:text-[18.4px] font-bold text-[#FAF9F6]">
                   {lang === 'he' ? 'בשר: נווה ציון' : 'Meat: Neve Zion'}
                 </div>
-                <span className="text-[11px] sm:text-xs text-[#FF7B1C] font-semibold block mt-0.5">
+                <span className="text-[12.65px] sm:text-[13.8px] text-[#FF7B1C] font-semibold block mt-0.5">
                   {lang === 'he' ? 'בשר חלק למהדרין' : 'Strict Mehadrin Glatt'}
                 </span>
               </div>
@@ -67,13 +67,13 @@ export const KashrutTabContent: React.FC<KashrutTabContentProps> = ({ lang, onCl
                 <CheckCircle2 className="w-5 h-5 text-[#FAF9F6]" />
               </div>
               <div>
-                <span className="text-[11px] sm:text-xs text-[#94A3B8] uppercase tracking-wider block font-medium">
+                <span className="text-[12.65px] sm:text-[13.8px] text-[#94A3B8] uppercase tracking-wider block font-medium">
                   {lang === 'he' ? 'שאר חומרי הגלם והמוצרים' : 'Other Ingredients & Products'}
                 </span>
-                <div className="text-sm sm:text-base font-bold text-[#FAF9F6]">
+                <div className="text-[16.1px] sm:text-[18.4px] font-bold text-[#FAF9F6]">
                   {lang === 'he' ? 'בד״ץ העדה החרדית' : 'Badatz Edah HaChareidis'}
                 </div>
-                <span className="text-[11px] sm:text-xs text-[#FAF9F6] font-semibold block mt-0.5">
+                <span className="text-[12.65px] sm:text-[13.8px] text-[#FAF9F6] font-semibold block mt-0.5">
                   {lang === 'he' ? 'השגחה קפדנית ומובחרת' : 'Prestigious Kosher Supervision'}
                 </span>
               </div>

@@ -294,7 +294,7 @@ export const Header: React.FC<HeaderProps> = ({
           </nav>
         </div>
 
-        {/* ROW 3: EXPANDABLE PANELS — LOCKED TO TOP TOOLBAR (Physically attached, covers Hero Video below) */}
+        {/* ROW 3: EXPANDABLE PANELS — PHYSICAL DRAWER IN SAME PAGE FLOW (Pushes content below downward) */}
         <ExpandableContentSection
           lang={lang}
           activeSection={activeSection}

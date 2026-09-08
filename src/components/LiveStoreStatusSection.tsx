@@ -43,7 +43,7 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
         
         {/* Dynamic Store Status Header Line — Text-Only with subtle timer glow */}
-        <div className="text-sm sm:text-base font-medium text-[#94A3B8] tracking-wide mb-1 sm:mb-2 flex items-center justify-center gap-1.5 flex-wrap">
+        <div className="text-[16.1px] sm:text-[18.4px] font-medium text-[#94A3B8] tracking-wide mb-1 sm:mb-2 flex items-center justify-center gap-1.5 flex-wrap">
           {status.isOpen ? (
             <>
               <span className="font-bold text-[#22C55E] drop-shadow-[0_0_8px_rgba(34,197,94,0.55)]">
@@ -155,13 +155,13 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
                         <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-[#FF7B1C]" />
                       </div>
                       <div>
-                        <span className="text-[11px] sm:text-xs font-bold text-[#94A3B8] uppercase tracking-wider block">
+                        <span className="text-[12.65px] sm:text-[13.8px] font-bold text-[#94A3B8] uppercase tracking-wider block">
                           {lang === 'he' ? 'שעות פעילות' : 'Operating Schedule'}
                         </span>
-                        <p className="text-xs sm:text-sm font-bold text-[#FF7B1C] mt-0.5">
+                        <p className="text-[13.8px] sm:text-[16.1px] font-bold text-[#FF7B1C] mt-0.5">
                           {BUSINESS_CONFIG.hours.summary[lang]}
                         </p>
-                        <p className="text-xs text-[#94A3B8] mt-0.5">
+                        <p className="text-[13.8px] text-[#94A3B8] mt-0.5">
                           {BUSINESS_CONFIG.hours.note[lang]}
                         </p>
                       </div>
@@ -174,13 +174,13 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
                           <MapPin className="w-4 h-4 text-[#FF7B1C]" />
                         </div>
                         <div>
-                          <span className="text-[11px] text-[#94A3B8] uppercase tracking-wider block font-semibold">
+                          <span className="text-[12.65px] text-[#94A3B8] uppercase tracking-wider block font-semibold">
                             {lang === 'he' ? 'כתובת לאיסוף' : 'Pickup Address'}
                           </span>
-                          <p className="text-xs sm:text-sm font-bold text-[#FAF9F6] mt-0.5">
+                          <p className="text-[13.8px] sm:text-[16.1px] font-bold text-[#FAF9F6] mt-0.5">
                             {BUSINESS_CONFIG.location.fullAddress[lang]}
                           </p>
-                          <span className="text-[11px] text-[#94A3B8]">
+                          <span className="text-[12.65px] text-[#94A3B8]">
                             {lang === 'he' ? "רובע ג', אשדוד" : 'Rova Gimmel, Ashdod'}
                           </span>
                         </div>
@@ -191,16 +191,16 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
                           <Phone className="w-4 h-4 text-[#FF7B1C]" />
                         </div>
                         <div>
-                          <span className="text-[11px] text-[#94A3B8] uppercase tracking-wider block font-semibold">
+                          <span className="text-[12.65px] text-[#94A3B8] uppercase tracking-wider block font-semibold">
                             {lang === 'he' ? 'טלפון ישיר' : 'Direct Phone'}
                           </span>
                           <a
                             href={`tel:${BUSINESS_CONFIG.contact.phone}`}
-                            className="text-xs sm:text-sm font-bold text-[#FAF9F6] hover:text-[#FF7B1C] mt-0.5 block transition-colors underline"
+                            className="text-[13.8px] sm:text-[16.1px] font-bold text-[#FAF9F6] hover:text-[#FF7B1C] mt-0.5 block transition-colors underline"
                           >
                             {BUSINESS_CONFIG.contact.phoneFormatted}
                           </a>
-                          <span className="text-[11px] text-[#94A3B8]">
+                          <span className="text-[12.65px] text-[#94A3B8]">
                             {lang === 'he' ? 'מענה בשעות הפעילות' : 'Available during open hours'}
                           </span>
                         </div>
@@ -208,13 +208,13 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
                     </div>
 
                     {/* Takeaway Model Note */}
-                    <div className="p-3.5 rounded-xl bg-[#0B0C0E] border border-[#252A32] text-xs flex items-start gap-2.5">
+                    <div className="p-3.5 rounded-xl bg-[#0B0C0E] border border-[#252A32] text-[13.8px] flex items-start gap-2.5">
                       <AlertCircle className="w-4 h-4 text-[#FF7B1C] shrink-0 mt-0.5" />
                       <div>
                         <span className="font-bold text-[#FAF9F6] block">
                           {lang === 'he' ? 'איסוף עצמי וטייק אווי' : 'Takeaway & Self-Pickup'}
                         </span>
-                        <p className="text-[#94A3B8] mt-0.5 leading-relaxed text-[11px] sm:text-xs">
+                        <p className="text-[#94A3B8] mt-0.5 leading-relaxed text-[12.65px] sm:text-[13.8px]">
                           {BUSINESS_CONFIG.location.takeawayNote[lang]}
                         </p>
                       </div>

@@ -63,20 +63,20 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
             <h2 id="accessibility-modal-title" className="text-xl md:text-2xl font-bold text-[#FAF9F6]">
               {lang === 'he' ? 'הצהרת נגישות' : 'Accessibility Statement'}
             </h2>
-            <span className="text-xs text-[#94A3B8]">
+            <span className="text-[13.8px] text-[#94A3B8]">
               {lang === 'he' ? 'עדכון אחרון: מרץ 2025' : 'Last updated: March 2025'}
             </span>
           </div>
         </div>
 
-        <div className="space-y-4 text-xs sm:text-sm text-[#94A3B8] leading-relaxed font-normal">
+        <div className="space-y-4 text-[13.8px] sm:text-[16.1px] text-[#94A3B8] leading-relaxed font-normal">
           <p>
             {lang === 'he'
               ? 'עסק "יהודלס" מייחס חשיבות עליונה להנגשת שירותיו ואתר האינטרנט לכלל האוכלוסייה, לרבות אנשים עם מוגבלות. אנו שואפים לאפשר לכל אדם לגלוש בנוחות, ליהנות מהתכנים ולבצע הזמנות באופן שוויוני, מכובד ועצמאי.'
               : 'Yehudales places supreme importance on ensuring its services and website are accessible to all individuals, including people with disabilities. We strive to provide an equitable, dignified, and independent digital experience.'}
           </p>
 
-          <h3 className="text-base font-bold text-[#FAF9F6] pt-2">
+          <h3 className="text-[18.4px] font-bold text-[#FAF9F6] pt-2">
             {lang === 'he' ? 'התאמות הנגישות שבוצעו באתר' : 'Digital Accessibility Measures'}
           </h3>
           <ul className="space-y-2">
@@ -138,7 +138,7 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
             </li>
           </ul>
 
-          <h3 className="text-base font-bold text-[#FAF9F6] pt-2">
+          <h3 className="text-[18.4px] font-bold text-[#FAF9F6] pt-2">
             {lang === 'he' ? 'הסדרי נגישות פיזיים (איסוף ומשלוחים)' : 'Physical Service Arrangements'}
           </h3>
           <p>
@@ -148,15 +148,15 @@ export const AccessibilityModal: React.FC<AccessibilityModalProps> = ({
           </p>
 
           <div className="bg-[#0B0C0E] rounded-xl p-4 sm:p-5 border border-[#252A32] mt-4">
-            <h4 className="text-sm font-bold text-[#FAF9F6] mb-2">
+            <h4 className="text-[16.1px] font-bold text-[#FAF9F6] mb-2">
               {lang === 'he' ? 'רכז נגישות ופניות בנושא נגישות' : 'Accessibility Coordinator Contact'}
             </h4>
-            <p className="text-xs text-[#94A3B8] mb-3">
+            <p className="text-[13.8px] text-[#94A3B8] mb-3">
               {lang === 'he'
                 ? 'אם נתקלתם בבעיית נגישות או שיש לכם הצעה לשיפור, נשמח לעמוד לרשותכם:'
                 : 'If you encountered an accessibility barrier or have suggestions for improvement, please contact us:'}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 text-xs font-semibold">
+            <div className="flex flex-col sm:flex-row gap-4 text-[13.8px] font-semibold">
               <a
                 href={`tel:${BUSINESS_CONFIG.contact.phone}`}
                 className="inline-flex items-center gap-1.5 text-[#FAF9F6] hover:text-[#FF7B1C] hover:underline min-h-[44px]"

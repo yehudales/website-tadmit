@@ -76,13 +76,13 @@ export const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
             <h2 id="whatsapp-modal-title" className="text-xl md:text-2xl font-bold tracking-tight text-[#FAF9F6]">
               {lang === 'he' ? 'יצירת קשר ב-WhatsApp' : 'Contact via WhatsApp'}
             </h2>
-            <p className="text-xs md:text-sm text-[#94A3B8]">
+            <p className="text-[13.8px] md:text-[16.1px] text-[#94A3B8]">
               {BUSINESS_CONFIG.name[lang]} • {BUSINESS_CONFIG.contact.phoneFormatted}
             </p>
           </div>
         </div>
 
-        <p className="text-xs sm:text-sm text-[#94A3B8] mb-5 sm:mb-6 leading-relaxed font-normal">
+        <p className="text-[13.8px] sm:text-[16.1px] text-[#94A3B8] mb-5 sm:mb-6 leading-relaxed font-normal">
           {lang === 'he'
             ? 'אנא בחרו את סוג הפנייה כדי שנוכל לחבר אתכם למענה המתאים ביותר:'
             : 'Please select the type of inquiry so we can route you to the appropriate team:'}
@@ -103,15 +103,15 @@ export const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm sm:text-base font-bold text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors">
+                  <h3 className="text-[16.1px] sm:text-[18.4px] font-bold text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors">
                     {options.general.title[lang]}
                   </h3>
                   <ExternalLink className="w-4 h-4 text-[#94A3B8] group-hover:text-[#FAF9F6] transition-colors" />
                 </div>
-                <p className="text-xs sm:text-sm text-[#94A3B8] mt-1 font-normal">
+                <p className="text-[13.8px] sm:text-[16.1px] text-[#94A3B8] mt-1 font-normal">
                   {options.general.desc[lang]}
                 </p>
-                <span className="inline-block mt-2 text-xs font-semibold text-emerald-400">
+                <span className="inline-block mt-2 text-[13.8px] font-semibold text-emerald-400">
                   {lang === 'he' ? 'מעבר לצ\'אט WhatsApp ←' : 'Open WhatsApp chat →'}
                 </span>
               </div>
@@ -131,15 +131,15 @@ export const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm sm:text-base font-bold text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors">
+                  <h3 className="text-[16.1px] sm:text-[18.4px] font-bold text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors">
                     {options.catering.title[lang]}
                   </h3>
                   <ExternalLink className="w-4 h-4 text-[#94A3B8] group-hover:text-emerald-300 transition-colors" />
                 </div>
-                <p className="text-xs sm:text-sm text-[#94A3B8] mt-1 font-normal">
+                <p className="text-[13.8px] sm:text-[16.1px] text-[#94A3B8] mt-1 font-normal">
                   {options.catering.desc[lang]}
                 </p>
-                <span className="inline-block mt-2 text-xs font-semibold text-emerald-400">
+                <span className="inline-block mt-2 text-[13.8px] font-semibold text-emerald-400">
                   {lang === 'he' ? 'מעבר לצ\'אט WhatsApp ←' : 'Open WhatsApp chat →'}
                 </span>
               </div>
@@ -148,11 +148,11 @@ export const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
         </div>
 
         {/* Direct Call Fallback */}
-        <div className="mt-5 sm:mt-6 pt-4 border-t border-[#252A32] flex items-center justify-between text-xs text-[#94A3B8]">
+        <div className="mt-5 sm:mt-6 pt-4 border-t border-[#252A32] flex items-center justify-between text-[13.8px] text-[#94A3B8]">
           <span>{lang === 'he' ? 'מעדיפים לחייג טלפונית?' : 'Prefer to call directly?'}</span>
           <a
             href={`tel:${BUSINESS_CONFIG.contact.phone}`}
-            className="inline-flex items-center gap-1.5 font-bold text-[#FAF9F6] hover:text-[#FF7B1C] underline focus:outline-none min-h-[44px]"
+            className="inline-flex items-center gap-1.5 font-bold text-[#FAF9F6] hover:text-[#FF7B1C] underline focus:outline-none min-h-[44px] text-[13.8px]"
           >
             <PhoneCall className="w-3.5 h-3.5 text-[#FF7B1C]" />
             {BUSINESS_CONFIG.contact.phoneFormatted}

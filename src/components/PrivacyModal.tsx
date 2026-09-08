@@ -63,20 +63,20 @@ export const PrivacyModal: React.FC<PrivacyModalProps> = ({
             <h2 id="privacy-modal-title" className="text-xl md:text-2xl font-bold text-[#FAF9F6]">
               {lang === 'he' ? 'מדיניות פרטיות ואבטחה' : 'Privacy & Security Policy'}
             </h2>
-            <span className="text-xs text-[#94A3B8]">
+            <span className="text-[13.8px] text-[#94A3B8]">
               {BUSINESS_CONFIG.name[lang]} • {lang === 'he' ? 'עודכן במרץ 2025' : 'Updated March 2025'}
             </span>
           </div>
         </div>
 
-        <div className="space-y-4 text-xs sm:text-sm text-[#94A3B8] leading-relaxed font-normal">
+        <div className="space-y-4 text-[13.8px] sm:text-[16.1px] text-[#94A3B8] leading-relaxed font-normal">
           <p>
             {lang === 'he'
               ? 'אתר "יהודלס" הינו אתר תדמיתי והפניה בלבד. אנו מכבדים את פרטיות המשתמשים ואיננו אוספים מידע אישי שלא לצורך.'
               : 'The Yehudales website is an informational presentation site. We respect your privacy and do not harvest unnecessary personal information.'}
           </p>
 
-          <h3 className="text-base font-bold text-[#FAF9F6] pt-2">
+          <h3 className="text-[18.4px] font-bold text-[#FAF9F6] pt-2">
             {lang === 'he' ? 'עקרונות הפרטיות באתר שלנו' : 'Core Privacy Commitments'}
           </h3>
           <ul className="space-y-2">
@@ -106,7 +106,7 @@ export const PrivacyModal: React.FC<PrivacyModalProps> = ({
             </li>
           </ul>
 
-          <p className="text-xs text-[#94A3B8] pt-3 border-t border-[#252A32]">
+          <p className="text-[13.8px] text-[#94A3B8] pt-3 border-t border-[#252A32]">
             {lang === 'he'
               ? `לשאלות נוספות בנושאי פרטיות, ניתן לפנות אלינו בכתובת: ${BUSINESS_CONFIG.contact.email}`
               : `For further inquiries regarding data privacy, reach us at: ${BUSINESS_CONFIG.contact.email}`}
