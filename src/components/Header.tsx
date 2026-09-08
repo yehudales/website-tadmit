@@ -123,10 +123,10 @@ export const Header: React.FC<HeaderProps> = ({
                       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
                     }
                   }}
-                  className="flex items-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] rounded-lg transition-transform duration-300 hover:scale-105"
+                  className="flex items-center justify-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] rounded-lg transition-transform duration-300 hover:scale-105"
                   aria-label={`${BUSINESS_CONFIG.name[lang]} - דף הבית`}
                 >
-                  <Logo className="h-7 sm:h-8 md:h-9 w-auto" />
+                  <Logo className="h-[89.6px] sm:h-8 md:h-9 w-auto" />
                 </button>
               </div>
 
