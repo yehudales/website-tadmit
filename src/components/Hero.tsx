@@ -19,7 +19,6 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
   const isAudioConnectedRef = useRef<boolean>(false);
 
   const [isPlaying, setIsPlaying] = useState(true);
-  const [hasVideoStarted, setHasVideoStarted] = useState<boolean>(false);
   const [heroHeight, setHeroHeight] = useState<number>(0);
   const [isScrolledPast, setIsScrolledPast] = useState<boolean>(false);
   const isPlayPendingRef = useRef<boolean>(false);
@@ -144,23 +143,24 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     [initAudioGraph, stopAudioImmediately]
   );
 
-  // Single authoritative guarded autoplay function
-  const safeAutoplay = useCallback(() => {
+  // Single authoritative race-safe play initiation function
+  const attemptPlay = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Ensure native muted & playsInline configuration for full mobile policy acceptance only if not yet unlocked
+    if (!video.paused) {
+      setIsPlaying(true);
+      return;
+    }
+
+    if (isPlayPendingRef.current) return;
+
+    // Ensure native muted & playsInline configuration for full mobile policy acceptance
     if (!hasUnlockedAudioRef.current) {
       video.muted = true;
       video.defaultMuted = true;
     }
     video.playsInline = true;
-
-    if (isPlayPendingRef.current) return;
-    if (!video.paused) {
-      setIsPlaying(true);
-      return;
-    }
 
     isPlayPendingRef.current = true;
     const playPromise = video.play();
@@ -179,12 +179,16 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     }
   }, []);
 
-  // Callback ref to configure synchronous native DOM attributes on mount and start playback as early as possible
+  // Callback ref to configure synchronous native DOM attributes on mount and start playback as soon as media data is ready
   const setVideoRef = useCallback((node: HTMLVideoElement | null) => {
     (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = node;
     if (node) {
-      node.muted = !hasUnlockedAudioRef.current;
-      node.defaultMuted = true;
+      // 1. Immediately apply native media attributes required for mobile autoplay compliance
+      if (!hasUnlockedAudioRef.current) {
+        node.muted = true;
+        node.defaultMuted = true;
+        node.setAttribute('muted', '');
+      }
       node.volume = 1.0;
       node.playsInline = true;
       node.autoplay = true;
@@ -193,20 +197,26 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       node.setAttribute('playsinline', '');
       node.setAttribute('webkit-playsinline', '');
       node.setAttribute('x5-playsinline', '');
-      node.setAttribute('muted', '');
       node.setAttribute('autoplay', '');
       node.setAttribute('loop', '');
       node.removeAttribute('controls');
 
-      // Attempt playback immediately if media has enough data, or listen for the earliest readiness event
+      // 2. Playback startup:
+      // If browser already has sufficient media data (readyState >= 2: HAVE_CURRENT_DATA+),
+      // attempt playback immediately. Otherwise, wait strictly for earliest readiness event.
       if (node.readyState >= 2) {
-        safeAutoplay();
+        attemptPlay();
       } else {
-        node.addEventListener('canplay', () => safeAutoplay(), { once: true });
-        node.addEventListener('loadeddata', () => safeAutoplay(), { once: true });
+        const onMediaReady = () => {
+          node.removeEventListener('canplay', onMediaReady);
+          node.removeEventListener('loadeddata', onMediaReady);
+          attemptPlay();
+        };
+        node.addEventListener('canplay', onMediaReady, { once: true });
+        node.addEventListener('loadeddata', onMediaReady, { once: true });
       }
     }
-  }, [safeAutoplay]);
+  }, [attemptPlay]);
 
   // Measure 16:9 hero container height and track scroll position for the shutter curtain effect
   useEffect(() => {
@@ -281,29 +291,11 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     };
   }, [fadeGainTo, stopAudioImmediately]);
 
-  // Autoplay with native muted configuration and cached-readiness check
+  // Unified multi-gesture unlock handler triggered on genuine user interaction anywhere on the page
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    video.playsInline = true;
-    video.autoplay = true;
-    video.loop = true;
-    if (!hasUnlockedAudioRef.current) {
-      video.muted = true;
-      video.defaultMuted = true;
-    }
-
-    // If media is already cached / ready (readyState >= 2), attempt playback immediately
-    if (video.readyState >= 2) {
-      safeAutoplay();
-    } else {
-      video.addEventListener('canplay', () => safeAutoplay(), { once: true });
-      video.addEventListener('loadeddata', () => safeAutoplay(), { once: true });
-      safeAutoplay();
-    }
-
-    // Unified multi-gesture unlock handler triggered on genuine user interaction anywhere on the page
     const events = [
       'touchstart',
       'touchend',
@@ -401,7 +393,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     return () => {
       removeGestureListeners();
     };
-  }, [videoSrc, initAudioGraph, safeAutoplay]);
+  }, [initAudioGraph]);
 
   // Clean up Web Audio graph on unmount
   useEffect(() => {
@@ -517,11 +509,8 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
             disableRemotePlayback
             tabIndex={-1}
             aria-label={lang === 'he' ? 'סרטון אווירה של יהודלס' : 'Yehudales atmosphere video'}
-            onLoadedMetadata={safeAutoplay}
-            onLoadedData={safeAutoplay}
-            onCanPlay={safeAutoplay}
+            onCanPlay={() => attemptPlay()}
             onPlaying={() => {
-              setHasVideoStarted(true);
               setIsPlaying(true);
               if (!isMutedRef.current) {
                 const targetGain = isHeroVisibleRef.current ? 1.0 : 0.08;
