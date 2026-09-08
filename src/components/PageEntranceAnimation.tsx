@@ -27,73 +27,72 @@ interface ParticleConfig {
   sparkY: number;
 }
 
-// 10 distinct particles with individualized floor physics:
-// - Fall duration: ~1.0s (0.0s - 1.0s) with natural gravity acceleration
-// - Landing bounce (~1.0s - 1.5s): gentle rebound & impact rotation
-// - Active floor motion (~1.5s - 4.5s): rolls sideways, wobbles, secondary hops, gradually loses momentum and settles
-// - Floor dwell: ~4.0s total floor interaction before fading
-// - Gradual opacity fade out (~4.8s - 5.6s) while remaining safely at bottom
-// - Total duration: 5.8s with clean unmount
+// 10 distinct particles (24px to 32px):
+// - Total duration: ~2.3s total visible lifetime
+// - Fall: 0.0s - 1.0s (natural smooth gravity descent to floor)
+// - Soft Floor Movement: 1.0s - 1.7s (soft landing bounce, smooth roll & wobble)
+// - Settle & Fade Out: 1.7s - 2.3s (continues gentle rolling while fading smoothly to 0 opacity at bottom)
+// - Clean unmount at 2.35s
 const PARTICLES_CONFIG: ParticleConfig[] = [
   {
     id: 1,
     size: 26,
     emitOffsetX: -8,
     sprayX: -75,
-    arcUp: -12,
+    arcUp: -10,
     fallMultiplier: 0.98,
-    bounceH1: 18,
-    bounceH2: 7,
-    roll1X: -22,
-    roll2X: -36,
-    settleX: -42,
-    rotLand: -28,
-    rotRoll1: -75,
-    rotRoll2: -110,
-    rotSettle: -125,
+    bounceH1: 14,
+    bounceH2: 5,
+    roll1X: -20,
+    roll2X: -34,
+    settleX: -40,
+    rotLand: -20,
+    rotRoll1: -55,
+    rotRoll2: -85,
+    rotSettle: -95,
     delay: 0,
     hasSpark: true,
-    sparkX: -6,
-    sparkY: -5,
+    sparkX: -5,
+    sparkY: -4,
   },
   {
     id: 2,
     size: 31,
     emitOffsetX: 5,
     sprayX: 70,
-    arcUp: -14,
+    arcUp: -12,
     fallMultiplier: 1.01,
-    bounceH1: 21,
-    bounceH2: 8,
-    roll1X: 24,
-    roll2X: 40,
-    settleX: 46,
-    rotLand: 32,
-    rotRoll1: 85,
-    rotRoll2: 125,
-    rotSettle: 140,
-    delay: 25,
+    bounceH1: 16,
+    bounceH2: 6,
+    roll1X: 22,
+    roll2X: 38,
+    settleX: 44,
+    rotLand: 22,
+    rotRoll1: 65,
+    rotRoll2: 95,
+    rotSettle: 110,
+    delay: 15,
     hasSpark: true,
-    sparkX: 6,
-    sparkY: -6,
+    sparkX: 5,
+    sparkY: -5,
   },
   {
     id: 3,
     size: 24,
     emitOffsetX: -12,
     sprayX: -45,
-    arcUp: -10,
+    arcUp: -8,
     fallMultiplier: 0.97,
-    bounceH1: 15,
-    bounceH2: 5,
-    roll1X: 14,
+    bounceH1: 12,
+    bounceH2: 4,
+    roll1X: 12,
     roll2X: 8,
     settleX: 5,
-    rotLand: 20,
-    rotRoll1: 45,
-    rotRoll2: 25,
-    rotSettle: 15,
-    delay: 45,
+    rotLand: 15,
+    rotRoll1: 35,
+    rotRoll2: 20,
+    rotSettle: 12,
+    delay: 30,
     hasSpark: false,
     sparkX: 0,
     sparkY: 0,
@@ -103,60 +102,60 @@ const PARTICLES_CONFIG: ParticleConfig[] = [
     size: 32,
     emitOffsetX: 9,
     sprayX: 40,
-    arcUp: -15,
+    arcUp: -13,
     fallMultiplier: 1.02,
-    bounceH1: 22,
-    bounceH2: 9,
-    roll1X: 18,
-    roll2X: 30,
-    settleX: 34,
-    rotLand: 35,
-    rotRoll1: 90,
-    rotRoll2: 130,
-    rotSettle: 145,
-    delay: 15,
+    bounceH1: 17,
+    bounceH2: 6,
+    roll1X: 16,
+    roll2X: 28,
+    settleX: 32,
+    rotLand: 25,
+    rotRoll1: 70,
+    rotRoll2: 100,
+    rotSettle: 115,
+    delay: 10,
     hasSpark: true,
-    sparkX: 7,
-    sparkY: -7,
+    sparkX: 6,
+    sparkY: -6,
   },
   {
     id: 5,
     size: 27,
     emitOffsetX: -3,
     sprayX: -15,
-    arcUp: -11,
+    arcUp: -9,
     fallMultiplier: 0.99,
-    bounceH1: 17,
-    bounceH2: 6,
-    roll1X: -18,
-    roll2X: -26,
-    settleX: -30,
-    rotLand: -22,
-    rotRoll1: -65,
-    rotRoll2: -90,
-    rotSettle: -100,
-    delay: 35,
+    bounceH1: 13,
+    bounceH2: 5,
+    roll1X: -16,
+    roll2X: -24,
+    settleX: -28,
+    rotLand: -18,
+    rotRoll1: -50,
+    rotRoll2: -70,
+    rotSettle: -80,
+    delay: 20,
     hasSpark: true,
-    sparkX: -5,
-    sparkY: -5,
+    sparkX: -4,
+    sparkY: -4,
   },
   {
     id: 6,
     size: 29,
     emitOffsetX: 10,
     sprayX: 15,
-    arcUp: -13,
+    arcUp: -11,
     fallMultiplier: 1.00,
-    bounceH1: 19,
-    bounceH2: 7,
-    roll1X: 16,
-    roll2X: 24,
-    settleX: 28,
-    rotLand: 25,
-    rotRoll1: 70,
-    rotRoll2: 95,
-    rotSettle: 105,
-    delay: 60,
+    bounceH1: 15,
+    bounceH2: 5,
+    roll1X: 14,
+    roll2X: 22,
+    settleX: 26,
+    rotLand: 20,
+    rotRoll1: 55,
+    rotRoll2: 75,
+    rotSettle: 85,
+    delay: 35,
     hasSpark: false,
     sparkX: 0,
     sparkY: 0,
@@ -166,60 +165,60 @@ const PARTICLES_CONFIG: ParticleConfig[] = [
     size: 24,
     emitOffsetX: -14,
     sprayX: -105,
-    arcUp: -9,
+    arcUp: -8,
     fallMultiplier: 0.96,
-    bounceH1: 14,
-    bounceH2: 5,
-    roll1X: 16,
-    roll2X: 26,
-    settleX: 30,
-    rotLand: 22,
-    rotRoll1: 55,
-    rotRoll2: 80,
-    rotSettle: 90,
-    delay: 20,
+    bounceH1: 11,
+    bounceH2: 4,
+    roll1X: 14,
+    roll2X: 24,
+    settleX: 28,
+    rotLand: 18,
+    rotRoll1: 45,
+    rotRoll2: 65,
+    rotSettle: 75,
+    delay: 15,
     hasSpark: true,
-    sparkX: -6,
-    sparkY: -4,
+    sparkX: -5,
+    sparkY: -3,
   },
   {
     id: 8,
     size: 30,
     emitOffsetX: 12,
     sprayX: 100,
-    arcUp: -14,
+    arcUp: -12,
     fallMultiplier: 1.01,
-    bounceH1: 20,
-    bounceH2: 8,
-    roll1X: -20,
-    roll2X: -32,
-    settleX: -36,
-    rotLand: -30,
-    rotRoll1: -80,
-    rotRoll2: -115,
-    rotSettle: -130,
-    delay: 40,
+    bounceH1: 15,
+    bounceH2: 6,
+    roll1X: -18,
+    roll2X: -30,
+    settleX: -34,
+    rotLand: -22,
+    rotRoll1: -60,
+    rotRoll2: -90,
+    rotSettle: -105,
+    delay: 25,
     hasSpark: true,
-    sparkX: 6,
-    sparkY: -6,
+    sparkX: 5,
+    sparkY: -5,
   },
   {
     id: 9,
     size: 26,
     emitOffsetX: -6,
     sprayX: -60,
-    arcUp: -11,
+    arcUp: -9,
     fallMultiplier: 0.98,
-    bounceH1: 16,
-    bounceH2: 6,
-    roll1X: -15,
-    roll2X: -22,
-    settleX: -25,
-    rotLand: -24,
-    rotRoll1: -60,
-    rotRoll2: -85,
-    rotSettle: -95,
-    delay: 20,
+    bounceH1: 13,
+    bounceH2: 5,
+    roll1X: -14,
+    roll2X: -20,
+    settleX: -23,
+    rotLand: -18,
+    rotRoll1: -45,
+    rotRoll2: -68,
+    rotSettle: -76,
+    delay: 15,
     hasSpark: false,
     sparkX: 0,
     sparkY: 0,
@@ -229,21 +228,21 @@ const PARTICLES_CONFIG: ParticleConfig[] = [
     size: 30,
     emitOffsetX: 7,
     sprayX: 55,
-    arcUp: -13,
+    arcUp: -11,
     fallMultiplier: 1.00,
-    bounceH1: 19,
-    bounceH2: 7,
-    roll1X: 20,
-    roll2X: 32,
-    settleX: 38,
-    rotLand: 28,
-    rotRoll1: 75,
-    rotRoll2: 110,
-    rotSettle: 120,
-    delay: 50,
+    bounceH1: 15,
+    bounceH2: 5,
+    roll1X: 18,
+    roll2X: 30,
+    settleX: 35,
+    rotLand: 22,
+    rotRoll1: 60,
+    rotRoll2: 85,
+    rotSettle: 95,
+    delay: 30,
     hasSpark: true,
-    sparkX: 5,
-    sparkY: -5,
+    sparkX: 4,
+    sparkY: -4,
   },
 ];
 
@@ -270,16 +269,16 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
     measureFloor();
 
     // Re-measure after transition expands
-    const t1 = setTimeout(measureFloor, 60);
-    const t2 = setTimeout(measureFloor, 200);
+    const t1 = setTimeout(measureFloor, 50);
+    const t2 = setTimeout(measureFloor, 150);
 
     const handleResize = () => measureFloor();
     window.addEventListener('resize', handleResize);
 
-    // Unmount completely after 5.8s
+    // Unmount completely after 2.35s (2350ms)
     const timer = setTimeout(() => {
       setIsVisible(false);
-    }, 5800);
+    }, 2350);
 
     return () => {
       clearTimeout(t1);
@@ -408,134 +407,106 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
     >
       <style>{`
         /* 
-          Full Physical Floor Sequence (5.6s total):
-          - 0.0s - 1.0s (0% - 18%): Slower, natural gravity fall to the floor
-          - 1.0s - 1.5s (18% - 27%): Floor impact & landing bounce with rotation
-          - 1.5s - 2.5s (27% - 45%): Active roll across floor + wobble + small secondary hop
-          - 2.5s - 4.5s (45% - 80%): Continuous rolling, slight direction change, micro vibrations, settling down on floor
-          - 4.5s - 4.8s (80% - 86%): Settled at rest on the floor
-          - 4.8s - 5.6s (86% - 100%): Smooth gradual opacity fade out while remaining at rest on the floor
+          Soft Physical Floor Sequence (2.3s total):
+          - 0.0s - 1.0s (0% - 43%): Smooth natural gravity descent to floor
+          - 1.0s - 1.7s (43% - 74%): Soft floor impact, cushioned bounce, smooth roll & wobble
+          - 1.7s - 2.3s (74% - 100%): Continues rolling into settle while smoothly fading out in opacity at bottom
         */
-        @keyframes toolbarFloorPhysics {
+        @keyframes toolbarSoftPhysics {
           0% {
-            transform: translate(0, 0) scale(0.6) rotate(0deg);
+            transform: translate(0, 0) scale(0.65) rotate(0deg);
             opacity: 0;
             filter: drop-shadow(0 0 2px #FF7B1C);
           }
-          3% {
+          6% {
             opacity: 0.95;
-            transform: translate(calc(var(--spray-x) * 0.15), calc(var(--arc-up, -12px) * 0.7)) scale(1) rotate(calc(var(--rot-land) * 0.1));
+            transform: translate(calc(var(--spray-x) * 0.15), calc(var(--arc-up, -10px) * 0.7)) scale(1) rotate(calc(var(--rot-land) * 0.1));
             filter: drop-shadow(0 0 8px #FF7B1C) drop-shadow(0 0 16px rgba(255, 123, 28, 0.6));
           }
-          8% {
+          20% {
             opacity: 1;
-            transform: translate(calc(var(--spray-x) * 0.4), calc(var(--fall-y) * 0.25)) scale(1) rotate(calc(var(--rot-land) * 0.3));
+            transform: translate(calc(var(--spray-x) * 0.45), calc(var(--fall-y) * 0.3)) scale(1) rotate(calc(var(--rot-land) * 0.35));
           }
-          14% {
+          33% {
             opacity: 1;
-            transform: translate(calc(var(--spray-x) * 0.8), calc(var(--fall-y) * 0.7)) scale(1) rotate(calc(var(--rot-land) * 0.7));
+            transform: translate(calc(var(--spray-x) * 0.8), calc(var(--fall-y) * 0.75)) scale(1) rotate(calc(var(--rot-land) * 0.75));
           }
-          /* --- Reaches floor at ~1.0s (18%) --- */
-          18% {
+          /* --- Floor arrival at ~1.0s (43%) --- */
+          43.5% {
             transform: translate(var(--spray-x), var(--fall-y)) scale(1) rotate(var(--rot-land));
             opacity: 1;
             filter: drop-shadow(0 0 10px #FF7B1C) drop-shadow(0 0 18px rgba(255, 123, 28, 0.5));
           }
-          /* --- Landing bounce peak (~1.25s) --- */
-          22.5% {
-            transform: translate(calc(var(--spray-x) + var(--roll1-x) * 0.3), calc(var(--fall-y) - var(--bounce-h1))) scale(1) rotate(calc(var(--rot-land) + var(--rot-roll1) * 0.2));
+          /* --- Cushioned soft landing bounce peak (~1.22s / 53%) --- */
+          53% {
+            transform: translate(calc(var(--spray-x) + var(--roll1-x) * 0.35), calc(var(--fall-y) - var(--bounce-h1))) scale(1) rotate(calc(var(--rot-land) + var(--rot-roll1) * 0.25));
             opacity: 1;
-            filter: drop-shadow(0 0 8px #FF7B1C);
+            filter: drop-shadow(0 0 7px #FF7B1C);
           }
-          /* --- Lands back on floor (~1.5s) --- */
-          27% {
-            transform: translate(calc(var(--spray-x) + var(--roll1-x) * 0.6), var(--fall-y)) scale(1) rotate(calc(var(--rot-land) + var(--rot-roll1) * 0.5));
+          /* --- Soft return to floor & smooth roll forward (~1.43s / 62%) --- */
+          62% {
+            transform: translate(calc(var(--spray-x) + var(--roll1-x) * 0.7), var(--fall-y)) scale(1) rotate(calc(var(--rot-land) + var(--rot-roll1) * 0.6));
             opacity: 1;
           }
-          /* --- Secondary small bounce + rolling (~1.9s) --- */
-          34% {
+          /* --- Gentle secondary micro-hop + rolling (~1.65s / 72%) --- */
+          72% {
             transform: translate(calc(var(--spray-x) + var(--roll1-x)), calc(var(--fall-y) - var(--bounce-h2))) scale(1) rotate(var(--rot-roll1));
             opacity: 1;
           }
-          /* --- Roll phase 1 lands (~2.3s) --- */
-          41% {
-            transform: translate(calc(var(--spray-x) + var(--roll1-x) * 1.2), var(--fall-y)) scale(1) rotate(calc(var(--rot-roll1) + 15deg));
-            opacity: 1;
-          }
-          /* --- Active rolling along floor with wobble (~2.9s) --- */
-          52% {
-            transform: translate(calc(var(--spray-x) + var(--roll2-x) * 0.7), calc(var(--fall-y) - 2px)) scale(1) rotate(calc(var(--rot-roll2) * 0.7));
-            opacity: 1;
-          }
-          /* --- Continues rolling and micro settling (~3.6s) --- */
-          64% {
-            transform: translate(calc(var(--spray-x) + var(--roll2-x)), var(--fall-y)) scale(1) rotate(var(--rot-roll2));
-            opacity: 1;
-          }
-          /* --- Gentle wobble & slowing down (~4.2s) --- */
-          75% {
-            transform: translate(calc(var(--spray-x) + var(--settle-x) * 0.9), var(--fall-y)) scale(1) rotate(calc(var(--rot-settle) - 5deg));
-            opacity: 1;
-          }
-          /* --- Settled at rest on the floor (~4.5s) --- */
+          /* --- Softly rolls into final path while starting gradual fade (~1.85s / 80%) --- */
           80% {
-            transform: translate(calc(var(--spray-x) + var(--settle-x)), var(--fall-y)) scale(1) rotate(var(--rot-settle));
-            opacity: 1;
-            filter: drop-shadow(0 0 8px #FF7B1C);
+            transform: translate(calc(var(--spray-x) + var(--roll2-x) * 0.85), var(--fall-y)) scale(1) rotate(var(--rot-roll2));
+            opacity: 0.85;
+            filter: drop-shadow(0 0 5px #FF7B1C);
           }
-          /* --- Rest continues through ~4.8s before fading --- */
-          86% {
-            transform: translate(calc(var(--spray-x) + var(--settle-x)), var(--fall-y)) scale(1) rotate(var(--rot-settle));
-            opacity: 1;
-            filter: drop-shadow(0 0 8px #FF7B1C);
-          }
-          /* --- Natural opacity fade out at the floor --- */
-          93% {
-            transform: translate(calc(var(--spray-x) + var(--settle-x)), var(--fall-y)) scale(0.96) rotate(var(--rot-settle));
+          /* --- Continuing smooth roll & rocking settle (~2.1s / 91%) --- */
+          91% {
+            transform: translate(calc(var(--spray-x) + var(--settle-x) * 0.95), var(--fall-y)) scale(0.97) rotate(calc(var(--rot-settle) - 3deg));
             opacity: 0.45;
-            filter: drop-shadow(0 0 4px #FF7B1C);
+            filter: drop-shadow(0 0 3px #FF7B1C);
           }
+          /* --- Completely settled at bottom and fully faded (~2.3s / 100%) --- */
           100% {
-            transform: translate(calc(var(--spray-x) + var(--settle-x)), var(--fall-y)) scale(0.92) rotate(var(--rot-settle));
+            transform: translate(calc(var(--spray-x) + var(--settle-x)), var(--fall-y)) scale(0.94) rotate(var(--rot-settle));
             opacity: 0;
             filter: drop-shadow(0 0 0px #FF7B1C);
           }
         }
 
-        /* Trailing subtle sparks during fall and landing bounce */
-        @keyframes toolbarFloorSparks {
-          0%, 3% {
+        /* Trailing subtle sparks during fall and soft bounce */
+        @keyframes toolbarSoftSparks {
+          0%, 6% {
             opacity: 0;
             transform: translate(0, 0) scale(0.3);
           }
-          10% {
+          20% {
             opacity: 0.95;
             transform: translate(var(--spark-x, 5px), var(--spark-y, -5px)) scale(1);
             filter: drop-shadow(0 0 4px #FF7B1C);
           }
-          18% {
+          38% {
             opacity: 0.8;
-            transform: translate(calc(var(--spark-x, 5px) * 1.5), calc(var(--spark-y, -5px) * 1.5)) scale(0.8);
+            transform: translate(calc(var(--spark-x, 5px) * 1.4), calc(var(--spark-y, -5px) * 1.4)) scale(0.7);
             filter: drop-shadow(0 0 2px #FF7B1C);
           }
-          26% {
+          52% {
             opacity: 0.35;
-            transform: translate(calc(var(--spark-x, 5px) * 2), calc(var(--spark-y, -5px) * 2)) scale(0.4);
+            transform: translate(calc(var(--spark-x, 5px) * 1.8), calc(var(--spark-y, -5px) * 1.8)) scale(0.4);
           }
-          32%, 100% {
+          65%, 100% {
             opacity: 0;
-            transform: translate(calc(var(--spark-x, 5px) * 2.4), calc(var(--spark-y, -5px) * 2.4)) scale(0.1);
+            transform: translate(calc(var(--spark-x, 5px) * 2.2), calc(var(--spark-y, -5px) * 2.2)) scale(0.1);
           }
         }
 
         @media (prefers-reduced-motion: reduce) {
           .emitter-particle {
-            animation: reducedFade 4.8s ease-out forwards !important;
+            animation: reducedFade 2.3s ease-out forwards !important;
           }
           @keyframes reducedFade {
             0% { opacity: 0; }
-            10% { opacity: 0.9; }
-            80% { opacity: 0.9; }
+            15% { opacity: 0.9; }
+            75% { opacity: 0.9; }
             100% { opacity: 0; }
           }
         }
@@ -554,7 +525,7 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
                 width: `${p.size}px`,
                 height: `${p.size}px`,
                 marginLeft: `${p.emitOffsetX}px`,
-                animation: `toolbarFloorPhysics 5.6s cubic-bezier(0.25, 0.1, 0.25, 1) forwards`,
+                animation: `toolbarSoftPhysics 2.3s cubic-bezier(0.25, 0.1, 0.25, 1) forwards`,
                 animationDelay: `${p.delay}ms`,
                 ['--spray-x' as string]: `${p.sprayX}px`,
                 ['--arc-up' as string]: `${p.arcUp}px`,
@@ -576,7 +547,7 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
                 <span
                   className="absolute top-1/2 left-1/2 w-1.5 h-1.5 rounded-full bg-[#FF7B1C] pointer-events-none"
                   style={{
-                    animation: `toolbarFloorSparks 5.6s ease-out forwards`,
+                    animation: `toolbarSoftSparks 2.3s ease-out forwards`,
                     animationDelay: `${p.delay}ms`,
                     ['--spark-x' as string]: `${p.sparkX}px`,
                     ['--spark-y' as string]: `${p.sparkY}px`,
