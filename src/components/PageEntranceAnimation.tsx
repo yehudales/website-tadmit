@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { NavSectionId } from '../types';
 
 interface PageEntranceAnimationProps {
@@ -12,7 +13,7 @@ interface ParticleConfig {
   sprayX: number;
   driftX: number;
   travelMultiplier: number;
-  spinTurns: number; // Dreidel self-rotation in degrees (2-3 full 360° rotations)
+  spinTurns: number; // Dreidel self-rotation in degrees (preserved exact turns)
   startAngle: number; // Initial rotation angle
   delay: number;
   hasSpark: boolean;
@@ -21,12 +22,11 @@ interface ParticleConfig {
 }
 
 // 5 distinct particles:
-// - Origin: Bottom-center narrow concentrated emission
-// - Smooth upward movement with gradual fan/cone horizontal expansion toward center
-// - Independent self-rotation around own center like a dreidel (2-3+ full 360° rotations)
-// - Completely separated transforms: path trajectory on outer container, center self-spin on inner container
-// - Total duration: ~4.6s total visible lifetime (preserved dwell time and fade)
-// - Clean unmount at 4.7s
+// - Origin: Screen/viewport bottom boundary (independent of tab height or scroll)
+// - Smooth upward movement with gradual fan/cone horizontal expansion
+// - Fast initial spin burst, slowing down smoothly towards the end
+// - Total duration: 3.6s visible lifetime (shortened by 1s)
+// - Clean unmount at 3.7s
 const PARTICLES_CONFIG: ParticleConfig[] = [
   {
     id: 1,
@@ -102,46 +102,41 @@ const PARTICLES_CONFIG: ParticleConfig[] = [
 
 export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ section }) => {
   const [isVisible, setIsVisible] = useState(true);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [travelDistance, setTravelDistance] = useState<number>(220);
+  const [mounted, setMounted] = useState(false);
+  const [travelDistance, setTravelDistance] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      return Math.min(380, Math.max(220, Math.round(window.innerHeight * 0.38)));
+    }
+    return 260;
+  });
 
-  // Measure actual container height and calculate upward travel distance to center
+  // Calculate upward travel distance relative to screen viewport height
   useEffect(() => {
+    setMounted(true);
     setIsVisible(true);
 
     const measureTravel = () => {
-      if (containerRef.current) {
-        const parent = containerRef.current.parentElement || containerRef.current;
-        const totalHeight = parent.clientHeight || parent.offsetHeight || 500;
-        // Travel upward from bottom to approximately center of container (~46% of container height)
-        const calculated = Math.max(160, Math.round(totalHeight * 0.46));
-        setTravelDistance(calculated);
-      }
+      const vh = window.innerHeight || 800;
+      // Travel upward from screen bottom boundary into visible viewport (~38% of screen height)
+      const calculated = Math.min(380, Math.max(220, Math.round(vh * 0.38)));
+      setTravelDistance(calculated);
     };
 
     measureTravel();
+    window.addEventListener('resize', measureTravel);
 
-    // Re-measure after transition expands
-    const t1 = setTimeout(measureTravel, 50);
-    const t2 = setTimeout(measureTravel, 150);
-
-    const handleResize = () => measureTravel();
-    window.addEventListener('resize', handleResize);
-
-    // Unmount completely after 4.7s (4700ms)
+    // Unmount completely after 3.7s (shortened by 1s from 4.7s)
     const timer = setTimeout(() => {
       setIsVisible(false);
-    }, 4700);
+    }, 3700);
 
     return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
       clearTimeout(timer);
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', measureTravel);
     };
   }, [section]);
 
-  if (!isVisible) return null;
+  if (!mounted || !isVisible || typeof document === 'undefined') return null;
 
   // Render SVG element according to the page type (strictly clean and proportional)
   const renderItemSvg = (type: NavSectionId) => {
@@ -252,19 +247,19 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
     }
   };
 
-  return (
+  return createPortal(
     <div
-      ref={containerRef}
       aria-hidden="true"
-      className="absolute inset-0 pointer-events-none overflow-hidden z-30 select-none"
+      className="fixed inset-0 pointer-events-none overflow-hidden z-[999] select-none"
     >
       <style>{`
         /* 
-          Bottom Confetti Trajectory Animation (4.6s total):
+          Bottom Confetti Trajectory Animation (3.6s total — shortened by 1s):
+          - Launches from screen/viewport bottom boundary
           - Fluid, soft upward curve with continuous natural easing
-          - 0% to 75%: Concentrated bottom launch with fan expansion toward center
-          - 75% to 86%: Gentle apex float and hover dwell at center
-          - 86% to 100%: Soft drift and gradual fade out
+          - 0% to 72%: Concentrated bottom launch with fan expansion upward into viewport
+          - 72% to 84%: Gentle apex float and hover dwell
+          - 84% to 100%: Soft drift and gradual fade out
         */
         @keyframes bottomConfettiTrajectory {
           0% {
@@ -272,31 +267,31 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
             opacity: 0;
             filter: drop-shadow(0 0 2px #FF7B1C);
           }
-          8% {
+          10% {
             opacity: 1;
-            transform: translate(calc(var(--spray-x) * 0.10), calc(var(--travel-y) * -0.15)) scale(0.95);
+            transform: translate(calc(var(--spray-x) * 0.12), calc(var(--travel-y) * -0.18)) scale(0.95);
             filter: drop-shadow(0 0 8px #FF7B1C) drop-shadow(0 0 16px rgba(255, 123, 28, 0.6));
           }
-          30% {
+          32% {
             opacity: 1;
-            transform: translate(calc(var(--spray-x) * 0.48), calc(var(--travel-y) * -0.58)) scale(1);
+            transform: translate(calc(var(--spray-x) * 0.52), calc(var(--travel-y) * -0.62)) scale(1);
           }
           58% {
             opacity: 1;
             transform: translate(calc(var(--spray-x) * 0.88), calc(var(--travel-y) * -0.90)) scale(1);
             filter: drop-shadow(0 0 7px #FF7B1C);
           }
-          75% {
+          72% {
             opacity: 1;
             transform: translate(var(--spray-x), calc(var(--travel-y) * -1)) scale(1);
             filter: drop-shadow(0 0 6px #FF7B1C);
           }
-          86% {
+          84% {
             opacity: 0.85;
             transform: translate(calc(var(--spray-x) + var(--drift-x) * 0.6), calc(var(--travel-y) * -1 - 6px)) scale(0.98);
             filter: drop-shadow(0 0 4px #FF7B1C);
           }
-          94% {
+          92% {
             opacity: 0.4;
             transform: translate(calc(var(--spray-x) + var(--drift-x)), calc(var(--travel-y) * -1 - 10px)) scale(0.96);
             filter: drop-shadow(0 0 2px #FF7B1C);
@@ -309,9 +304,9 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
         }
 
         /* 
-          Dreidel Self-Rotation around OWN CENTER (2-3+ full 360° continuous rotations):
-          - Centered on individual emoji (transform-origin: center center)
-          - Completely decoupled from trajectory translation
+          Dreidel Self-Rotation around OWN CENTER:
+          - Starts very fast, decelerates heavily to spin even slower at the end
+          - Preserves the exact same number of total turns as configured
         */
         @keyframes dreidelSelfSpin {
           0% {
@@ -350,7 +345,7 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
 
         @media (prefers-reduced-motion: reduce) {
           .emitter-particle {
-            animation: reducedFade 4.6s ease-out forwards !important;
+            animation: reducedFade 3.6s ease-out forwards !important;
           }
           .dreidel-spinner {
             animation: none !important;
@@ -364,8 +359,8 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
         }
       `}</style>
 
-      {/* Origin point: Bottom-center region of the panel container */}
-      <div className="absolute bottom-[6%] left-1/2 -translate-x-1/2 w-0 h-0 pointer-events-none">
+      {/* Origin point: Bottom boundary of the screen viewport */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0 pointer-events-none">
         {PARTICLES_CONFIG.map((p) => {
           const particleTravelY = Math.round(travelDistance * p.travelMultiplier);
 
@@ -377,19 +372,19 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
                 width: `${p.size}px`,
                 height: `${p.size}px`,
                 marginLeft: `${p.emitOffsetX}px`,
-                animation: `bottomConfettiTrajectory 4.6s cubic-bezier(0.25, 1, 0.35, 1) forwards`,
+                animation: `bottomConfettiTrajectory 3.6s cubic-bezier(0.25, 1, 0.35, 1) forwards`,
                 animationDelay: `${p.delay}ms`,
                 ['--spray-x' as string]: `${p.sprayX}px`,
                 ['--drift-x' as string]: `${p.driftX}px`,
                 ['--travel-y' as string]: `${particleTravelY}px`,
               }}
             >
-              {/* Inner Dreidel Container: Spins around its own exact center without affecting path */}
+              {/* Inner Dreidel Container: Spins faster at start, much slower at end */}
               <div
                 className="dreidel-spinner w-full h-full flex items-center justify-center will-change-transform"
                 style={{
                   transformOrigin: '50% 50%',
-                  animation: `dreidelSelfSpin 4.6s cubic-bezier(0.25, 1, 0.4, 1) forwards`,
+                  animation: `dreidelSelfSpin 3.6s cubic-bezier(0.06, 0.82, 0.16, 1) forwards`,
                   animationDelay: `${p.delay}ms`,
                   ['--start-rot' as string]: `${p.startAngle}deg`,
                   ['--spin-rot' as string]: `${p.spinTurns}deg`,
@@ -402,7 +397,7 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
                 <span
                   className="absolute top-1/2 left-1/2 w-1.5 h-1.5 rounded-full bg-[#FF7B1C] pointer-events-none"
                   style={{
-                    animation: `confettiSoftSparks 4.6s ease-out forwards`,
+                    animation: `confettiSoftSparks 3.6s ease-out forwards`,
                     animationDelay: `${p.delay}ms`,
                     ['--spark-x' as string]: `${p.sparkX}px`,
                     ['--spark-y' as string]: `${p.sparkY}px`,
@@ -413,6 +408,7 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
           );
         })}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

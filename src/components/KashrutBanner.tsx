@@ -1,7 +1,8 @@
 import React from 'react';
-import { CheckCircle2, X } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { Language } from '../types';
 import { InteractiveDisclosureTrigger } from './InteractiveDisclosureTrigger';
+import { BannerBottomCloseButton } from './BannerBottomCloseButton';
 
 export interface KashrutTabContentProps {
   lang: Language;
@@ -13,17 +14,6 @@ export const KashrutTabContent: React.FC<KashrutTabContentProps> = ({ lang, onCl
     <div id="kashrut-expandable-content" className="w-full relative">
       <div className="pt-2 pb-2">
         <div className="p-5 sm:p-7 md:p-8 rounded-2xl bg-[#14171C] border border-[#252A32] shadow-2xl text-center space-y-5 relative">
-          {onClose && (
-            <button
-              type="button"
-              onClick={onClose}
-              className="absolute top-3 left-3 sm:top-4 sm:left-4 w-8 h-8 rounded-full bg-[#0B0C0E] border border-[#252A32] hover:border-[#FF7B1C]/50 text-[#94A3B8] hover:text-[#FAF9F6] flex items-center justify-center transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C]"
-              aria-label={lang === 'he' ? 'סגור פירוט כשרות למהדרין' : 'Close strict kosher details'}
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-
           {/* Top Badge & Headings */}
           <div className="space-y-1.5">
             <span className="text-[12.65px] sm:text-[13.8px] font-bold uppercase tracking-widest text-[#FF7B1C] px-3 py-1 rounded-md bg-[#0B0C0E] border border-[#252A32] inline-block">
@@ -79,6 +69,15 @@ export const KashrutTabContent: React.FC<KashrutTabContentProps> = ({ lang, onCl
               </div>
             </div>
           </div>
+
+          {/* Bottom circular arrow control */}
+          {onClose && (
+            <BannerBottomCloseButton
+              onClose={onClose}
+              ariaLabel={lang === 'he' ? 'סגור פירוט כשרות למהדרין' : 'Close strict kosher details'}
+              title={lang === 'he' ? 'סגור פירוט כשרות למהדרין' : 'Close strict kosher details'}
+            />
+          )}
         </div>
       </div>
     </div>

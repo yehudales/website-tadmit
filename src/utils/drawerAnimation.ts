@@ -2,14 +2,14 @@
  * Physical Drawer Animation Configuration for Expandable Banners & Tabs
  *
  * Requirements:
- * - Physical drawer pull-down / contract-up feel
- * - Motion profile: FAST → SMOOTH → GENTLE DECELERATION → SOFT FINAL SETTLE
- * - Timing: ~450-650ms (540ms open, 500ms close)
- * - Easing: Refined cubic-bezier [0.22, 1, 0.36, 1] (no bounce, no overshoot, zero abrupt stops)
+ * - Normal speed during the main traversal
+ * - A few pixels before reaching final destination (open or closed), enters a smooth deceleration phase
+ * - The final slow phase takes EXACTLY 1 second to complete
+ * - Progressive deceleration: continuous movement without freeze, bounce, overshoot, or abrupt stop
  * - Respects prefers-reduced-motion
  */
 
-export const DRAWER_EASING: [number, number, number, number] = [0.22, 1, 0.36, 1];
+export const DRAWER_EASING: [number, number, number, number] = [0.03, 0.94, 0.16, 0.985];
 
 export const getDrawerAnimationConfig = (shouldReduceMotion: boolean | null | undefined) => {
   if (shouldReduceMotion) {
@@ -32,7 +32,8 @@ export const getDrawerAnimationConfig = (shouldReduceMotion: boolean | null | un
       height: 'auto',
       opacity: 1,
       transition: {
-        height: { duration: 0.54, ease: DRAWER_EASING },
+        // Base normal speed traversal (~0.54s) + exactly 1.00s final slow deceleration = 1.54s
+        height: { duration: 1.54, ease: DRAWER_EASING },
         opacity: { duration: 0.32, ease: 'easeOut' },
       },
     },
@@ -40,9 +41,11 @@ export const getDrawerAnimationConfig = (shouldReduceMotion: boolean | null | un
       height: 0,
       opacity: 0,
       transition: {
-        height: { duration: 0.50, ease: DRAWER_EASING },
-        opacity: { duration: 0.36, ease: DRAWER_EASING, delay: 0.1 },
+        // Base normal speed traversal (~0.50s) + exactly 1.00s final slow deceleration = 1.50s
+        height: { duration: 1.50, ease: DRAWER_EASING },
+        opacity: { duration: 1.40, ease: 'easeOut', delay: 0.05 },
       },
     },
   };
 };
+

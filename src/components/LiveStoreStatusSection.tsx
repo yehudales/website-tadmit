@@ -10,6 +10,7 @@ import { useStoreStatus } from '../hooks/useStoreStatus';
 import { Language } from '../types';
 import { BUSINESS_CONFIG } from '../config/businessConfig';
 import { InteractiveDisclosureTrigger } from './InteractiveDisclosureTrigger';
+import { BannerBottomCloseButton } from './BannerBottomCloseButton';
 import { getDrawerAnimationConfig } from '../utils/drawerAnimation';
 
 interface LiveStoreStatusSectionProps {
@@ -219,6 +220,13 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
                         </p>
                       </div>
                     </div>
+
+                    {/* Bottom circular arrow control */}
+                    <BannerBottomCloseButton
+                      onClose={() => setIsHoursOpen(false)}
+                      ariaLabel={lang === 'he' ? 'סגור פירוט שעות פתיחה' : 'Close opening hours details'}
+                      title={lang === 'he' ? 'סגור פירוט שעות פתיחה' : 'Close opening hours details'}
+                    />
                   </div>
                 </div>
               </motion.div>
