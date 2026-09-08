@@ -4,6 +4,7 @@ import { BUSINESS_CONFIG } from '../config/businessConfig';
 import { Language, NavSectionId } from '../types';
 import { Logo } from './Logo';
 import { ExpandableContentSection } from './ExpandableContentSection';
+import { hasToolbarShimmerPlayed, markToolbarShimmerAsPlayed } from '../utils/sessionShimmer';
 
 interface HeaderProps {
   lang: Language;
@@ -29,8 +30,24 @@ export const Header: React.FC<HeaderProps> = ({
   onGoHome,
 }) => {
   const [scrolled, setScrolled] = useState(false);
+  const [isShimmerActive, setIsShimmerActive] = useState(() => !hasToolbarShimmerPlayed());
   const headerRef = useRef<HTMLElement>(null);
   const baseHeaderRef = useRef<HTMLDivElement>(null);
+
+  // Manage one-time entrance text glint for top navigation labels
+  useEffect(() => {
+    if (!isShimmerActive) return;
+
+    markToolbarShimmerAsPlayed();
+
+    // The sweep travels smoothly across the 5 items (~1.35s duration + max 280ms stagger delay = 1.63s).
+    // Transition cleanly to normal state at 1.75s so that all text returns to 100% normal appearance.
+    const timer = setTimeout(() => {
+      setIsShimmerActive(false);
+    }, 1750);
+
+    return () => clearTimeout(timer);
+  }, [isShimmerActive]);
 
   // Measure base header height (row 1 + row 2) and keep --header-height CSS variable synchronized
   useEffect(() => {
@@ -154,6 +171,8 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="flex items-center justify-start md:justify-center overflow-x-auto no-scrollbar scroll-smooth py-1.5 sm:py-2 gap-1 sm:gap-2 md:gap-4 lg:gap-7">
                 {navItems.map((item, index) => {
                   const isActive = activeSection === item.id;
+                  const showShimmer = isShimmerActive && !isActive;
+
                   return (
                     <React.Fragment key={item.id}>
                       <button
@@ -168,7 +187,24 @@ export const Header: React.FC<HeaderProps> = ({
                         aria-controls="expandable-content-area"
                       >
                         <span className="relative pb-1">
-                          {item.label[lang]}
+                          <span
+                            className={`inline-block ${
+                              showShimmer
+                                ? lang === 'he'
+                                  ? 'toolbar-nav-text-glint-rtl'
+                                  : 'toolbar-nav-text-glint-ltr'
+                                : ''
+                            }`}
+                            style={
+                              showShimmer
+                                ? {
+                                    animationDelay: `${index * 70}ms`,
+                                  }
+                                : undefined
+                            }
+                          >
+                            {item.label[lang]}
+                          </span>
                           {isActive && (
                             <span
                               className="absolute bottom-0 inset-x-0 h-0.5 bg-[#FF7B1C] rounded-full shadow-[0_0_8px_rgba(255,123,28,0.5)]"

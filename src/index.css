@@ -91,6 +91,62 @@
   animation: timerGlowPulseOrange 4s ease-in-out infinite;
 }
 
+/* ==========================================================================
+   Top Navigation Toolbar - One-Time Entrance Text-Only Glint Animation
+   - Clipped strictly to text glyphs via background-clip: text
+   - Soft white reflective sweep travelling through the letters
+   - Zero colored glow, zero text shadow, zero container effect
+   - Single sweep only (~1.35s duration)
+   ========================================================================== */
+@keyframes toolbarTextGlintRTL {
+  0% {
+    background-position: 0% 0;
+  }
+  100% {
+    background-position: 100% 0;
+  }
+}
+
+@keyframes toolbarTextGlintLTR {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0% 0;
+  }
+}
+
+.toolbar-nav-text-glint-rtl,
+.toolbar-nav-text-glint-ltr {
+  display: inline-block;
+  background-image: linear-gradient(
+    115deg,
+    rgba(250, 249, 246, 0.85) 0%,
+    rgba(250, 249, 246, 0.85) 36%,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(250, 249, 246, 0.85) 64%,
+    rgba(250, 249, 246, 0.85) 100%
+  );
+  background-size: 320% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  will-change: background-position;
+  animation-duration: 1.35s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-fill-mode: forwards;
+  animation-iteration-count: 1;
+}
+
+.toolbar-nav-text-glint-rtl {
+  animation-name: toolbarTextGlintRTL;
+}
+
+.toolbar-nav-text-glint-ltr {
+  animation-name: toolbarTextGlintLTR;
+}
+
 /* Accessibility Feature Classes */
 html.a11y-readable-font body,
 html.a11y-readable-font * {
@@ -136,6 +192,13 @@ html.a11y-highlight-links a {
     filter: none !important;
     text-shadow: none !important;
   }
+  .toolbar-nav-text-glint-rtl,
+  .toolbar-nav-text-glint-ltr {
+    animation: none !important;
+    background: none !important;
+    -webkit-text-fill-color: currentColor !important;
+    color: inherit !important;
+  }
 }
 
 /* User-toggled reduced motion in accessibility toolbar */
@@ -152,6 +215,14 @@ html.a11y-reduced-motion .timer-typographic-green {
   animation: none !important;
   filter: none !important;
   text-shadow: none !important;
+}
+
+html.a11y-reduced-motion .toolbar-nav-text-glint-rtl,
+html.a11y-reduced-motion .toolbar-nav-text-glint-ltr {
+  animation: none !important;
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  color: inherit !important;
 }
 
 /* Suppress all native browser video start-playback buttons and overlay media controls */
