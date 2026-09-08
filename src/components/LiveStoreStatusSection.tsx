@@ -150,6 +150,7 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
                 initial={{ opacity: 0, height: 0 }}
                 animate={drawerAnim.open}
                 exit={drawerAnim.closed}
+                style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden', willChange: 'height' }}
                 className="w-full overflow-hidden"
               >
                 <div className="pt-4 pb-2 text-start">

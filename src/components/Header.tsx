@@ -70,10 +70,17 @@ export const Header: React.FC<HeaderProps> = ({
 
   // Measure base header height (row 1 + row 2) and keep --header-height CSS variable synchronized
   useEffect(() => {
+    let ticking = false;
     const updateHeaderHeight = () => {
-      if (baseHeaderRef.current) {
-        const height = baseHeaderRef.current.offsetHeight;
-        document.documentElement.style.setProperty('--header-height', `${height}px`);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (baseHeaderRef.current) {
+            const height = baseHeaderRef.current.offsetHeight;
+            document.documentElement.style.setProperty('--header-height', `${height}px`);
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
     updateHeaderHeight();
@@ -95,10 +102,12 @@ export const Header: React.FC<HeaderProps> = ({
 
   // Instantly re-synchronize header height when Kashrut drawer state toggles
   useEffect(() => {
-    if (baseHeaderRef.current) {
-      const height = baseHeaderRef.current.offsetHeight;
-      document.documentElement.style.setProperty('--header-height', `${height}px`);
-    }
+    window.requestAnimationFrame(() => {
+      if (baseHeaderRef.current) {
+        const height = baseHeaderRef.current.offsetHeight;
+        document.documentElement.style.setProperty('--header-height', `${height}px`);
+      }
+    });
   }, [isKashrutOpen]);
 
   useEffect(() => {
@@ -220,6 +229,7 @@ export const Header: React.FC<HeaderProps> = ({
                   initial={{ opacity: 0, height: 0 }}
                   animate={drawerAnim.open}
                   exit={drawerAnim.closed}
+                  style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden', willChange: 'height' }}
                   className="w-full overflow-hidden"
                 >
                   <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-3 pt-1">

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import {
   ChevronUp,
@@ -35,145 +35,138 @@ interface ExpandableContentSectionProps {
   onOpenPrivacy: () => void;
 }
 
-export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> = ({
+const sectionTitles: Record<NavSectionId, { he: string; en: string; icon: React.ReactNode }> = {
+  about: {
+    he: 'אודות יהודלס',
+    en: 'About Yehudales',
+    icon: <Info className="w-4 h-4 text-[#FF7B1C]" aria-hidden="true" />,
+  },
+  updates: {
+    he: 'עדכונים והודעות',
+    en: 'Updates & Announcements',
+    icon: <Bell className="w-4 h-4 text-[#FF7B1C]" aria-hidden="true" />,
+  },
+  'business-orders': {
+    he: 'הזמנות עסקיות וקייטרינג',
+    en: 'Business Orders & Catering',
+    icon: <Briefcase className="w-4 h-4 text-[#FF7B1C]" aria-hidden="true" />,
+  },
+  location: {
+    he: 'סניף יהודלס אשדוד',
+    en: 'Ashdod Branch & Hours',
+    icon: <MapPin className="w-4 h-4 text-[#FF7B1C]" aria-hidden="true" />,
+  },
+  reviews: {
+    he: 'ביקורות',
+    en: 'Reviews',
+    icon: <Star className="w-4 h-4 text-[#FF7B1C]" aria-hidden="true" />,
+  },
+};
+
+// 6 Brand Pillars exactly as provided
+const brandPillars = [
+  {
+    num: '01',
+    title: { he: 'טעם ייחודי וגבוה', en: 'Distinctive High Taste' },
+    desc: {
+      he: "מתכון צ'ולנט ומטעמי שבת שהשתבחו במהלך כ-6 שנות ניסיון, בתיבול עשיר וטעם עמוק ובלתי נשכח.",
+      en: 'Cholent and Shabbat delicacies perfected through ~6 years of culinary craft, with rich seasoning and unforgettable depth.',
+    },
+  },
+  {
+    num: '02',
+    title: { he: 'איכות בלתי מתפשרת', en: 'Uncompromising Quality' },
+    desc: {
+      he: 'שימוש בבשרים מובחרים, חומרי גלם איכותיים ביותר ובישול מסורתי מוקפד בכל מנה ומנה.',
+      en: 'Choice select meats, premium raw ingredients, and meticulous traditional slow-cooking in every dish.',
+    },
+  },
+  {
+    num: '03',
+    title: { he: 'ניקיון והיגיינה מוקפדת', en: 'Meticulous Cleanliness & Hygiene' },
+    desc: {
+      he: 'סטנדרט היגיינה עליון וסטריליות בכל שלבי ההכנה, האריזה והמשלוח לביתכם.',
+      en: 'Top hygiene standards and sterility throughout all preparation, packaging, and delivery phases.',
+    },
+  },
+  {
+    num: '04',
+    title: { he: 'שירות מעולה ומהיר', en: 'Fast & Excellent Service' },
+    desc: {
+      he: 'יחס חם, אריזה מוקפדת השומרת על חום המנות, ומענה מהיר להזמנות ב-WhatsApp עם איסוף עצמי מסודר.',
+      en: 'Warm attentive service, thermal packaging keeping food piping hot, and swift WhatsApp orders with organized pickup.',
+    },
+  },
+  {
+    num: '05',
+    title: { he: 'כשרות מהודרת ללא פשרות', en: 'Strict Kosher Without Compromise' },
+    desc: {
+      he: 'בשר נווה ציון ושאר מוצרים בהשגחת בד״ץ העדה החרדית – כשרות ברורה, אמינה ומפוקחת.',
+      en: 'Neve Zion meats and all products under Badatz Edah HaChareidis supervision — clear, trustworthy, strictly overseen.',
+    },
+  },
+  {
+    num: '06',
+    title: { he: 'חוויית ליל שישי אמיתית', en: 'Authentic Friday Night Experience' },
+    desc: {
+      he: 'האווירה, הריחות והטעמים של ליל שישי מסורתי וחם, זמינים עבורכם בכל שבוע באשדוד.',
+      en: 'The genuine atmosphere, aromas, and heartfelt flavors of traditional Friday night, right here in Ashdod every week.',
+    },
+  },
+];
+
+interface BannerPanelContentProps {
+  section: NavSectionId;
+  lang: Language;
+  onClose: () => void;
+  onOpenWhatsApp: () => void;
+  onOpenAccessibility: () => void;
+  onOpenPrivacy: () => void;
+  drawerAnim: ReturnType<typeof getDrawerAnimationConfig>;
+}
+
+const BannerPanelContent: React.FC<BannerPanelContentProps> = ({
+  section,
   lang,
-  activeSection,
   onClose,
   onOpenWhatsApp,
   onOpenAccessibility,
   onOpenPrivacy,
+  drawerAnim,
 }) => {
-  const shouldReduceMotion = useReducedMotion();
-  const drawerAnim = getDrawerAnimationConfig(shouldReduceMotion);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Keyboard accessibility: Escape closes the active panel
-  useEffect(() => {
-    if (!activeSection) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeSection, onClose]);
-
-  const sectionTitles: Record<NavSectionId, { he: string; en: string; icon: React.ReactNode }> = {
-    about: {
-      he: 'אודות יהודלס',
-      en: 'About Yehudales',
-      icon: <Info className="w-4 h-4 text-[#FF7B1C]" aria-hidden="true" />,
-    },
-    updates: {
-      he: 'עדכונים והודעות',
-      en: 'Updates & Announcements',
-      icon: <Bell className="w-4 h-4 text-[#FF7B1C]" aria-hidden="true" />,
-    },
-    'business-orders': {
-      he: 'הזמנות עסקיות וקייטרינג',
-      en: 'Business Orders & Catering',
-      icon: <Briefcase className="w-4 h-4 text-[#FF7B1C]" aria-hidden="true" />,
-    },
-    location: {
-      he: 'סניף יהודלס אשדוד',
-      en: 'Ashdod Branch & Hours',
-      icon: <MapPin className="w-4 h-4 text-[#FF7B1C]" aria-hidden="true" />,
-    },
-    reviews: {
-      he: 'ביקורות',
-      en: 'Reviews',
-      icon: <Star className="w-4 h-4 text-[#FF7B1C]" aria-hidden="true" />,
-    },
-  };
-
-  const currentTitle = activeSection ? sectionTitles[activeSection] : null;
+  const currentTitle = sectionTitles[section];
   const cateringWhatsAppUrl = getWhatsAppOrderUrl(BUSINESS_CONFIG.whatsapp.options.catering.message);
 
-  // 6 Brand Pillars exactly as provided
-  const brandPillars = [
-    {
-      num: '01',
-      title: { he: 'טעם ייחודי וגבוה', en: 'Distinctive High Taste' },
-      desc: {
-        he: "מתכון צ'ולנט ומטעמי שבת שהשתבחו במהלך כ-6 שנות ניסיון, בתיבול עשיר וטעם עמוק ובלתי נשכח.",
-        en: 'Cholent and Shabbat delicacies perfected through ~6 years of culinary craft, with rich seasoning and unforgettable depth.',
-      },
-    },
-    {
-      num: '02',
-      title: { he: 'איכות בלתי מתפשרת', en: 'Uncompromising Quality' },
-      desc: {
-        he: 'שימוש בבשרים מובחרים, חומרי גלם איכותיים ביותר ובישול מסורתי מוקפד בכל מנה ומנה.',
-        en: 'Choice select meats, premium raw ingredients, and meticulous traditional slow-cooking in every dish.',
-      },
-    },
-    {
-      num: '03',
-      title: { he: 'ניקיון והיגיינה מוקפדת', en: 'Meticulous Cleanliness & Hygiene' },
-      desc: {
-        he: 'סטנדרט היגיינה עליון וסטריליות בכל שלבי ההכנה, האריזה והמשלוח לביתכם.',
-        en: 'Top hygiene standards and sterility throughout all preparation, packaging, and delivery phases.',
-      },
-    },
-    {
-      num: '04',
-      title: { he: 'שירות מעולה ומהיר', en: 'Fast & Excellent Service' },
-      desc: {
-        he: 'יחס חם, אריזה מוקפדת השומרת על חום המנות, ומענה מהיר להזמנות ב-WhatsApp עם איסוף עצמי מסודר.',
-        en: 'Warm attentive service, thermal packaging keeping food piping hot, and swift WhatsApp orders with organized pickup.',
-      },
-    },
-    {
-      num: '05',
-      title: { he: 'כשרות מהודרת ללא פשרות', en: 'Strict Kosher Without Compromise' },
-      desc: {
-        he: 'בשר נווה ציון ושאר מוצרים בהשגחת בד״ץ העדה החרדית – כשרות ברורה, אמינה ומפוקחת.',
-        en: 'Neve Zion meats and all products under Badatz Edah HaChareidis supervision — clear, trustworthy, strictly overseen.',
-      },
-    },
-    {
-      num: '06',
-      title: { he: 'חוויית ליל שישי אמיתית', en: 'Authentic Friday Night Experience' },
-      desc: {
-        he: 'האווירה, הריחות והטעמים של ליל שישי מסורתי וחם, זמינים עבורכם בכל שבוע באשדוד.',
-        en: 'The genuine atmosphere, aromas, and heartfelt flavors of traditional Friday night, right here in Ashdod every week.',
-      },
-    },
-  ];
-
   return (
-    <AnimatePresence mode="wait">
-      {activeSection && currentTitle && (
-        <motion.div
-          id="expandable-content-area"
-          ref={containerRef}
-          key={activeSection}
-          initial={{ opacity: 0, height: 0 }}
-          animate={drawerAnim.open}
-          exit={drawerAnim.closed}
-          className="w-full overflow-hidden bg-[#0E1013] border-b border-[#252A32] relative z-20 select-text"
-          role="region"
-          aria-labelledby="expandable-heading"
-        >
-          {/* Animated Page Entrance Effect (Orange-only, ~2s duration, unmounts automatically) */}
-          <PageEntranceAnimation key={activeSection} section={activeSection} />
+    <motion.div
+      id="expandable-content-area"
+      key={section}
+      initial={{ opacity: 0, height: 0 }}
+      animate={drawerAnim.open}
+      exit={drawerAnim.closed}
+      style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden', willChange: 'height' }}
+      className="w-full overflow-hidden bg-[#0E1013] border-b border-[#252A32] relative z-20 select-text"
+      role="region"
+      aria-labelledby="expandable-heading"
+    >
+      {/* Animated Page Entrance Effect (Orange-only, ~2s duration, unmounts automatically) */}
+      <PageEntranceAnimation key={section} section={section} />
 
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-8">
-            {/* Top Panel Control Bar with Section Badge (No X/Close Button) */}
-            <div className="flex items-center justify-start pb-5 mb-6 border-b border-[#252A32]">
-              <div className="flex items-center gap-2.5">
-                <span className="p-1.5 rounded-lg bg-[#1A1D22] border border-[#252A32] flex items-center justify-center">
-                  {currentTitle.icon}
-                </span>
-                <h2 id="expandable-heading" className="text-lg sm:text-xl font-black text-[#FAF9F6] tracking-tight">
-                  {currentTitle[lang]}
-                </h2>
-              </div>
-            </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-8">
+        {/* Top Panel Control Bar with Section Badge (No X/Close Button) */}
+        <div className="flex items-center justify-start pb-5 mb-6 border-b border-[#252A32]">
+          <div className="flex items-center gap-2.5">
+            <span className="p-1.5 rounded-lg bg-[#1A1D22] border border-[#252A32] flex items-center justify-center">
+              {currentTitle.icon}
+            </span>
+            <h2 id="expandable-heading" className="text-lg sm:text-xl font-black text-[#FAF9F6] tracking-tight">
+              {currentTitle[lang]}
+            </h2>
+          </div>
+        </div>
 
-            {/* Section 1: אודות (About — Comprehensive Brand Content) */}
-            {activeSection === 'about' && (
+        {/* Section 1: אודות (About — Comprehensive Brand Content) */}
+        {section === 'about' && (
               <div className="space-y-10">
                 {/* 1. Main Brand Story & Profile */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -445,7 +438,7 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
             )}
 
             {/* Section 2: עדכונים (Updates) */}
-            {activeSection === 'updates' && (
+            {section === 'updates' && (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {BUSINESS_CONFIG.updates.map((update) => (
@@ -481,7 +474,7 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
             )}
 
             {/* Section 3: הזמנות עסקיות (Business Orders & Catering) */}
-            {activeSection === 'business-orders' && (
+            {section === 'business-orders' && (
               <div className="space-y-8">
                 {/* 1. אירועים וקייטרינג מיוחד (Event & Catering Information) */}
                 <div className="space-y-4">
@@ -589,7 +582,7 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
             )}
 
             {/* Section 4: סניף (Branch & Location) */}
-            {activeSection === 'location' && (
+            {section === 'location' && (
               <div className="space-y-8">
                 {/* Header */}
                 <div className="text-start">
@@ -751,7 +744,7 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
             )}
 
             {/* Section 5: ביקורות (Reviews — Intentionally empty clean content area ready for content to be added later) */}
-            {activeSection === 'reviews' && (
+            {section === 'reviews' && (
               <div className="space-y-6 min-h-[260px]">
                 {/* Intentionally empty clean content area ready for future reviews */}
                 <div className="p-8 sm:p-14 rounded-2xl bg-[#14171C]/40 border border-[#252A32]/60 flex flex-col items-center justify-center min-h-[220px]" />
@@ -772,6 +765,45 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
             </button>
           </div>
         </motion.div>
+  );
+};
+
+export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> = ({
+  lang,
+  activeSection,
+  onClose,
+  onOpenWhatsApp,
+  onOpenAccessibility,
+  onOpenPrivacy,
+}) => {
+  const shouldReduceMotion = useReducedMotion();
+  const drawerAnim = getDrawerAnimationConfig(shouldReduceMotion);
+
+  // Keyboard accessibility: Escape closes the active panel
+  useEffect(() => {
+    if (!activeSection) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeSection, onClose]);
+
+  return (
+    <AnimatePresence initial={false}>
+      {activeSection && (
+        <BannerPanelContent
+          key={activeSection}
+          section={activeSection}
+          lang={lang}
+          onClose={onClose}
+          onOpenWhatsApp={onOpenWhatsApp}
+          onOpenAccessibility={onOpenAccessibility}
+          onOpenPrivacy={onOpenPrivacy}
+          drawerAnim={drawerAnim}
+        />
       )}
     </AnimatePresence>
   );

@@ -153,11 +153,21 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
 
     window.addEventListener('resize', updateDimensions);
 
+    let scrollTicking = false;
     const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const el = containerRef.current;
-      const threshold = el ? el.offsetTop + el.offsetHeight : 350;
-      setIsScrolledPast(scrollY > threshold);
+      if (!scrollTicking) {
+        window.requestAnimationFrame(() => {
+          const scrollY = window.scrollY;
+          const el = containerRef.current;
+          const threshold = el ? el.offsetTop + el.offsetHeight : 350;
+          setIsScrolledPast((prev) => {
+            const next = scrollY > threshold;
+            return prev === next ? prev : next;
+          });
+          scrollTicking = false;
+        });
+        scrollTicking = true;
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
