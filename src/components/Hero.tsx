@@ -155,7 +155,8 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
 
     const handleScroll = () => {
       const scrollY = window.scrollY;
-      const threshold = containerRef.current?.offsetHeight || 350;
+      const el = containerRef.current;
+      const threshold = el ? el.offsetTop + el.offsetHeight : 350;
       setIsScrolledPast(scrollY > threshold);
     };
 
@@ -377,19 +378,14 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
       className="relative w-full aspect-video max-h-[70vh] select-none"
     >
       {/* 
-        Stationary Fixed Cinematic 16:9 Video Layer
-        Locks directly below the locked top banner.
-        Does NOT move when user scrolls.
-        The scrolling content slides over this layer like a curtain/shutter.
+        Cinematic 16:9 Video Layer
+        Participates naturally in document scroll flow with sticky top-0 shutter curtain effect.
+        Content below slides upward over this layer.
       */}
       <div
-        className={`fixed inset-x-0 z-10 overflow-hidden bg-[#0B0C0E] select-none flex items-center justify-center transition-opacity duration-200 ${
+        className={`sticky top-0 inset-x-0 z-10 w-full h-full overflow-hidden bg-[#0B0C0E] select-none flex items-center justify-center transition-opacity duration-200 ${
           isScrolledPast ? 'pointer-events-none' : 'pointer-events-auto'
         }`}
-        style={{
-          top: 'var(--header-height, 98px)',
-          height: heroHeight > 0 ? `${heroHeight}px` : 'calc(min(56.25vw, 70vh))',
-        }}
       >
         <div className="relative w-full h-full max-w-7xl mx-auto flex items-center justify-center overflow-hidden">
           <video

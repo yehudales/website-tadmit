@@ -123,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
     <>
       <header
         ref={headerRef}
-        className={`fixed top-0 inset-x-0 z-50 transition-colors duration-300 bg-[#0B0C0E] border-b ${
+        className={`relative w-full z-40 transition-colors duration-300 bg-[#0B0C0E] border-b ${
           scrolled
             ? 'shadow-2xl border-[#252A32]'
             : 'shadow-md border-[#252A32]/80'
