@@ -38,9 +38,9 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
     >
       {/* Animated Touch Indicator Composition: Positioned to the RIGHT of text and lowered 2.5px to align with text */}
       <div className="relative top-[2.5px] flex items-center justify-center w-5 h-5 shrink-0 select-none finger-combined-motion [isolation:isolate]">
-        {/* 1. LAYER: BACK -> Simple Solid Orange Circle on layer z-0, positioned underneath the fingertip */}
+        {/* 1. LAYER: BACK -> Simple Solid Orange Circle on layer z-0 (50% size: 5px x 5px), positioned underneath the fingertip */}
         <span
-          className="absolute -left-0.5 top-[68%] -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-[#FF7B1C] z-0 pointer-events-none motion-reduce:hidden finger-circle-pulse"
+          className="absolute left-[0.5px] top-[68%] -translate-y-1/2 w-[5px] h-[5px] rounded-full bg-[#FF7B1C] z-0 pointer-events-none motion-reduce:hidden finger-circle-pulse"
           style={{ zIndex: 0 }}
           aria-hidden="true"
         />

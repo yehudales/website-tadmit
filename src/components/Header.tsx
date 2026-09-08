@@ -89,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* ROW 1: Top Header Area (Brand Title & Settings Action) */}
           <div
             className="border-b border-[#252A32]/60 py-2 sm:py-2.5 bg-[#0B0C0E]/95 flex items-center"
-            style={{ height: '93.8889px' }}
+            style={{ height: '104.8889px' }}
           >
             <div className="max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 grid grid-cols-3 items-center">
               {/* Left / Home shortcut (Left Col) */}
