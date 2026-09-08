@@ -10,6 +10,10 @@ interface InteractiveDisclosureTriggerProps {
   ariaLabelOpen: string;
   ariaLabelClosed: string;
   id?: string;
+  emojiColor?: string;
+  circleColor?: string;
+  accentColor?: string;
+  textClassName?: string;
 }
 
 export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTriggerProps> = ({
@@ -20,6 +24,10 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
   ariaLabelOpen,
   ariaLabelClosed,
   id,
+  emojiColor = '#FF7B1C',
+  circleColor = '#FF7B1C',
+  accentColor = '#FF7B1C',
+  textClassName = '',
 }) => {
   const handleClick = () => {
     triggerMobileHaptic(15);
@@ -34,14 +42,14 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
       aria-expanded={isOpen}
       aria-controls={ariaControls}
       aria-label={isOpen ? ariaLabelOpen : ariaLabelClosed}
-      className="group inline-flex flex-row items-center justify-center gap-2 py-1.5 px-2 text-xs sm:text-sm font-semibold tracking-wide transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] rounded-lg whitespace-nowrap select-none no-underline"
+      className="group inline-flex flex-row items-center justify-center gap-1.5 py-0.5 px-2 text-xs sm:text-sm font-semibold tracking-wide transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] rounded-lg whitespace-nowrap select-none no-underline"
     >
       {/* Animated Touch Indicator Composition: Positioned to the RIGHT of text and lowered 2.5px to align with text */}
       <div className="relative top-[2.5px] flex items-center justify-center w-5 h-5 shrink-0 select-none finger-combined-motion [isolation:isolate]">
         {/* 1. LAYER: BACK -> Simple Solid Orange Circle on layer z-0 (+30% size: 6.5px x 6.5px), raised slightly UP to sit precisely in front of fingertip */}
         <span
-          className="absolute left-[0.5px] top-[56%] -translate-y-1/2 w-[6.5px] h-[6.5px] rounded-full bg-[#FF7B1C] z-0 pointer-events-none motion-reduce:hidden finger-circle-pulse"
-          style={{ zIndex: 0 }}
+          className="absolute left-[0.5px] top-[56%] -translate-y-1/2 w-[6.5px] h-[6.5px] rounded-full z-0 pointer-events-none motion-reduce:hidden finger-circle-pulse"
+          style={{ zIndex: 0, backgroundColor: circleColor }}
           aria-hidden="true"
         />
 
@@ -51,7 +59,8 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
           style={{ zIndex: 10 }}
         >
           <svg
-            className="w-4 h-4 text-[#FF7B1C]"
+            className="w-4 h-4"
+            style={{ color: emojiColor }}
             viewBox="0 0 24 24"
             fill="#0B0C0E"
             stroke="currentColor"
@@ -65,11 +74,12 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
         </div>
       </div>
 
-      {/* Text: Normal = WHITE, Open/Active = ORANGE #FF7B1C, NO UNDERLINE in any state */}
+      {/* Text: Normal = WHITE, Open/Active = ACCENT COLOR, NO UNDERLINE in any state */}
       <span
-        className={`transition-colors duration-200 no-underline decoration-transparent select-none ${
-          isOpen ? 'text-[#FF7B1C]' : 'text-[#FAF9F6]'
+        className={`transition-colors duration-200 no-underline decoration-transparent select-none ${textClassName} ${
+          isOpen ? '' : 'text-[#FAF9F6]'
         }`}
+        style={isOpen ? { color: accentColor } : undefined}
       >
         {label}
       </span>
@@ -77,7 +87,8 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
       {/* Reverse / Close Upward Arrow (Appears ONLY in open state, tailless chevron) */}
       {isOpen && (
         <ChevronUp
-          className="w-3.5 h-3.5 text-[#FF7B1C] shrink-0"
+          className="w-3.5 h-3.5 shrink-0"
+          style={{ color: accentColor }}
           strokeWidth={2.4}
           aria-hidden="true"
         />

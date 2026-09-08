@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Language, NavSectionId } from './types';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
-import { KashrutBanner } from './components/KashrutBanner';
 import { LiveStoreStatusSection } from './components/LiveStoreStatusSection';
 import { GallerySection } from './components/GallerySection';
 import { Footer } from './components/Footer';
@@ -122,7 +121,7 @@ export default function App() {
         className="fixed top-2 left-2 z-[9999] pointer-events-none w-6 h-6 rounded-full bg-[#1A1D22]/80 border border-white/20 text-[#FAF9F6]/80 text-[10px] font-mono font-bold flex items-center justify-center select-none shadow-sm"
         aria-hidden="true"
       >
-        31
+        34
       </div>
 
       {/* Accessible Skip Link */}
@@ -158,9 +157,6 @@ export default function App() {
 
         {/* Scrolling Foreground Layer (Slides upward over the stationary fixed video like a curtain/shutter) */}
         <div className="relative z-20 bg-[#0B0C0E] shadow-[0_-20px_40px_rgba(0,0,0,0.85)] border-t border-[#252A32]/60">
-          {/* Compact Kashrut Disclosure Trigger & Expandable Banner */}
-          <KashrutBanner lang={lang} />
-
           {/* Live Store Status & Modern Large Countdown Timer */}
           <LiveStoreStatusSection
             lang={lang}
