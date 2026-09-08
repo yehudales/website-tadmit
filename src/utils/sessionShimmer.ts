@@ -9,42 +9,31 @@
  * - Does NOT replay on every render.
  * - Does NOT replay when the component remounts during normal interaction.
  * - Respects prefers-reduced-motion: if enabled, skips the animation immediately.
- * - Uses native sessionStorage combined with an in-memory session flag.
  */
 
-const SHIMMER_SESSION_KEY = 'yehudales_toolbar_text_shimmer_v1';
-let memoryShimmerPlayed = false;
+// In-memory guard for the current page session/load
+let pageSessionPlayed = false;
 
 export const hasToolbarShimmerPlayed = (): boolean => {
-  if (memoryShimmerPlayed) return true;
+  if (pageSessionPlayed) return true;
 
   if (typeof window === 'undefined') return false;
 
-  // Reduced motion preference check
+  // Respect reduced motion preference
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     return true;
   }
 
+  // Clear any legacy stale session keys that might have permanently blocked reloads
   try {
-    if (sessionStorage.getItem(SHIMMER_SESSION_KEY) === 'true') {
-      memoryShimmerPlayed = true;
-      return true;
-    }
+    sessionStorage.removeItem('yehudales_toolbar_text_shimmer_v1');
   } catch {
-    // sessionStorage might be restricted (e.g. strict private mode)
+    // Ignore storage errors
   }
 
   return false;
 };
 
 export const markToolbarShimmerAsPlayed = (): void => {
-  memoryShimmerPlayed = true;
-
-  if (typeof window === 'undefined') return;
-
-  try {
-    sessionStorage.setItem(SHIMMER_SESSION_KEY, 'true');
-  } catch {
-    // Fallback safely if sessionStorage write is prevented
-  }
+  pageSessionPlayed = true;
 };

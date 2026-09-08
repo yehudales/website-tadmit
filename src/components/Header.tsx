@@ -30,24 +30,31 @@ export const Header: React.FC<HeaderProps> = ({
   onGoHome,
 }) => {
   const [scrolled, setScrolled] = useState(false);
-  const [isShimmerActive, setIsShimmerActive] = useState(() => !hasToolbarShimmerPlayed());
   const headerRef = useRef<HTMLElement>(null);
   const baseHeaderRef = useRef<HTMLDivElement>(null);
+  // Entrance text glint state for top navigation labels (runs once on initial page load)
+  const [isShimmerActive, setIsShimmerActive] = useState(false);
 
-  // Manage one-time entrance text glint for top navigation labels
   useEffect(() => {
-    if (!isShimmerActive) return;
+    if (hasToolbarShimmerPlayed()) return;
 
     markToolbarShimmerAsPlayed();
 
-    // The sweep travels smoothly across the 5 items (~1.35s duration + max 280ms stagger delay = 1.63s).
-    // Transition cleanly to normal state at 1.75s so that all text returns to 100% normal appearance.
-    const timer = setTimeout(() => {
-      setIsShimmerActive(false);
-    }, 1750);
+    // 250ms initial pause after mount so the page layout and fonts settle before the light sweep begins
+    const startTimer = setTimeout(() => {
+      setIsShimmerActive(true);
+    }, 250);
 
-    return () => clearTimeout(timer);
-  }, [isShimmerActive]);
+    // 1.4s animation + 280ms stagger = ~1.68s. After 2.1s from mount, return cleanly to standard text state
+    const endTimer = setTimeout(() => {
+      setIsShimmerActive(false);
+    }, 2100);
+
+    return () => {
+      clearTimeout(startTimer);
+      clearTimeout(endTimer);
+    };
+  }, []);
 
   // Measure base header height (row 1 + row 2) and keep --header-height CSS variable synchronized
   useEffect(() => {

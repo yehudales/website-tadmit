@@ -100,19 +100,19 @@
    ========================================================================== */
 @keyframes toolbarTextGlintRTL {
   0% {
-    background-position: 0% 0;
+    background-position: 180% 0;
   }
   100% {
-    background-position: 100% 0;
+    background-position: -180% 0;
   }
 }
 
 @keyframes toolbarTextGlintLTR {
   0% {
-    background-position: 100% 0;
+    background-position: -180% 0;
   }
   100% {
-    background-position: 0% 0;
+    background-position: 180% 0;
   }
 }
 
@@ -120,22 +120,22 @@
 .toolbar-nav-text-glint-ltr {
   display: inline-block;
   background-image: linear-gradient(
-    115deg,
-    rgba(250, 249, 246, 0.85) 0%,
-    rgba(250, 249, 246, 0.85) 36%,
+    110deg,
+    rgba(250, 249, 246, 0.78) 0%,
+    rgba(250, 249, 246, 0.78) 35%,
     rgba(255, 255, 255, 1) 50%,
-    rgba(250, 249, 246, 0.85) 64%,
-    rgba(250, 249, 246, 0.85) 100%
+    rgba(250, 249, 246, 0.78) 65%,
+    rgba(250, 249, 246, 0.78) 100%
   );
-  background-size: 320% 100%;
+  background-size: 280% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
   will-change: background-position;
-  animation-duration: 1.35s;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  animation-fill-mode: forwards;
+  animation-duration: 1.4s;
+  animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+  animation-fill-mode: both;
   animation-iteration-count: 1;
 }
 

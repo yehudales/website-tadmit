@@ -25,8 +25,8 @@ interface ParticleConfig {
 // - Smooth upward movement with gradual fan/cone horizontal expansion toward center
 // - Independent self-rotation around own center like a dreidel (2-3+ full 360° rotations)
 // - Completely separated transforms: path trajectory on outer container, center self-spin on inner container
-// - Total duration: ~2.3s total visible lifetime (preserved dwell time and fade)
-// - Clean unmount at 2.35s
+// - Total duration: ~4.6s total visible lifetime (preserved dwell time and fade)
+// - Clean unmount at 4.7s
 const PARTICLES_CONFIG: ParticleConfig[] = [
   {
     id: 1,
@@ -51,7 +51,7 @@ const PARTICLES_CONFIG: ParticleConfig[] = [
     travelMultiplier: 1.02,
     spinTurns: 1120, // ~3.1 full CW spins
     startAngle: 20,
-    delay: 15,
+    delay: 30,
     hasSpark: true,
     sparkX: 5,
     sparkY: -6,
@@ -65,7 +65,7 @@ const PARTICLES_CONFIG: ParticleConfig[] = [
     travelMultiplier: 0.95,
     spinTurns: 900, // 2.5 full CW spins
     startAngle: -10,
-    delay: 30,
+    delay: 60,
     hasSpark: false,
     sparkX: 0,
     sparkY: 0,
@@ -79,7 +79,7 @@ const PARTICLES_CONFIG: ParticleConfig[] = [
     travelMultiplier: 1.04,
     spinTurns: -1020, // ~2.8 full CCW spins
     startAngle: 12,
-    delay: 10,
+    delay: 20,
     hasSpark: true,
     sparkX: 4,
     sparkY: -4,
@@ -93,7 +93,7 @@ const PARTICLES_CONFIG: ParticleConfig[] = [
     travelMultiplier: 1.00,
     spinTurns: 1080, // 3 full CW spins (1080°)
     startAngle: 0,
-    delay: 20,
+    delay: 40,
     hasSpark: true,
     sparkX: -3,
     sparkY: -4,
@@ -128,10 +128,10 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
     const handleResize = () => measureTravel();
     window.addEventListener('resize', handleResize);
 
-    // Unmount completely after 2.35s (2350ms)
+    // Unmount completely after 4.7s (4700ms)
     const timer = setTimeout(() => {
       setIsVisible(false);
-    }, 2350);
+    }, 4700);
 
     return () => {
       clearTimeout(t1);
@@ -260,7 +260,7 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
     >
       <style>{`
         /* 
-          Bottom Confetti Trajectory Animation (2.3s total):
+          Bottom Confetti Trajectory Animation (4.6s total):
           - Fluid, soft upward curve with continuous natural easing
           - 0% to 75%: Concentrated bottom launch with fan expansion toward center
           - 75% to 86%: Gentle apex float and hover dwell at center
@@ -350,7 +350,7 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
 
         @media (prefers-reduced-motion: reduce) {
           .emitter-particle {
-            animation: reducedFade 2.3s ease-out forwards !important;
+            animation: reducedFade 4.6s ease-out forwards !important;
           }
           .dreidel-spinner {
             animation: none !important;
@@ -377,7 +377,7 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
                 width: `${p.size}px`,
                 height: `${p.size}px`,
                 marginLeft: `${p.emitOffsetX}px`,
-                animation: `bottomConfettiTrajectory 2.3s cubic-bezier(0.25, 1, 0.35, 1) forwards`,
+                animation: `bottomConfettiTrajectory 4.6s cubic-bezier(0.25, 1, 0.35, 1) forwards`,
                 animationDelay: `${p.delay}ms`,
                 ['--spray-x' as string]: `${p.sprayX}px`,
                 ['--drift-x' as string]: `${p.driftX}px`,
@@ -389,7 +389,7 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
                 className="dreidel-spinner w-full h-full flex items-center justify-center will-change-transform"
                 style={{
                   transformOrigin: '50% 50%',
-                  animation: `dreidelSelfSpin 2.3s cubic-bezier(0.25, 1, 0.4, 1) forwards`,
+                  animation: `dreidelSelfSpin 4.6s cubic-bezier(0.25, 1, 0.4, 1) forwards`,
                   animationDelay: `${p.delay}ms`,
                   ['--start-rot' as string]: `${p.startAngle}deg`,
                   ['--spin-rot' as string]: `${p.spinTurns}deg`,
@@ -402,7 +402,7 @@ export const PageEntranceAnimation: React.FC<PageEntranceAnimationProps> = ({ se
                 <span
                   className="absolute top-1/2 left-1/2 w-1.5 h-1.5 rounded-full bg-[#FF7B1C] pointer-events-none"
                   style={{
-                    animation: `confettiSoftSparks 2.3s ease-out forwards`,
+                    animation: `confettiSoftSparks 4.6s ease-out forwards`,
                     animationDelay: `${p.delay}ms`,
                     ['--spark-x' as string]: `${p.sparkX}px`,
                     ['--spark-y' as string]: `${p.sparkY}px`,
