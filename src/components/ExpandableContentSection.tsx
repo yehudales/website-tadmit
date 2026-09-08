@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion, useIsPresent } from 'motion/react';
 import {
   ChevronUp,
   Info,
@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { Language, NavSectionId } from '../types';
 import { BUSINESS_CONFIG, getWhatsAppOrderUrl } from '../config/businessConfig';
-import { getDrawerAnimationConfig } from '../utils/drawerAnimation';
+import { getBannerRevealConfig } from '../utils/drawerAnimation';
 import { PageEntranceAnimation } from './PageEntranceAnimation';
 
 interface ExpandableContentSectionProps {
@@ -122,7 +122,8 @@ interface BannerPanelContentProps {
   onOpenWhatsApp: () => void;
   onOpenAccessibility: () => void;
   onOpenPrivacy: () => void;
-  drawerAnim: ReturnType<typeof getDrawerAnimationConfig>;
+  bannerAnim: ReturnType<typeof getBannerRevealConfig>;
+  shouldReduceMotion: boolean | null | undefined;
 }
 
 const BannerPanelContent: React.FC<BannerPanelContentProps> = ({
@@ -132,27 +133,47 @@ const BannerPanelContent: React.FC<BannerPanelContentProps> = ({
   onOpenWhatsApp,
   onOpenAccessibility,
   onOpenPrivacy,
-  drawerAnim,
+  bannerAnim,
+  shouldReduceMotion,
 }) => {
   const currentTitle = sectionTitles[section];
   const cateringWhatsAppUrl = getWhatsAppOrderUrl(BUSINESS_CONFIG.whatsapp.options.catering.message);
 
+  const isPresent = useIsPresent();
+  const [isExpanded, setIsExpanded] = useState(Boolean(shouldReduceMotion));
+
+  useEffect(() => {
+    if (shouldReduceMotion) return;
+    const rafId = requestAnimationFrame(() => {
+      setIsExpanded(true);
+    });
+    return () => cancelAnimationFrame(rafId);
+  }, [shouldReduceMotion]);
+
   return (
-    <motion.div
+    <div
       id="expandable-content-area"
-      key={section}
-      initial={{ opacity: 0, height: 0 }}
-      animate={drawerAnim.open}
-      exit={drawerAnim.closed}
-      style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden', willChange: 'height' }}
-      className="w-full overflow-hidden bg-[#0E1013] border-b border-[#252A32] relative z-20 select-text"
+      className="w-full overflow-hidden grid bg-[#0E1013] border-b border-[#252A32] relative z-20 select-text transition-[grid-template-rows]"
+      style={{
+        gridTemplateRows: isExpanded && isPresent ? '1fr' : '0fr',
+        transitionDuration: shouldReduceMotion ? '0s' : (isPresent ? '1.54s' : '1.50s'),
+        transitionTimingFunction: 'cubic-bezier(0.03, 0.94, 0.16, 0.985)',
+      }}
       role="region"
       aria-labelledby="expandable-heading"
     >
-      {/* Animated Page Entrance Effect (Orange-only, ~2s duration, unmounts automatically) */}
-      <PageEntranceAnimation key={section} section={section} />
+      <div className="min-h-0 overflow-hidden" style={{ contain: 'layout style' }}>
+        <motion.div
+          key={section}
+          initial={bannerAnim.initial}
+          animate={bannerAnim.open}
+          exit={bannerAnim.closed}
+          className="w-full"
+        >
+          {/* Animated Page Entrance Effect (Orange-only, ~2s duration, unmounts automatically) */}
+          <PageEntranceAnimation key={section} section={section} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-8">
         {/* Top Panel Control Bar with Section Badge (No X/Close Button) */}
         <div className="flex items-center justify-start pb-5 mb-6 border-b border-[#252A32]">
           <div className="flex items-center gap-2.5">
@@ -765,6 +786,8 @@ const BannerPanelContent: React.FC<BannerPanelContentProps> = ({
             </button>
           </div>
         </motion.div>
+      </div>
+    </div>
   );
 };
 
@@ -777,7 +800,7 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
   onOpenPrivacy,
 }) => {
   const shouldReduceMotion = useReducedMotion();
-  const drawerAnim = getDrawerAnimationConfig(shouldReduceMotion);
+  const bannerAnim = getBannerRevealConfig(shouldReduceMotion);
 
   // Synchronous session tracking to handle direct switching with zero delay.
   // In a direct switch (Section A -> Section B):
@@ -829,7 +852,8 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
           onOpenWhatsApp={onOpenWhatsApp}
           onOpenAccessibility={onOpenAccessibility}
           onOpenPrivacy={onOpenPrivacy}
-          drawerAnim={drawerAnim}
+          bannerAnim={bannerAnim}
+          shouldReduceMotion={shouldReduceMotion}
         />
       )}
     </AnimatePresence>

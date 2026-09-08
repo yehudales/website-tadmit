@@ -16,6 +16,82 @@ export const isMobileViewport = () => {
   return window.innerWidth < 768;
 };
 
+/**
+ * Compositor-friendly reveal configuration for Toolbar Banners.
+ * Uses GPU-accelerated clipPath and opacity instead of height: "auto" in document flow.
+ * Preserves the exact 1.54s open / 1.50s close timing with the 1.00s final slow deceleration phase.
+ */
+export const getBannerRevealConfig = (shouldReduceMotion: boolean | null | undefined) => {
+  if (shouldReduceMotion) {
+    return {
+      initial: {
+        clipPath: 'inset(0 0 0% 0)',
+        opacity: 1,
+      },
+      open: {
+        clipPath: 'inset(0 0 0% 0)',
+        opacity: 1,
+        transition: { duration: 0 },
+      },
+      closed: {
+        clipPath: 'inset(0 0 100% 0)',
+        opacity: 0,
+        transition: { duration: 0 },
+      },
+    };
+  }
+
+  const isMobile = isMobileViewport();
+
+  if (isMobile) {
+    return {
+      initial: {
+        clipPath: 'inset(0 0 100% 0)',
+        opacity: 0,
+      },
+      open: {
+        clipPath: 'inset(0 0 0% 0)',
+        opacity: 1,
+        transition: {
+          clipPath: { duration: 1.54, ease: DRAWER_EASING },
+          opacity: { duration: 0.28, ease: 'easeOut' },
+        },
+      },
+      closed: {
+        clipPath: 'inset(0 0 100% 0)',
+        opacity: 0,
+        transition: {
+          clipPath: { duration: 1.50, ease: DRAWER_EASING },
+          opacity: { duration: 0.28, ease: 'easeOut', delay: 1.22 },
+        },
+      },
+    };
+  }
+
+  return {
+    initial: {
+      clipPath: 'inset(0 0 100% 0)',
+      opacity: 0,
+    },
+    open: {
+      clipPath: 'inset(0 0 0% 0)',
+      opacity: 1,
+      transition: {
+        clipPath: { duration: 1.54, ease: DRAWER_EASING },
+        opacity: { duration: 0.32, ease: 'easeOut' },
+      },
+    },
+    closed: {
+      clipPath: 'inset(0 0 100% 0)',
+      opacity: 0,
+      transition: {
+        clipPath: { duration: 1.50, ease: DRAWER_EASING },
+        opacity: { duration: 1.40, ease: 'easeOut', delay: 0.05 },
+      },
+    },
+  };
+};
+
 export const getDrawerAnimationConfig = (shouldReduceMotion: boolean | null | undefined) => {
   if (shouldReduceMotion) {
     return {
