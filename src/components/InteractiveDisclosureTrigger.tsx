@@ -37,15 +37,15 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
       className="group inline-flex flex-row items-center justify-center gap-2 py-1.5 px-2 text-xs sm:text-sm font-semibold tracking-wide transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] rounded-lg whitespace-nowrap select-none no-underline"
     >
       {/* Animated Touch Indicator Composition: Positioned to the RIGHT of text */}
-      <div className="relative flex items-center justify-center w-5 h-5 shrink-0 select-none">
+      <div className="relative flex items-center justify-center w-5 h-5 shrink-0 select-none finger-combined-motion">
         {/* 1. Small Circle (67% smaller ~8px), Layered UNDER the fingertip */}
         <span
-          className="absolute top-0.5 left-0.5 w-2 h-2 rounded-full bg-[#FF7B1C] finger-circle-pulse-small z-0 pointer-events-none motion-reduce:hidden"
+          className="absolute left-[3px] top-1/2 w-2 h-2 rounded-full bg-[#FF7B1C] finger-circle-pulse-small z-0 pointer-events-none motion-reduce:hidden"
           aria-hidden="true"
         />
 
-        {/* 2. Hand Emoji (Rotated 45° to the LEFT), Layered ABOVE the circle */}
-        <div className="relative z-10 flex items-center justify-center rotate-[-45deg]">
+        {/* 2. Hand Emoji (Rotated -90° to point directly at the text), Layered ABOVE the circle */}
+        <div className="relative z-10 flex items-center justify-center rotate-[-90deg]">
           <svg
             className="w-4 h-4 text-[#FF7B1C]"
             viewBox="0 0 24 24"
@@ -79,20 +79,39 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
         />
       )}
 
-      {/* Lightweight CSS Keyframes: Small Localized Circle Pulse directly under Fingertip */}
+      {/* Lightweight CSS Keyframes: Synchronized Hand + Circle Micro-Motion & Fingertip Circle Pulse */}
       <style>{`
+        @keyframes finger-combined-anim {
+          0%, 100% {
+            transform: translateX(1.5px);
+          }
+          50% {
+            transform: translateX(-2.5px);
+          }
+        }
+        .finger-combined-motion {
+          animation: finger-combined-anim 2.2s ease-in-out infinite;
+        }
+
         @keyframes finger-circle-pulse-small-anim {
           0%, 100% {
-            transform: scale(0.85);
+            transform: translateY(-50%) scale(0.85);
             opacity: 0.35;
           }
           50% {
-            transform: scale(1.35);
+            transform: translateY(-50%) scale(1.35);
             opacity: 0.85;
           }
         }
         .finger-circle-pulse-small {
-          animation: finger-circle-pulse-small-anim 1.8s ease-in-out infinite;
+          animation: finger-circle-pulse-small-anim 2.2s ease-in-out infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .finger-combined-motion,
+          .finger-circle-pulse-small {
+            animation: none !important;
+          }
         }
       `}</style>
     </button>
