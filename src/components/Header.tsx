@@ -51,12 +51,13 @@ export const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // The 4 toolbar navigation items (RTL order: אודות | עדכונים | הזמנות עסקיות | סניף)
+  // The 5 toolbar navigation items (RTL order: אודות | עדכונים | הזמנות עסקיות | סניף | ביקורות)
   const navItems: { id: NavSectionId; label: { he: string; en: string } }[] = [
     { id: 'about', label: { he: 'אודות', en: 'About' } },
     { id: 'updates', label: { he: 'עדכונים', en: 'Updates' } },
     { id: 'business-orders', label: { he: 'הזמנות עסקיות', en: 'Business Orders' } },
     { id: 'location', label: { he: 'סניף', en: 'Branch' } },
+    { id: 'reviews', label: { he: 'ביקורות', en: 'Reviews' } },
   ];
 
   const handleNavItemClick = (sectionId: NavSectionId) => {

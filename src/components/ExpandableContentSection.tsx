@@ -19,9 +19,11 @@ import {
   HeartHandshake,
   Soup,
   AlertCircle,
+  Star,
 } from 'lucide-react';
 import { Language, NavSectionId } from '../types';
 import { BUSINESS_CONFIG, getWhatsAppOrderUrl } from '../config/businessConfig';
+import { PageEntranceAnimation } from './PageEntranceAnimation';
 
 interface ExpandableContentSectionProps {
   lang: Language;
@@ -81,6 +83,11 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
       he: 'סניף יהודלס אשדוד',
       en: 'Ashdod Branch & Hours',
       icon: <MapPin className="w-4 h-4 text-[#FF7B1C]" aria-hidden="true" />,
+    },
+    reviews: {
+      he: 'ביקורות',
+      en: 'Reviews',
+      icon: <Star className="w-4 h-4 text-[#FF7B1C]" aria-hidden="true" />,
     },
   };
 
@@ -154,6 +161,9 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
           role="region"
           aria-labelledby="expandable-heading"
         >
+          {/* Animated Page Entrance Effect (Orange-only, ~2s duration, unmounts automatically) */}
+          <PageEntranceAnimation key={activeSection} section={activeSection} />
+
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-8">
             {/* Top Panel Control Bar with Section Badge (No X/Close Button) */}
             <div className="flex items-center justify-start pb-5 mb-6 border-b border-[#252A32]">
@@ -742,6 +752,14 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Section 5: ביקורות (Reviews — Intentionally empty clean content area ready for content to be added later) */}
+            {activeSection === 'reviews' && (
+              <div className="space-y-6 min-h-[260px]">
+                {/* Intentionally empty clean content area ready for future reviews */}
+                <div className="p-8 sm:p-14 rounded-2xl bg-[#14171C]/40 border border-[#252A32]/60 flex flex-col items-center justify-center min-h-[220px]" />
               </div>
             )}
           </div>

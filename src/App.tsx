@@ -13,6 +13,22 @@ import { PrivacyModal } from './components/PrivacyModal';
 import { SettingsModal } from './components/SettingsModal';
 import { BUSINESS_CONFIG } from './config/businessConfig';
 
+const pathToSection = (pathOrHash: string): NavSectionId | null => {
+  if (typeof window === 'undefined') return null;
+  const clean = decodeURIComponent(pathOrHash)
+    .replace(/^#\/?/, '')
+    .replace(/^\//, '')
+    .trim()
+    .toLowerCase();
+
+  if (clean === 'reviews' || clean === 'ביקורות') return 'reviews';
+  if (clean === 'about' || clean === 'אודות') return 'about';
+  if (clean === 'updates' || clean === 'עדכונים') return 'updates';
+  if (clean === 'business-orders' || clean === 'catering' || clean === 'הזמנות-עסקיות' || clean === 'הזמנות עסקיות') return 'business-orders';
+  if (clean === 'location' || clean === 'branch' || clean === 'סניף') return 'location';
+  return null;
+};
+
 export default function App() {
   const [lang, setLang] = useState<Language>('he');
   const [activeSection, setActiveSection] = useState<NavSectionId | null>(null);
@@ -33,6 +49,35 @@ export default function App() {
     }
   }, []);
 
+  // Synchronize route directly from URL (supports both /reviews and /#reviews)
+  useEffect(() => {
+    const handleUrlSync = () => {
+      const target = pathToSection(window.location.hash) || pathToSection(window.location.pathname);
+      if (target) {
+        setActiveSection(target);
+        setTimeout(() => {
+          const el = document.getElementById('expandable-content-area');
+          if (el) {
+            const headerOffset = 110;
+            const elementPosition = el.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+          }
+        }, 150);
+      } else {
+        setActiveSection(null);
+      }
+    };
+
+    handleUrlSync();
+    window.addEventListener('popstate', handleUrlSync);
+    window.addEventListener('hashchange', handleUrlSync);
+    return () => {
+      window.removeEventListener('popstate', handleUrlSync);
+      window.removeEventListener('hashchange', handleUrlSync);
+    };
+  }, []);
+
   // Synchronize document direction and lang attribute
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -45,6 +90,10 @@ export default function App() {
   const handleSelectSection = (sectionId: NavSectionId) => {
     setActiveSection((prev) => {
       const next = prev === sectionId ? null : sectionId;
+      if (typeof window !== 'undefined') {
+        const nextUrl = next ? `/${next}` : '/';
+        window.history.pushState({ section: next }, '', nextUrl);
+      }
       if (next) {
         // Smoothly scroll down so the expandable content section below the Hero is in view
         setTimeout(() => {
@@ -61,11 +110,27 @@ export default function App() {
     });
   };
 
+  const handleCloseSection = () => {
+    setActiveSection(null);
+    if (typeof window !== 'undefined') {
+      window.history.pushState({ section: null }, '', '/');
+    }
+  };
+
   return (
     <div
       dir={lang === 'he' ? 'rtl' : 'ltr'}
       className="min-h-screen bg-[#0B0C0E] text-[#FAF9F6] font-sans antialiased selection:bg-[#FF7B1C] selection:text-[#0B0C0E]"
     >
+      {/* Temporary Debug Version Marker (Fixed top-left, circular, high z-index, pointer-events none) */}
+      <div
+        id="debug-version-marker"
+        className="fixed top-2 left-2 z-[9999] pointer-events-none w-6 h-6 rounded-full bg-[#1A1D22]/80 border border-white/20 text-[#FAF9F6]/80 text-[10px] font-mono font-bold flex items-center justify-center select-none shadow-sm"
+        aria-hidden="true"
+      >
+        4
+      </div>
+
       {/* Accessible Skip Link */}
       <a
         href="#main-content"

@@ -61,6 +61,48 @@ const DAYS: DayNode[] = [
   },
 ];
 
+// Helper to get current Israel (Asia/Jerusalem) calendar day (0=Sun..6=Sat) and hour
+function getIsraelTime(): { day: number; hours: number } {
+  try {
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Jerusalem',
+      weekday: 'short',
+      hour: 'numeric',
+      hourCycle: 'h23',
+    }).formatToParts(now);
+
+    const weekdayPart = parts.find((p) => p.type === 'weekday')?.value;
+    const hourPart = parts.find((p) => p.type === 'hour')?.value;
+
+    const weekdayMap: Record<string, number> = {
+      Sun: 0,
+      Mon: 1,
+      Tue: 2,
+      Wed: 3,
+      Thu: 4,
+      Fri: 5,
+      Sat: 6,
+    };
+
+    const day =
+      weekdayPart && weekdayMap[weekdayPart] !== undefined
+        ? weekdayMap[weekdayPart]
+        : now.getDay();
+    const hours = hourPart !== undefined ? parseInt(hourPart, 10) : now.getHours();
+
+    return { day, hours };
+  } catch {
+    const now = new Date();
+    const israelStr = now.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem' });
+    const israelDate = new Date(israelStr);
+    return {
+      day: !isNaN(israelDate.getTime()) ? israelDate.getDay() : now.getDay(),
+      hours: !isNaN(israelDate.getTime()) ? israelDate.getHours() : now.getHours(),
+    };
+  }
+}
+
 export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang }) => {
   const [fillPercent, setFillPercent] = useState(5);
   const [isOpenNow, setIsOpenNow] = useState(false);
@@ -74,48 +116,24 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
   const decayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const decayIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Calculate real-time Israel day, hours, minutes, and fill position
+  // Calculate real-time Israel day and discrete daily position (00:00 midnight calendar day)
   const updateTimelinePosition = useCallback(() => {
-    try {
-      const now = new Date();
-      const israelStr = now.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem' });
-      const israelDate = new Date(israelStr);
+    const { day, hours } = getIsraelTime();
 
-      const day = israelDate.getDay(); // 0 = Sun, 1 = Mon, ..., 4 = Thu, 5 = Fri, 6 = Sat
-      const hours = israelDate.getHours();
-      const minutes = israelDate.getMinutes();
-      const seconds = israelDate.getSeconds();
+    // CURRENT DAY = CURRENT LOADING-LINE DAY:
+    // At exactly 00:00 local Israel time, the active day immediately becomes the NEW calendar day.
+    const activeDay = DAYS[day] || DAYS[0];
+    setFillPercent(activeDay.positionPercent);
 
-      // Total seconds in 7 days = 604,800
-      const elapsedSeconds = day * 86400 + hours * 3600 + minutes * 60 + seconds;
-      const weekRatio = Math.min(1, Math.max(0, elapsedSeconds / 604800));
-
-      // Map progress from 5% (Sunday start on the right) to 95% (Saturday end on the left)
-      const mappedFill = 5 + weekRatio * 90;
-      setFillPercent(mappedFill);
-
-      // Business window: Thursday 17:00 -> Friday 01:00
-      const isThuOpen = day === 4 && hours >= 17;
-      const isFriEarlyOpen = day === 5 && hours < 1;
-      setIsOpenNow(isThuOpen || isFriEarlyOpen);
-    } catch {
-      const now = new Date();
-      const day = now.getDay();
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
-      const seconds = now.getSeconds();
-      const elapsedSeconds = day * 86400 + hours * 3600 + minutes * 60 + seconds;
-      const weekRatio = Math.min(1, Math.max(0, elapsedSeconds / 604800));
-      setFillPercent(5 + weekRatio * 90);
-      const isThuOpen = day === 4 && hours >= 17;
-      const isFriEarlyOpen = day === 5 && hours < 1;
-      setIsOpenNow(isThuOpen || isFriEarlyOpen);
-    }
+    // Business window: Thursday 17:00 -> Friday 01:00
+    const isThuOpen = day === 4 && hours >= 17;
+    const isFriEarlyOpen = day === 5 && hours < 1;
+    setIsOpenNow(isThuOpen || isFriEarlyOpen);
   }, []);
 
   useEffect(() => {
     updateTimelinePosition();
-    const interval = setInterval(updateTimelinePosition, 10000);
+    const interval = setInterval(updateTimelinePosition, 1000);
     return () => clearInterval(interval);
   }, [updateTimelinePosition]);
 
@@ -126,6 +144,17 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
       if (decayTimeoutRef.current) clearTimeout(decayTimeoutRef.current);
       if (decayIntervalRef.current) clearInterval(decayIntervalRef.current);
     };
+  }, []);
+
+  // Feature-safe subtle haptic pulse (15ms) for interactive loading-line clicks and pot activation
+  const triggerHaptic = useCallback(() => {
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate(15);
+      } catch {
+        // Silently ignore if unsupported or restricted
+      }
+    }
   }, []);
 
   // Increment press count (1 to 50)
@@ -140,18 +169,12 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
       decayIntervalRef.current = null;
     }
 
-    if (typeof window !== 'undefined' && 'vibrate' in navigator) {
-      try {
-        navigator.vibrate(10 + Math.min(20, Math.floor(pressCountRef.current / 2)));
-      } catch {
-        // Ignore
-      }
-    }
+    triggerHaptic();
 
     const nextCount = Math.min(50, Math.max(0, pressCountRef.current + amount));
     pressCountRef.current = nextCount;
     setPressCount(nextCount);
-  }, []);
+  }, [triggerHaptic]);
 
   // Start Press / Hold interaction
   const startPotActivation = useCallback(() => {
@@ -198,13 +221,7 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
   }, []);
 
   const handleTimelineClick = () => {
-    if (typeof window !== 'undefined' && 'vibrate' in navigator) {
-      try {
-        navigator.vibrate(18);
-      } catch {
-        // Ignore
-      }
-    }
+    triggerHaptic();
     setIsSparkBurst(true);
     setTimeout(() => setIsSparkBurst(false), 450);
 
@@ -481,8 +498,9 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
             <div className="absolute top-[0.5px] inset-x-2 h-[1px] rounded-full bg-white/20 pointer-events-none" />
 
             {/* Glowing Orange Liquid / Filament Fill (Right -> Left) */}
+            {/* Discrete daily state without CSS transition; line itself cleanly cut with rounded end */}
             <div
-              className="absolute top-0 right-0 bottom-0 rounded-full transition-all duration-700 ease-out"
+              className="absolute top-0 right-0 bottom-0 rounded-full"
               style={{
                 width: `${fillPercent}%`,
                 background:
@@ -506,12 +524,27 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
               return (
                 <div
                   key={day.index}
-                  className="absolute top-1/2 -translate-y-1/2 translate-x-1/2 pointer-events-none z-10"
+                  className="absolute top-1/2 -translate-y-1/2 translate-x-1/2 z-20 cursor-pointer touch-manipulation pointer-events-auto"
                   style={{ right: `${day.positionPercent}%` }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleTimelineClick();
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.stopPropagation();
+                      handleTimelineClick();
+                    }
+                  }}
+                  aria-label={`${day.label.line1[lang]} - ${day.positionPercent}%`}
                 >
                   <div
-                    className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full ${pointColorClass} border-2`}
+                    className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full ${pointColorClass} border-2 transition-transform active:scale-110`}
                   />
+                  {/* Invisible extended touch target for mobile accuracy */}
+                  <div className="absolute -inset-3.5 rounded-full" />
                 </div>
               );
             })}
@@ -1113,24 +1146,14 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
               )}
             </div>
 
-            {/* Current Fill Head (Glowing Circular Bead + Burning Wick Sparks) */}
+            {/* Current Fill Leading Edge Sparks (Burning Wick Sparks) */}
+            {/* Clean rounded cut of the line itself — white circular bead removed, all sparks preserved */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 translate-x-1/2 pointer-events-none z-20 transition-all duration-700 ease-out"
+              className={`absolute top-1/2 -translate-y-1/2 translate-x-1/2 pointer-events-none z-20 transition-transform duration-200 ${
+                isSparkBurst ? 'scale-125' : 'scale-100'
+              }`}
               style={{ right: `${fillPercent}%` }}
             >
-              {/* Glowing Head Ring */}
-              <div
-                className={`w-4 h-4 sm:w-4.5 sm:h-4.5 rounded-full border-2 border-white bg-[#0B0C0E] flex items-center justify-center transition-transform ${
-                  isSparkBurst ? 'scale-125' : 'scale-100'
-                }`}
-                style={{
-                  boxShadow:
-                    '0 0 14px #FF7B1C, 0 0 26px #FF7B1C, inset 0 0 6px #FF7B1C',
-                }}
-              >
-                <div className="w-1.5 h-1.5 rounded-full bg-[#FF7B1C] shadow-[0_0_4px_#FFF]" />
-              </div>
-
               {/* Burning Wick Spark Embers */}
               <div className="absolute -top-1 right-1/2 translate-x-1/2 pointer-events-none motion-reduce:hidden">
                 <span className="wick-spark spark-1" />
