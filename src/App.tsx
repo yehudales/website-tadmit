@@ -55,15 +55,6 @@ export default function App() {
       const target = pathToSection(window.location.hash) || pathToSection(window.location.pathname);
       if (target) {
         setActiveSection(target);
-        setTimeout(() => {
-          const el = document.getElementById('expandable-content-area');
-          if (el) {
-            const headerOffset = 110;
-            const elementPosition = el.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-          }
-        }, 150);
       } else {
         setActiveSection(null);
       }
@@ -94,18 +85,6 @@ export default function App() {
         const nextUrl = next ? `/${next}` : '/';
         window.history.pushState({ section: next }, '', nextUrl);
       }
-      if (next) {
-        // Smoothly scroll down so the expandable content section below the Hero is in view
-        setTimeout(() => {
-          const el = document.getElementById('expandable-content-area');
-          if (el) {
-            const headerOffset = 110;
-            const elementPosition = el.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-          }
-        }, 120);
-      }
       return next;
     });
   };
@@ -128,7 +107,7 @@ export default function App() {
         className="fixed top-2 left-2 z-[9999] pointer-events-none w-6 h-6 rounded-full bg-[#1A1D22]/80 border border-white/20 text-[#FAF9F6]/80 text-[10px] font-mono font-bold flex items-center justify-center select-none shadow-sm"
         aria-hidden="true"
       >
-        6
+        9
       </div>
 
       {/* Accessible Skip Link */}

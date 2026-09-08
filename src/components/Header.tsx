@@ -75,7 +75,7 @@ export const Header: React.FC<HeaderProps> = ({
         }`}
       >
         {/* Base Locked Header Container (Row 1 + Row 2 measured for page clearance) */}
-        <div ref={baseHeaderRef} className="w-full">
+        <div ref={baseHeaderRef} className="w-full shrink-0 relative z-50 bg-[#0B0C0E]">
           {/* ROW 1: Top Header Area (Brand Title & Settings Action) */}
           <div className="border-b border-[#252A32]/60 py-2 sm:py-2.5 bg-[#0B0C0E]/95">
             <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
