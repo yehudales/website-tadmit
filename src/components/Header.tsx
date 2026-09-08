@@ -14,6 +14,7 @@ interface HeaderProps {
   onOpenAccessibility: () => void;
   onOpenPrivacy: () => void;
   onCloseSection?: () => void;
+  onGoHome?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -25,6 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAccessibility,
   onOpenPrivacy,
   onCloseSection,
+  onGoHome,
 }) => {
   const [scrolled, setScrolled] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
@@ -85,38 +87,55 @@ export const Header: React.FC<HeaderProps> = ({
           />
 
           {/* ROW 1: Top Header Area (Brand Title & Settings Action) */}
-          <div className="border-b border-[#252A32]/60 py-2 sm:py-2.5 bg-[#0B0C0E]/95">
-            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
-              {/* Left / Home shortcut */}
-              <a
-                href="#"
-                className="flex items-center gap-2 text-[#FAF9F6] hover:text-[#FF7B1C] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] rounded-full p-1"
-                aria-label={`${BUSINESS_CONFIG.name[lang]} - דף הבית`}
-              >
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#16191E] border border-[#252A32] flex items-center justify-center text-[#FAF9F6]/80 hover:text-[#FF7B1C] hover:border-[#FF7B1C]/40 transition-all">
+          <div
+            className="border-b border-[#252A32]/60 py-2 sm:py-2.5 bg-[#0B0C0E]/95 flex items-center"
+            style={{ height: '93.8889px' }}
+          >
+            <div className="max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 grid grid-cols-3 items-center">
+              {/* Left / Home shortcut (Left Col) */}
+              <div className="flex items-center justify-start">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onGoHome) {
+                      onGoHome();
+                    } else {
+                      if (onCloseSection) onCloseSection();
+                      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                    }
+                  }}
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#16191E] border border-[#252A32] hover:border-[#FF7B1C]/40 text-[#FAF9F6]/80 hover:text-[#FF7B1C] transition-all flex items-center justify-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C]"
+                  aria-label={`${BUSINESS_CONFIG.name[lang]} - דף הבית`}
+                >
                   <Home className="w-4 h-4" />
-                </div>
-                <span className="hidden sm:inline font-bold tracking-tight text-xs sm:text-sm text-[#FAF9F6]/90">
-                  {BUSINESS_CONFIG.name[lang]}
-                </span>
-              </a>
+                </button>
+              </div>
 
-              {/* Center: Brand Logo / Wordmark */}
-              <a
-                href="#"
-                className="flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] rounded-lg transition-transform duration-300 hover:scale-105"
-                aria-label={`${BUSINESS_CONFIG.name[lang]} - דף הבית`}
-              >
-                <Logo className="h-7 sm:h-8 md:h-9 w-auto" />
-              </a>
+              {/* Center: Brand Logo / Wordmark (Center Col) */}
+              <div className="flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onGoHome) {
+                      onGoHome();
+                    } else {
+                      if (onCloseSection) onCloseSection();
+                      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                    }
+                  }}
+                  className="flex items-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] rounded-lg transition-transform duration-300 hover:scale-105"
+                  aria-label={`${BUSINESS_CONFIG.name[lang]} - דף הבית`}
+                >
+                  <Logo className="h-7 sm:h-8 md:h-9 w-auto" />
+                </button>
+              </div>
 
-              {/* Right / Settings Action */}
-              <div className="flex items-center gap-2">
-                {/* Settings Button: Displays ONLY the gear icon ⚙ in WHITE */}
+              {/* Right / Settings Action (Right Col) */}
+              <div className="flex items-center justify-end">
                 <button
                   onClick={onOpenSettings}
                   type="button"
-                  className="min-h-[38px] min-w-[38px] p-2 rounded-full bg-[#16191E] hover:bg-[#20242B] border border-[#252A32] hover:border-white/40 text-white transition-all flex items-center justify-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#16191E] hover:bg-[#20242B] border border-[#252A32] hover:border-white/40 text-white transition-all flex items-center justify-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                   aria-label={lang === 'he' ? 'הגדרות' : 'Settings'}
                   title={lang === 'he' ? 'הגדרות' : 'Settings'}
                 >

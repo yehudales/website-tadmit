@@ -37,35 +37,36 @@ export default function App() {
   const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
-  // Configure manual scroll restoration on initial mount so page and refresh always start at top (scrollY 0)
+  // ALWAYS open Home at the top (scrollY 0) upon fresh load / refresh
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'scrollRestoration' in history) {
-      history.scrollRestoration = 'manual';
-    }
-    try {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    } catch {
-      window.scrollTo(0, 0);
+    if (typeof window !== 'undefined') {
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+      try {
+        window.history.replaceState(null, '', '/');
+      } catch {}
+      try {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      } catch {
+        window.scrollTo(0, 0);
+      }
     }
   }, []);
 
-  // Synchronize route directly from URL (supports both /reviews and /#reviews)
+  // Listen to in-session back/forward navigation only
   useEffect(() => {
-    const handleUrlSync = () => {
-      const target = pathToSection(window.location.hash) || pathToSection(window.location.pathname);
-      if (target) {
-        setActiveSection(target);
+    const handlePopState = (e: PopStateEvent) => {
+      if (e.state && e.state.section) {
+        setActiveSection(e.state.section);
       } else {
         setActiveSection(null);
       }
     };
 
-    handleUrlSync();
-    window.addEventListener('popstate', handleUrlSync);
-    window.addEventListener('hashchange', handleUrlSync);
+    window.addEventListener('popstate', handlePopState);
     return () => {
-      window.removeEventListener('popstate', handleUrlSync);
-      window.removeEventListener('hashchange', handleUrlSync);
+      window.removeEventListener('popstate', handlePopState);
     };
   }, []);
 
@@ -96,6 +97,20 @@ export default function App() {
     }
   };
 
+  const handleGoHome = () => {
+    setActiveSection(null);
+    if (typeof window !== 'undefined') {
+      try {
+        window.history.replaceState(null, '', '/');
+      } catch {}
+      try {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      } catch {
+        window.scrollTo(0, 0);
+      }
+    }
+  };
+
   return (
     <div
       dir={lang === 'he' ? 'rtl' : 'ltr'}
@@ -107,7 +122,7 @@ export default function App() {
         className="fixed top-2 left-2 z-[9999] pointer-events-none w-6 h-6 rounded-full bg-[#1A1D22]/80 border border-white/20 text-[#FAF9F6]/80 text-[10px] font-mono font-bold flex items-center justify-center select-none shadow-sm"
         aria-hidden="true"
       >
-        21
+        26
       </div>
 
       {/* Accessible Skip Link */}
@@ -123,7 +138,8 @@ export default function App() {
         lang={lang}
         activeSection={activeSection}
         onSelectSection={handleSelectSection}
-        onCloseSection={() => setActiveSection(null)}
+        onCloseSection={handleCloseSection}
+        onGoHome={handleGoHome}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenWhatsApp={() => setIsWhatsAppOpen(true)}
         onOpenAccessibility={() => setIsAccessibilityOpen(true)}

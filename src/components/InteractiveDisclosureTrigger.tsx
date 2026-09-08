@@ -36,20 +36,24 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
       aria-label={isOpen ? ariaLabelOpen : ariaLabelClosed}
       className="group inline-flex flex-row items-center justify-center gap-2 py-1.5 px-2 text-xs sm:text-sm font-semibold tracking-wide transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] rounded-lg whitespace-nowrap select-none no-underline"
     >
-      {/* Animated Touch Indicator Composition: Positioned to the RIGHT of text */}
-      <div className="relative flex items-center justify-center w-5 h-5 shrink-0 select-none finger-combined-motion [isolation:isolate]">
-        {/* 1. Simple Solid Orange Circle: Filled ONLY, Layered UNDER the fingertip (z-0), aligned to fingertip center */}
+      {/* Animated Touch Indicator Composition: Positioned to the RIGHT of text and lowered 2.5px to align with text */}
+      <div className="relative top-[2.5px] flex items-center justify-center w-5 h-5 shrink-0 select-none finger-combined-motion [isolation:isolate]">
+        {/* 1. LAYER: BACK -> Simple Solid Orange Circle on layer z-0, positioned underneath the fingertip */}
         <span
           className="absolute -left-0.5 top-[68%] -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-[#FF7B1C] z-0 pointer-events-none motion-reduce:hidden finger-circle-pulse"
+          style={{ zIndex: 0 }}
           aria-hidden="true"
         />
 
-        {/* 2. Hand Emoji: Layered in FRONT of the solid circle (z-10) with fingertip overlapping the circle */}
-        <div className="relative z-10 flex items-center justify-center rotate-[-90deg]">
+        {/* 2. LAYER: FRONT -> Hand / Finger with opaque fill on layer z-10, physically overlapping and occluding the circle underneath */}
+        <div
+          className="relative z-10 flex items-center justify-center rotate-[-90deg]"
+          style={{ zIndex: 10 }}
+        >
           <svg
             className="w-4 h-4 text-[#FF7B1C]"
             viewBox="0 0 24 24"
-            fill="none"
+            fill="#0B0C0E"
             stroke="currentColor"
             strokeWidth="2.2"
             strokeLinecap="round"
