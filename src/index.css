@@ -154,12 +154,55 @@ html.a11y-reduced-motion .timer-typographic-green {
 }
 
 /* Suppress all native browser video start-playback buttons and overlay media controls */
-video::-webkit-media-controls,
-video::-webkit-media-controls-start-playback-button,
-video::-webkit-media-controls-overlay-play-button,
-video::-webkit-media-controls-play-button,
-video::-webkit-media-controls-enclosure,
-video::-webkit-media-controls-panel,
+/* Separated into individual rules so browsers that do not recognize one pseudo-element will not drop the others */
+video::-webkit-media-controls {
+  display: none !important;
+  -webkit-appearance: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+video::-webkit-media-controls-start-playback-button {
+  display: none !important;
+  -webkit-appearance: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+video::-webkit-media-controls-overlay-play-button {
+  display: none !important;
+  -webkit-appearance: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+video::-webkit-media-controls-play-button {
+  display: none !important;
+  -webkit-appearance: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+video::-webkit-media-controls-enclosure {
+  display: none !important;
+  -webkit-appearance: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+video::-webkit-media-controls-panel {
+  display: none !important;
+  -webkit-appearance: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 video::-webkit-media-controls-overlay-enclosure {
   display: none !important;
   -webkit-appearance: none !important;

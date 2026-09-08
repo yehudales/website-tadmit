@@ -34,11 +34,28 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     video.muted = true;
     video.defaultMuted = true;
     video.playsInline = true;
+    video.setAttribute('muted', '');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
 
-    // Single deterministic play attempt to satisfy browser policies
-    video.play().catch(() => {
-      // If browser policy defers playback until interaction, touchstart will resume
-    });
+    const startMutedAutoplay = () => {
+      if (video.paused) {
+        video.muted = true;
+        video.play().catch(() => {});
+      }
+    };
+
+    // Immediate attempt
+    startMutedAutoplay();
+
+    // Ensure startup as soon as the first frame or playable data is buffered
+    video.addEventListener('loadeddata', startMutedAutoplay, { once: true });
+    video.addEventListener('canplay', startMutedAutoplay, { once: true });
+
+    return () => {
+      video.removeEventListener('loadeddata', startMutedAutoplay);
+      video.removeEventListener('canplay', startMutedAutoplay);
+    };
   }, []);
 
   // --------------------------------------------------------------------------
