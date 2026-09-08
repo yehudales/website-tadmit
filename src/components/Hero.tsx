@@ -40,7 +40,11 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     isMutedRef.current = isMuted;
     const video = videoRef.current;
     if (video) {
-      video.muted = isMuted;
+      if (hasUnlockedAudioRef.current) {
+        video.muted = isMuted;
+      } else {
+        video.muted = true;
+      }
     }
   }, [isMuted]);
 
@@ -140,23 +144,69 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     [initAudioGraph, stopAudioImmediately]
   );
 
-  // Callback ref to configure synchronous native DOM attributes on mount (no duplicate play calls)
+  // Single authoritative guarded autoplay function
+  const safeAutoplay = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Ensure native muted & playsInline configuration for full mobile policy acceptance only if not yet unlocked
+    if (!hasUnlockedAudioRef.current) {
+      video.muted = true;
+      video.defaultMuted = true;
+    }
+    video.playsInline = true;
+
+    if (isPlayPendingRef.current) return;
+    if (!video.paused) {
+      setIsPlaying(true);
+      return;
+    }
+
+    isPlayPendingRef.current = true;
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          isPlayPendingRef.current = false;
+          setIsPlaying(true);
+        })
+        .catch(() => {
+          isPlayPendingRef.current = false;
+        });
+    } else {
+      isPlayPendingRef.current = false;
+      setIsPlaying(true);
+    }
+  }, []);
+
+  // Callback ref to configure synchronous native DOM attributes on mount and start playback as early as possible
   const setVideoRef = useCallback((node: HTMLVideoElement | null) => {
     (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = node;
     if (node) {
-      node.muted = true;
+      node.muted = !hasUnlockedAudioRef.current;
       node.defaultMuted = true;
       node.volume = 1.0;
       node.playsInline = true;
       node.autoplay = true;
       node.loop = true;
+      node.preload = 'auto';
       node.setAttribute('playsinline', '');
       node.setAttribute('webkit-playsinline', '');
       node.setAttribute('x5-playsinline', '');
       node.setAttribute('muted', '');
+      node.setAttribute('autoplay', '');
+      node.setAttribute('loop', '');
       node.removeAttribute('controls');
+
+      // Attempt playback immediately if media has enough data, or listen for the earliest readiness event
+      if (node.readyState >= 2) {
+        safeAutoplay();
+      } else {
+        node.addEventListener('canplay', () => safeAutoplay(), { once: true });
+        node.addEventListener('loadeddata', () => safeAutoplay(), { once: true });
+      }
     }
-  }, []);
+  }, [safeAutoplay]);
 
   // Measure 16:9 hero container height and track scroll position for the shutter curtain effect
   useEffect(() => {
@@ -231,39 +281,6 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     };
   }, [fadeGainTo, stopAudioImmediately]);
 
-  // Single authoritative guarded autoplay function
-  const safeAutoplay = useCallback(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    // Ensure native muted & playsInline configuration for full mobile policy acceptance only if not yet unlocked
-    if (!hasUnlockedAudioRef.current) {
-      video.muted = true;
-    }
-    video.playsInline = true;
-
-    if (isPlayPendingRef.current) return;
-    if (!video.paused) {
-      setIsPlaying(true);
-      return;
-    }
-
-    isPlayPendingRef.current = true;
-    const playPromise = video.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          isPlayPendingRef.current = false;
-          setIsPlaying(true);
-        })
-        .catch(() => {
-          isPlayPendingRef.current = false;
-        });
-    } else {
-      isPlayPendingRef.current = false;
-    }
-  }, []);
-
   // Autoplay with native muted configuration and cached-readiness check
   useEffect(() => {
     const video = videoRef.current;
@@ -281,6 +298,8 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
     if (video.readyState >= 2) {
       safeAutoplay();
     } else {
+      video.addEventListener('canplay', () => safeAutoplay(), { once: true });
+      video.addEventListener('loadeddata', () => safeAutoplay(), { once: true });
       safeAutoplay();
     }
 
@@ -488,7 +507,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
           <video
             ref={setVideoRef}
             src="/assets/videos/hero.mp4"
-            muted={isMuted}
+            muted={!hasUnlockedAudioRef.current ? true : isMuted}
             autoPlay={true}
             playsInline={true}
             loop={true}
@@ -520,9 +539,7 @@ export const Hero: React.FC<HeroProps> = ({ lang = 'he' }) => {
               setIsPlaying(false);
               stopAudioImmediately();
             }}
-            className={`w-full h-full object-cover object-center block pointer-events-none select-none transition-opacity duration-300 ${
-              hasVideoStarted ? 'opacity-100' : 'opacity-0'
-            }`}
+            className="w-full h-full object-cover object-center block pointer-events-none select-none opacity-100"
           />
 
           {/* Subtle top vignette gradient for header readability */}
