@@ -11,6 +11,7 @@ import { Language } from '../types';
 import { BUSINESS_CONFIG } from '../config/businessConfig';
 import { InteractiveDisclosureTrigger } from './InteractiveDisclosureTrigger';
 import { BannerBottomCloseButton } from './BannerBottomCloseButton';
+import { WeeklyEnergyTimeline } from './WeeklyEnergyTimeline';
 import { getDrawerAnimationConfig } from '../utils/drawerAnimation';
 
 interface LiveStoreStatusSectionProps {
@@ -127,8 +128,11 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
           </div>
         </div>
 
+        {/* Entire Existing Weekly Energy / Loading Section */}
+        <WeeklyEnergyTimeline lang={lang} />
+
         {/* Interactive "שעות פתיחה" Trigger (Frameless, Direct on Page) */}
-        <div className="mt-6 sm:mt-8 flex flex-col items-center w-full max-w-2xl">
+        <div className="mt-4 sm:mt-5 flex flex-col items-center w-full max-w-2xl">
           <InteractiveDisclosureTrigger
             isOpen={isHoursOpen}
             onToggle={() => setIsHoursOpen((prev) => !prev)}

@@ -460,7 +460,7 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
   return (
     <aside
       aria-label={lang === 'he' ? 'ציר אנרגיה שבועי' : 'Weekly energy timeline'}
-      className="fixed bottom-0 inset-x-0 z-40 bg-[#0B0C0E]/95 backdrop-blur-md pb-2 sm:pb-2.5 pt-4 sm:pt-5 px-3 sm:px-6 select-none border-t border-[#252A32]/40"
+      className="w-full max-w-3xl mx-auto pt-6 sm:pt-8 pb-1 sm:pb-2 px-3 sm:px-6 select-none"
       dir="rtl"
     >
       <div className="max-w-3xl mx-auto w-full">
