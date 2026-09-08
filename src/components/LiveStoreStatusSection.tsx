@@ -10,6 +10,7 @@ import {
 import { useStoreStatus } from '../hooks/useStoreStatus';
 import { Language } from '../types';
 import { BUSINESS_CONFIG } from '../config/businessConfig';
+import { triggerMobileHaptic } from '../utils/haptics';
 
 interface LiveStoreStatusSectionProps {
   lang: Language;
@@ -21,6 +22,11 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
 }) => {
   const status = useStoreStatus();
   const [isHoursOpen, setIsHoursOpen] = useState(false);
+
+  const handleToggleHours = () => {
+    triggerMobileHaptic(15);
+    setIsHoursOpen((prev) => !prev);
+  };
 
   const pad = (n: number) => n.toString().padStart(2, '0');
 
@@ -123,28 +129,29 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
           </div>
         </div>
 
-        {/* Interactive "שעות פתיחה" Trigger with Animated Tap / Finger Icon */}
-        <div className="mt-8 sm:mt-10 flex flex-col items-center w-full max-w-2xl">
+        {/* Interactive "שעות פתיחה" Trigger (Frameless, Direct on Page) */}
+        <div className="mt-6 sm:mt-8 flex flex-col items-center w-full max-w-2xl">
           <button
             type="button"
-            onClick={() => setIsHoursOpen((prev) => !prev)}
+            onClick={handleToggleHours}
             aria-expanded={isHoursOpen}
             aria-controls="opening-hours-expandable-content"
-            className="group inline-flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl bg-[#14171C] hover:bg-[#1C2026] border border-[#252A32] hover:border-[#FF7B1C]/50 text-[#FAF9F6] text-xs sm:text-sm font-bold tracking-wide transition-all duration-200 cursor-pointer shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C]"
+            className="group inline-flex flex-col items-center justify-center gap-1.5 py-1 text-[#FAF9F6] text-xs sm:text-sm font-bold tracking-wide transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] rounded-lg"
             aria-label={
               isHoursOpen
                 ? (lang === 'he' ? 'סגור פירוט שעות פתיחה' : 'Close opening hours details')
                 : (lang === 'he' ? 'פתח פירוט שעות פתיחה' : 'Open opening hours details')
             }
           >
-            {/* Animated Touch / Pointer Finger Icon with Soft Tap Glow (ABOVE text, pointing down) */}
-            <div className="relative flex items-center justify-center w-5 h-5 text-[#FF7B1C] shrink-0">
-              {/* Circle: Scale only grow/shrink animation */}
-              <span className="absolute inset-0 rounded-full bg-[#FF7B1C]/25 finger-tap-glow motion-reduce:hidden" />
-              {/* Finger: Horizontal movement only, fixed size, pointing downward toward text */}
+            {/* Animated Touch / Pointer Finger Indicator (ABOVE text, pointing from right toward text) */}
+            <div className="relative flex items-center justify-center w-6 h-6 text-[#FF7B1C] shrink-0">
+              {/* Circle Element: Scales gently up & down ONLY (isolated transform) */}
+              <span className="absolute inset-0 rounded-full bg-[#FF7B1C]/25 finger-circle-pulse motion-reduce:hidden pointer-events-none" />
+
+              {/* Finger Element: Fixed size, moves strictly horizontally LEFT <-> RIGHT, pointing from right */}
               <div className="relative z-10 flex items-center justify-center finger-horizontal-motion">
                 <svg
-                  className="w-3.5 h-3.5 text-[#FF7B1C] rotate-180"
+                  className="w-4 h-4 text-[#FF7B1C] rotate-[-90deg]"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -159,7 +166,7 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
             </div>
 
             <div className="inline-flex items-center gap-1.5">
-              <span className="text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors">
+              <span className="text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors underline-offset-4 group-hover:underline">
                 {lang === 'he' ? 'שעות פתיחה' : 'Opening Hours'}
               </span>
 
@@ -174,7 +181,7 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
             </div>
           </button>
 
-          {/* Expandable Opening Hours Information Banner */}
+          {/* Expandable Opening Hours Information */}
           <AnimatePresence>
             {isHoursOpen && (
               <motion.div
@@ -266,31 +273,31 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
 
       </div>
 
-      {/* Lightweight CSS Keyframes for Touch Finger Horizontal Motion and Soft Circle Scale Glow */}
+      {/* Lightweight CSS Keyframes: Separate Circle Scaling & Strictly Horizontal-Only Finger Movement */}
       <style>{`
         @keyframes finger-horizontal-anim {
           0%, 100% {
-            transform: translateX(-3.5px);
+            transform: translateX(3px);
           }
           50% {
-            transform: translateX(3.5px);
+            transform: translateX(-3px);
           }
         }
-        @keyframes finger-glow-anim {
+        @keyframes finger-circle-pulse-anim {
           0%, 100% {
             transform: scale(0.85);
-            opacity: 0.25;
+            opacity: 0.2;
           }
           50% {
             transform: scale(1.35);
-            opacity: 0.75;
+            opacity: 0.7;
           }
         }
         .finger-horizontal-motion {
           animation: finger-horizontal-anim 1.8s ease-in-out infinite;
         }
-        .finger-tap-glow {
-          animation: finger-glow-anim 1.8s ease-in-out infinite;
+        .finger-circle-pulse {
+          animation: finger-circle-pulse-anim 1.8s ease-in-out infinite;
         }
       `}</style>
     </section>

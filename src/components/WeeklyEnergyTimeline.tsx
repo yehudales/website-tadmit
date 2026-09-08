@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Language } from '../types';
+import { triggerMobileHaptic } from '../utils/haptics';
 
 interface WeeklyEnergyTimelineProps {
   lang: Language;
@@ -146,17 +147,6 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
     };
   }, []);
 
-  // Feature-safe subtle haptic pulse (15ms) for interactive loading-line clicks and pot activation
-  const triggerHaptic = useCallback(() => {
-    if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      try {
-        navigator.vibrate(15);
-      } catch {
-        // Silently ignore if unsupported or restricted
-      }
-    }
-  }, []);
-
   // Increment press count (1 to 50)
   const incrementPress = useCallback((amount: number = 1) => {
     // Cancel any active decay immediately
@@ -169,16 +159,15 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
       decayIntervalRef.current = null;
     }
 
-    triggerHaptic();
-
     const nextCount = Math.min(50, Math.max(0, pressCountRef.current + amount));
     pressCountRef.current = nextCount;
     setPressCount(nextCount);
-  }, [triggerHaptic]);
+  }, []);
 
   // Start Press / Hold interaction
   const startPotActivation = useCallback(() => {
     isPressingRef.current = true;
+    triggerMobileHaptic(15);
     incrementPress(1);
 
     // Continuous build while holding (up to 50)
@@ -221,7 +210,7 @@ export const WeeklyEnergyTimeline: React.FC<WeeklyEnergyTimelineProps> = ({ lang
   }, []);
 
   const handleTimelineClick = () => {
-    triggerHaptic();
+    triggerMobileHaptic(15);
     setIsSparkBurst(true);
     setTimeout(() => setIsSparkBurst(false), 450);
 
