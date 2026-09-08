@@ -161,24 +161,26 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
           aria-hidden="true"
         />
 
-        {/* 2. LAYER: FRONT -> Hand / Finger with opaque fill on layer z-10, physically overlapping and occluding the circle underneath */}
+        {/* 2. LAYER: FRONT -> Hand / Finger with opaque fill on layer z-10, vertically mirrored (flipped along horizontal axis: TOP becomes BOTTOM, preserving left-pointing direction) */}
         <div
-          className="relative z-10 flex items-center justify-center rotate-[-90deg]"
-          style={{ zIndex: 10 }}
+          className="relative z-10 flex items-center justify-center"
+          style={{ zIndex: 10, transform: 'scaleY(-1)' }}
         >
-          <svg
-            className="w-4 h-4"
-            style={{ color: emojiColor }}
-            viewBox="0 0 24 24"
-            fill="#0B0C0E"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M12 2a2 2 0 0 0-2 2v9.5l-1.5-1.5a2.12 2.12 0 0 0-3 3L10 19.5a6 6 0 0 0 6 2.5h1a6 6 0 0 0 6-6V13a2 2 0 0 0-2-2 2 2 0 0 0-2 2v-1a2 2 0 0 0-2-2 2 2 0 0 0-2 2V4a2 2 0 0 0-2-2z" />
-          </svg>
+          <div className="flex items-center justify-center rotate-[-90deg]">
+            <svg
+              className="w-4 h-4"
+              style={{ color: emojiColor }}
+              viewBox="0 0 24 24"
+              fill="#0B0C0E"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 2a2 2 0 0 0-2 2v9.5l-1.5-1.5a2.12 2.12 0 0 0-3 3L10 19.5a6 6 0 0 0 6 2.5h1a6 6 0 0 0 6-6V13a2 2 0 0 0-2-2 2 2 0 0 0-2 2v-1a2 2 0 0 0-2-2 2 2 0 0 0-2 2V4a2 2 0 0 0-2-2z" />
+            </svg>
+          </div>
         </div>
       </div>
 
