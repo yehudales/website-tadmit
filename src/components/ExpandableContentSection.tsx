@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import {
   ChevronUp,
@@ -779,6 +779,29 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
   const shouldReduceMotion = useReducedMotion();
   const drawerAnim = getDrawerAnimationConfig(shouldReduceMotion);
 
+  // Synchronous session tracking to handle direct switching with zero delay.
+  // In a direct switch (Section A -> Section B):
+  // Section A is unmounted synchronously with ZERO closing animation,
+  // while Section B starts immediately with its normal opening animation.
+  const [sessionKey, setSessionKey] = useState(0);
+  const [prevSection, setPrevSection] = useState<NavSectionId | null>(activeSection);
+  const isExitingRef = useRef(false);
+
+  if (activeSection !== prevSection) {
+    setPrevSection(activeSection);
+    // If switching directly from an existing open or exiting banner to a new banner:
+    // Increment sessionKey so the previous banner's container unmounts instantly with 0 animation,
+    // and the new banner mounts clean and plays its normal opening animation immediately.
+    if (activeSection !== null && (prevSection !== null || isExitingRef.current)) {
+      setSessionKey((k) => k + 1);
+    }
+    // If activeSection becomes null, this is a normal close:
+    // Mark exiting as true until onExitComplete clears it
+    if (activeSection === null && prevSection !== null) {
+      isExitingRef.current = true;
+    }
+  }
+
   // Keyboard accessibility: Escape closes the active panel
   useEffect(() => {
     if (!activeSection) return;
@@ -791,8 +814,12 @@ export const ExpandableContentSection: React.FC<ExpandableContentSectionProps> =
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeSection, onClose]);
 
+  const handleExitComplete = () => {
+    isExitingRef.current = false;
+  };
+
   return (
-    <AnimatePresence initial={false}>
+    <AnimatePresence initial={false} key={sessionKey} onExitComplete={handleExitComplete}>
       {activeSection && (
         <BannerPanelContent
           key={activeSection}
