@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Settings, Home } from 'lucide-react';
 import { BUSINESS_CONFIG } from '../config/businessConfig';
 import { Language, NavSectionId } from '../types';
@@ -30,38 +30,17 @@ export const Header: React.FC<HeaderProps> = ({
   const headerRef = useRef<HTMLElement>(null);
   const baseHeaderRef = useRef<HTMLDivElement>(null);
 
-  // Single Source of Truth: Measure actual base header element (Row 1 + Row 2)
-  // useLayoutEffect guarantees synchronous measurement BEFORE browser paint to prevent any visual jump.
-  // ResizeObserver continuously monitors baseHeaderRef for font loading, responsive layout, and window changes.
-  useLayoutEffect(() => {
-    const el = baseHeaderRef.current;
-    if (!el) return;
-
-    let lastHeight = 0;
+  // Measure base header height (row 1 + row 2) and keep --header-height CSS variable synchronized
+  useEffect(() => {
     const updateHeaderHeight = () => {
-      if (!baseHeaderRef.current) return;
-      const rect = baseHeaderRef.current.getBoundingClientRect();
-      const height = rect.height || baseHeaderRef.current.offsetHeight;
-      if (height > 0 && Math.abs(height - lastHeight) >= 0.5) {
-        lastHeight = height;
+      if (baseHeaderRef.current) {
+        const height = baseHeaderRef.current.offsetHeight;
         document.documentElement.style.setProperty('--header-height', `${height}px`);
       }
     };
-
-    // Immediate synchronous measurement before initial paint
     updateHeaderHeight();
-
-    const resizeObserver = new ResizeObserver(() => {
-      updateHeaderHeight();
-    });
-
-    resizeObserver.observe(el);
     window.addEventListener('resize', updateHeaderHeight);
-
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener('resize', updateHeaderHeight);
-    };
+    return () => window.removeEventListener('resize', updateHeaderHeight);
   }, []);
 
   useEffect(() => {
@@ -86,15 +65,6 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      {/* Temporary Deployment Verification Marker */}
-      <div
-        id="debug-version-marker"
-        className="fixed top-2 left-2 z-[99999] pointer-events-none px-2.5 py-1 rounded bg-black/90 text-[#FF7B1C] border border-[#FF7B1C] font-mono text-xs font-bold tracking-wider shadow-lg select-none"
-        aria-hidden="true"
-      >
-        DEBUG v7
-      </div>
-
       <header
         ref={headerRef}
         className={`fixed top-0 inset-x-0 z-50 transition-colors duration-300 bg-[#0B0C0E] border-b ${

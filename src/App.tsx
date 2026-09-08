@@ -21,6 +21,60 @@ export default function App() {
   const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
+  // Configure manual scroll restoration on initial mount so page and refresh reliably start at top (scrollY 0)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+
+    const resetToTop = () => {
+      try {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      } catch {
+        window.scrollTo(0, 0);
+      }
+      if (document.documentElement) {
+        document.documentElement.scrollTop = 0;
+      }
+      if (document.body) {
+        document.body.scrollTop = 0;
+      }
+    };
+
+    // Immediate synchronous reset
+    resetToTop();
+
+    // Bounded multi-stage post-layout stabilization resets (frame-bounded, does NOT permanently lock scrolling)
+    const raf1 = requestAnimationFrame(resetToTop);
+    const raf2 = requestAnimationFrame(() => {
+      requestAnimationFrame(resetToTop);
+    });
+
+    const timer1 = setTimeout(resetToTop, 50);
+    const timer2 = setTimeout(resetToTop, 150);
+    const timer3 = setTimeout(resetToTop, 300);
+
+    const handlePageShow = (e: PageTransitionEvent) => {
+      resetToTop();
+      if (e.persisted) {
+        requestAnimationFrame(resetToTop);
+      }
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+    window.addEventListener('load', resetToTop, { once: true });
+
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+      window.removeEventListener('pageshow', handlePageShow);
+      window.removeEventListener('load', resetToTop);
+    };
+  }, []);
+
   // Synchronize document direction and lang attribute
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -79,7 +133,7 @@ export default function App() {
         id="main-content"
         tabIndex={-1}
         className="focus:outline-none"
-        style={{ paddingTop: 'var(--header-height)' }}
+        style={{ paddingTop: 'var(--header-height, 98px)' }}
       >
         {/* Stationary Fixed Cinematic 16:9 Hero Video */}
         <Hero lang={lang} />
