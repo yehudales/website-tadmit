@@ -137,6 +137,7 @@ export const LiveStoreStatusSection: React.FC<LiveStoreStatusSectionProps> = ({
             isOpen={isHoursOpen}
             onToggle={() => setIsHoursOpen((prev) => !prev)}
             label={lang === 'he' ? 'שעות פתיחה' : 'Opening Hours'}
+            lang={lang}
             ariaControls="opening-hours-expandable-content"
             ariaLabelOpen={lang === 'he' ? 'סגור פירוט שעות פתיחה' : 'Close opening hours details'}
             ariaLabelClosed={lang === 'he' ? 'פתח פירוט שעות פתיחה' : 'Open opening hours details'}

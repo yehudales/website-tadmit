@@ -15,6 +15,7 @@ interface InteractiveDisclosureTriggerProps {
   accentColor?: string;
   textClassName?: string;
   variant?: 'touch' | 'kashrut-arrow';
+  lang?: 'he' | 'en';
 }
 
 export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTriggerProps> = ({
@@ -30,6 +31,7 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
   accentColor = '#FF7B1C',
   textClassName = '',
   variant = 'touch',
+  lang,
 }) => {
   const handleClick = () => {
     triggerMobileHaptic(15);
@@ -142,6 +144,9 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
     );
   }
 
+  // Detect RTL semantics: Hebrew text or explicit lang="he"
+  const isRTL = lang === 'he' || /[\u0590-\u05FF]/.test(label);
+
   return (
     <button
       id={id}
@@ -150,63 +155,105 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
       aria-expanded={isOpen}
       aria-controls={ariaControls}
       aria-label={isOpen ? ariaLabelOpen : ariaLabelClosed}
-      className="group inline-flex flex-row items-center justify-center gap-1.5 py-0.5 px-2 text-xs sm:text-sm font-semibold tracking-wide transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] rounded-lg whitespace-nowrap select-none no-underline"
+      className="group relative inline-flex items-center justify-center py-0.5 px-2 text-xs sm:text-sm font-semibold tracking-wide transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] rounded-lg whitespace-nowrap select-none no-underline"
     >
-      {/* Animated Touch Indicator Composition: Positioned to the RIGHT of text and lowered 2.5px to align with text */}
-      <div className="relative top-[2.5px] flex items-center justify-center w-5 h-5 shrink-0 select-none finger-combined-motion [isolation:isolate]">
-        {/* 1. LAYER: BACK -> Simple Solid Orange Circle on layer z-0 (+30% size: 6.5px x 6.5px), raised slightly UP to sit precisely in front of fingertip */}
+      {/* 
+        Independent Centered Text Container:
+        The text element serves as the sole in-flow alignment anchor.
+        The finger emoji is completely excluded from the text centering calculation and layout box.
+      */}
+      <span className="relative inline-flex items-center justify-center">
+        {/* Text: Normal = WHITE, Open/Active = ACCENT COLOR, NO UNDERLINE in any state */}
         <span
-          className="absolute left-[0.5px] top-[56%] -translate-y-1/2 w-[6.5px] h-[6.5px] rounded-full z-0 pointer-events-none motion-reduce:hidden finger-circle-pulse"
-          style={{ zIndex: 0, backgroundColor: circleColor }}
-          aria-hidden="true"
-        />
-
-        {/* 2. LAYER: FRONT -> Hand / Finger with opaque fill on layer z-10, vertically mirrored (flipped along horizontal axis: TOP becomes BOTTOM, preserving left-pointing direction) */}
-        <div
-          className="relative z-10 flex items-center justify-center"
-          style={{ zIndex: 10, transform: 'scaleY(-1)' }}
+          className={`transition-colors duration-200 no-underline decoration-transparent select-none ${textClassName} ${
+            isOpen ? '' : 'text-[#FAF9F6]'
+          }`}
+          style={isOpen ? { color: accentColor } : undefined}
         >
-          <div className="flex items-center justify-center rotate-[-90deg]">
-            <svg
-              className="w-4 h-4"
-              style={{ color: emojiColor }}
-              viewBox="0 0 24 24"
-              fill="#0B0C0E"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          {label}
+        </span>
+
+        {/* 
+          Independent Touch Indicator (Finger Emoji):
+          Positioned beside the text (to the physical RIGHT of Hebrew text in RTL, to the physical LEFT in LTR).
+          Completely excluded from the centering calculation with zero push or offset on the text anchor.
+        */}
+        <span
+          className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none select-none"
+          style={
+            isRTL
+              ? { left: 'calc(100% + 6px)' }
+              : { right: 'calc(100% + 6px)' }
+          }
+          aria-hidden="true"
+        >
+          {/* Touch Indicator Composition: lowered 2.5px to align with text, container position static */}
+          <div className="relative top-[2.5px] flex items-center justify-center w-5 h-5 shrink-0 select-none [isolation:isolate]">
+            {/* 1. LAYER: BACK -> Locked Static Orange Circle on layer z-0 (+30% size: 6.5px x 6.5px), center point permanently fixed, offset X: -2px, Y: -3px */}
+            <div
+              className="absolute -translate-y-1/2 w-[6.5px] h-[6.5px] flex items-center justify-center pointer-events-none z-0"
+              style={{ zIndex: 0, left: '-1.5px', top: 'calc(56% - 3px)' }}
               aria-hidden="true"
             >
-              <path d="M12 2a2 2 0 0 0-2 2v9.5l-1.5-1.5a2.12 2.12 0 0 0-3 3L10 19.5a6 6 0 0 0 6 2.5h1a6 6 0 0 0 6-6V13a2 2 0 0 0-2-2 2 2 0 0 0-2 2v-1a2 2 0 0 0-2-2 2 2 0 0 0-2 2V4a2 2 0 0 0-2-2z" />
-            </svg>
-          </div>
-        </div>
-      </div>
+              <span
+                className="w-full h-full rounded-full motion-reduce:hidden finger-circle-pulse"
+                style={{
+                  backgroundColor: circleColor,
+                  transformOrigin: 'center center',
+                }}
+              />
+            </div>
 
-      {/* Text: Normal = WHITE, Open/Active = ACCENT COLOR, NO UNDERLINE in any state */}
-      <span
-        className={`transition-colors duration-200 no-underline decoration-transparent select-none ${textClassName} ${
-          isOpen ? '' : 'text-[#FAF9F6]'
-        }`}
-        style={isOpen ? { color: accentColor } : undefined}
-      >
-        {label}
+            {/* 2. LAYER: FRONT -> Hand / Finger with opaque fill on layer z-10, vertically mirrored, shifted upward by 3px, animated independently without moving the circle */}
+            <div className="finger-hand-motion flex items-center justify-center">
+              <div
+                className="relative z-10 flex items-center justify-center"
+                style={{ zIndex: 10, transform: 'scaleY(-1)', top: '-3px' }}
+              >
+                <div className="flex items-center justify-center rotate-[-90deg]">
+                  <svg
+                    className="w-4 h-4"
+                    style={{ color: emojiColor }}
+                    viewBox="0 0 24 24"
+                    fill="#0B0C0E"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 2a2 2 0 0 0-2 2v9.5l-1.5-1.5a2.12 2.12 0 0 0-3 3L10 19.5a6 6 0 0 0 6 2.5h1a6 6 0 0 0 6-6V13a2 2 0 0 0-2-2 2 2 0 0 0-2 2v-1a2 2 0 0 0-2-2 2 2 0 0 0-2 2V4a2 2 0 0 0-2-2z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </span>
+
+        {/* Reverse / Close Upward Arrow (Appears ONLY in open state, placed on opposite side without affecting text center) */}
+        {isOpen && (
+          <span
+            className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none select-none"
+            style={
+              isRTL
+                ? { right: 'calc(100% + 6px)' }
+                : { left: 'calc(100% + 6px)' }
+            }
+            aria-hidden="true"
+          >
+            <ChevronUp
+              className="w-3.5 h-3.5 shrink-0"
+              style={{ color: accentColor }}
+              strokeWidth={2.4}
+              aria-hidden="true"
+            />
+          </span>
+        )}
       </span>
 
-      {/* Reverse / Close Upward Arrow (Appears ONLY in open state, tailless chevron) */}
-      {isOpen && (
-        <ChevronUp
-          className="w-3.5 h-3.5 shrink-0"
-          style={{ color: accentColor }}
-          strokeWidth={2.4}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Lightweight CSS Keyframes: Synchronized Hand + Circle Micro-Motion & Fingertip Circle Pulse */}
+      {/* Lightweight CSS Keyframes: Independent Hand Tap Motion & Fixed-Center Circle Pulse */}
       <style>{`
-        @keyframes finger-combined-anim {
+        @keyframes finger-hand-anim {
           0%, 100% {
             transform: translateX(1.5px);
           }
@@ -214,26 +261,27 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
             transform: translateX(-2.5px);
           }
         }
-        .finger-combined-motion {
-          animation: finger-combined-anim 2.2s ease-in-out infinite;
+        .finger-hand-motion {
+          animation: finger-hand-anim 2.2s ease-in-out infinite;
         }
 
         @keyframes finger-circle-pulse-anim {
           0%, 100% {
-            transform: translateY(-50%) scale(0.9);
+            transform: scale(0.9);
             opacity: 0.65;
           }
           50% {
-            transform: translateY(-50%) scale(1.2);
+            transform: scale(1.2);
             opacity: 1;
           }
         }
         .finger-circle-pulse {
+          transform-origin: center center;
           animation: finger-circle-pulse-anim 2.2s ease-in-out infinite;
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .finger-combined-motion,
+          .finger-hand-motion,
           .finger-circle-pulse {
             animation: none !important;
           }
