@@ -9,6 +9,14 @@
     /* Official YEHUDAL'ES Cyan Color */
     --color-cyan: #71D2F6;
 
+    /* Layer Stacking Hierarchy Tokens */
+    --z-shop-hero: 10;
+    --z-shop-content: 20;
+    --z-shop-header: 40;
+    --z-topmost-header: 50;
+    --z-modal-overlay: 60;
+    --z-product-banner: 70;
+
     /* Brand Dark Luxury Color System */
     --brand-bg-deep: #0B0C0E;
     --brand-bg-soft: #121417;

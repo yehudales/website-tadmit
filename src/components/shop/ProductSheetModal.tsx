@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { MenuItem, Language } from '../../types';
 import { X, Share2, Plus, Minus, Utensils, Check } from 'lucide-react';
 import { SAMPLE_MENU_ITEMS } from '../../config/businessConfig';
@@ -89,8 +90,10 @@ export const ProductSheetModal: React.FC<ProductSheetModalProps> = ({
 
   const totalPrice = (product.price || 0) * quantity;
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-hidden select-none">
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[var(--z-product-banner,70)] overflow-hidden select-none">
       {/* Dark Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -294,6 +297,7 @@ export const ProductSheetModal: React.FC<ProductSheetModalProps> = ({
           </div>
         </div>
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 };

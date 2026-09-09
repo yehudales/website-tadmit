@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Language, CartItem } from '../../types';
 import { Plus, Minus, Trash2, ShoppingBag, Send, CheckCircle2, Clock, MapPin, Store } from 'lucide-react';
 import { getWhatsAppOrderUrl } from '../../config/businessConfig';
@@ -93,8 +94,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     setIsSubmitting(false);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-hidden select-none">
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[var(--z-modal-overlay,60)] overflow-hidden select-none">
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -342,6 +345,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           </div>
         )}
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 };
