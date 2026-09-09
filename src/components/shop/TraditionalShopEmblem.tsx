@@ -228,7 +228,7 @@ export const TraditionalShopEmblem: React.FC<TraditionalShopEmblemProps> = ({
             <div className="relative w-2.5 h-2.5 mb-0.5 pointer-events-none">
               <span className="absolute bottom-0 left-0 w-2 h-2 rounded-full bg-[#BAE6FD] anim-flat-smoke-1" />
               <span className="absolute bottom-0 left-0.5 w-2 h-2 rounded-full bg-[#7DD3FC] anim-flat-smoke-2" />
-              <span className="absolute bottom-0 left-0 w-1.5 h-1.5 rounded-full bg-[#38BDF8] anim-flat-smoke-3" />
+              <span className="absolute bottom-0 left-0 w-1.5 h-1.5 rounded-full bg-[#71D2F6] anim-flat-smoke-3" />
             </div>
 
             {/* 2D Chimney Cap & Body */}
@@ -237,7 +237,7 @@ export const TraditionalShopEmblem: React.FC<TraditionalShopEmblemProps> = ({
           </div>
 
           {/* Flat 2D Roof Bar */}
-          <div className="w-[94%] h-2 bg-[#0284C7] border-t border-x border-[#38BDF8] rounded-t-xs flex items-center justify-between px-1.5">
+          <div className="w-[94%] h-2 bg-[#0284C7] border-t border-x border-[#71D2F6] rounded-t-xs flex items-center justify-between px-1.5">
             <span className="w-1 h-0.5 bg-[#BAE6FD] rounded-xs" />
             <span className="w-8 h-0.5 bg-[#7DD3FC]/80 rounded-full" />
             <span className="w-1 h-0.5 bg-[#BAE6FD] rounded-xs" />
@@ -265,7 +265,7 @@ export const TraditionalShopEmblem: React.FC<TraditionalShopEmblemProps> = ({
                 className={`flex-1 h-full ${
                   i % 2 === 0
                     ? 'bg-[#E0F2FE] border-r border-[#BAE6FD]'
-                    : 'bg-[#38BDF8] border-r border-[#0284C7]'
+                    : 'bg-[#71D2F6] border-r border-[#0284C7]'
                 }`}
               />
             ))}
@@ -279,7 +279,7 @@ export const TraditionalShopEmblem: React.FC<TraditionalShopEmblemProps> = ({
                 className={`w-[14.2%] h-1.5 rounded-b-full border-b border-x anim-scallop-${i + 1} ${
                   i % 2 === 0
                     ? 'bg-[#E0F2FE] border-[#BAE6FD]'
-                    : 'bg-[#38BDF8] border-[#0284C7]'
+                    : 'bg-[#71D2F6] border-[#0284C7]'
                 }`}
               />
             ))}
@@ -293,37 +293,37 @@ export const TraditionalShopEmblem: React.FC<TraditionalShopEmblemProps> = ({
             
             {/* Left 2D Window */}
             <div className="flex-1 flex flex-col items-center">
-              <div className="w-full h-4 sm:h-4.5 bg-[#082F49] border border-[#38BDF8] rounded-t-xs p-0.5 flex flex-col justify-between">
-                <div className="w-full h-[0.5px] bg-[#38BDF8]" />
+              <div className="w-full h-4 sm:h-4.5 bg-[#082F49] border border-[#71D2F6] rounded-t-xs p-0.5 flex flex-col justify-between">
+                <div className="w-full h-[0.5px] bg-[#71D2F6]" />
                 <div className="flex justify-around items-center h-full">
                   <div className="w-1.5 h-2 bg-[#7DD3FC]/40 rounded-xs" />
-                  <div className="w-[0.5px] h-full bg-[#38BDF8]" />
+                  <div className="w-[0.5px] h-full bg-[#71D2F6]" />
                   <div className="w-1.5 h-2 bg-[#7DD3FC]/40 rounded-xs" />
                 </div>
-                <div className="w-full h-[0.5px] bg-[#38BDF8]" />
+                <div className="w-full h-[0.5px] bg-[#71D2F6]" />
               </div>
-              <div className="w-full h-0.5 bg-[#38BDF8] rounded-b-xs" />
+              <div className="w-full h-0.5 bg-[#71D2F6] rounded-b-xs" />
             </div>
 
             {/* Central 2D Entrance with Animated Doors */}
-            <div className="relative w-9 sm:w-10 h-5 sm:h-6 bg-[#041E32] border border-[#38BDF8] rounded-t-xs overflow-hidden flex flex-col justify-end items-center">
+            <div className="relative w-9 sm:w-10 h-5 sm:h-6 bg-[#041E32] border border-[#71D2F6] rounded-t-xs overflow-hidden flex flex-col justify-end items-center">
               {/* 2D Interior light indicator */}
-              <div className="absolute inset-0 bg-[#38BDF8]/40 anim-flat-interior pointer-events-none" />
+              <div className="absolute inset-0 bg-[#71D2F6]/40 anim-flat-interior pointer-events-none" />
 
               {/* Animated 2D Double Doors */}
               <div className="relative z-10 w-full h-4 sm:h-5 flex">
                 
                 {/* Left Door */}
-                <div className="flex-1 h-full bg-[#0284C7] border-r border-[#38BDF8] border-t border-[#38BDF8] p-0.5 anim-flat-door-l flex flex-col justify-between">
-                  <div className="w-full h-2 bg-[#38BDF8]/40 rounded-xs" />
+                <div className="flex-1 h-full bg-[#0284C7] border-r border-[#71D2F6] border-t border-[#71D2F6] p-0.5 anim-flat-door-l flex flex-col justify-between">
+                  <div className="w-full h-2 bg-[#71D2F6]/40 rounded-xs" />
                   <div className="flex justify-end pr-0.5">
                     <span className="w-0.5 h-0.5 rounded-full bg-[#BAE6FD]" />
                   </div>
                 </div>
 
                 {/* Right Door */}
-                <div className="flex-1 h-full bg-[#0284C7] border-l border-[#38BDF8] border-t border-[#38BDF8] p-0.5 anim-flat-door-r flex flex-col justify-between">
-                  <div className="w-full h-2 bg-[#38BDF8]/40 rounded-xs" />
+                <div className="flex-1 h-full bg-[#0284C7] border-l border-[#71D2F6] border-t border-[#71D2F6] p-0.5 anim-flat-door-r flex flex-col justify-between">
+                  <div className="w-full h-2 bg-[#71D2F6]/40 rounded-xs" />
                   <div className="flex justify-start pl-0.5">
                     <span className="w-0.5 h-0.5 rounded-full bg-[#BAE6FD]" />
                   </div>
@@ -336,22 +336,22 @@ export const TraditionalShopEmblem: React.FC<TraditionalShopEmblemProps> = ({
 
             {/* Right 2D Window */}
             <div className="flex-1 flex flex-col items-center">
-              <div className="w-full h-4 sm:h-4.5 bg-[#082F49] border border-[#38BDF8] rounded-t-xs p-0.5 flex flex-col justify-between">
-                <div className="w-full h-[0.5px] bg-[#38BDF8]" />
+              <div className="w-full h-4 sm:h-4.5 bg-[#082F49] border border-[#71D2F6] rounded-t-xs p-0.5 flex flex-col justify-between">
+                <div className="w-full h-[0.5px] bg-[#71D2F6]" />
                 <div className="flex justify-around items-center h-full">
                   <div className="w-1.5 h-2 bg-[#7DD3FC]/40 rounded-xs" />
-                  <div className="w-[0.5px] h-full bg-[#38BDF8]" />
+                  <div className="w-[0.5px] h-full bg-[#71D2F6]" />
                   <div className="w-1.5 h-2 bg-[#7DD3FC]/40 rounded-xs" />
                 </div>
-                <div className="w-full h-[0.5px] bg-[#38BDF8]" />
+                <div className="w-full h-[0.5px] bg-[#71D2F6]" />
               </div>
-              <div className="w-full h-0.5 bg-[#38BDF8] rounded-b-xs" />
+              <div className="w-full h-0.5 bg-[#71D2F6] rounded-b-xs" />
             </div>
 
           </div>
 
           {/* Flat Base Step */}
-          <div className="w-full h-1 bg-[#0284C7] rounded-xs mt-0.5 border-t border-[#38BDF8] flex justify-between px-1 items-center">
+          <div className="w-full h-1 bg-[#0284C7] rounded-xs mt-0.5 border-t border-[#71D2F6] flex justify-between px-1 items-center">
             <span className="w-2 h-0.5 bg-[#BAE6FD] rounded-full" />
             <span className="w-2 h-0.5 bg-[#BAE6FD] rounded-full" />
           </div>

@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Language, CartItem } from '../../types';
-import { X, Plus, Minus, Trash2, ShoppingBag, Send, CheckCircle2, Clock, MapPin, Store } from 'lucide-react';
+import { Plus, Minus, Trash2, ShoppingBag, Send, CheckCircle2, Clock, MapPin, Store } from 'lucide-react';
 import { getWhatsAppOrderUrl } from '../../config/businessConfig';
+import { DownwardArrowNoTail } from './DownwardArrowNoTail';
+import { motion } from 'motion/react';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -32,8 +34,31 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   const [orderNotes, setOrderNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const [isReadyToScroll, setIsReadyToScroll] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen) {
+      setIsClosing(false);
+      setIsReadyToScroll(false);
+    }
+  }, [isOpen]);
+
+  if (!isOpen && !isClosing) return null;
+
+  const handleClose = () => {
+    setIsClosing(true);
+  };
+
+  const handleAnimationComplete = () => {
+    if (isClosing) {
+      setIsClosing(false);
+      setIsReadyToScroll(false);
+      onClose();
+    } else if (isOpen) {
+      setIsReadyToScroll(true);
+    }
+  };
 
   const handleSendOrder = () => {
     setIsSubmitting(true);
@@ -71,23 +96,33 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-hidden select-none">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/75 backdrop-blur-sm transition-opacity animate-fade-in"
-        onClick={onClose}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isClosing ? 0 : 1 }}
+        transition={{ duration: 0.28 }}
+        className="absolute inset-0 bg-black/75 backdrop-blur-sm cursor-pointer"
+        onClick={handleClose}
         aria-hidden="true"
       />
 
-      {/* Drawer Container */}
-      <div
+      {/* Bottom-origin Banner / Bottom Sheet Container */}
+      <motion.div
         dir={lang === 'he' ? 'rtl' : 'ltr'}
-        className={`fixed inset-y-0 ${
-          lang === 'he' ? 'left-0' : 'right-0'
-        } max-w-full w-full sm:w-[420px] bg-[#0E1116] border-x border-[#1E232B] shadow-2xl flex flex-col z-10 animate-slide-in`}
+        initial={{ y: '100%' }}
+        animate={{ y: isClosing ? '100%' : 0 }}
+        transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+        onAnimationComplete={handleAnimationComplete}
+        className="fixed inset-x-0 bottom-0 max-w-lg mx-auto w-full max-h-[88vh] bg-[#0E1116] border-t border-[#1E232B] rounded-t-[28px] shadow-2xl flex flex-col z-10 overflow-hidden"
       >
+        {/* Drag Handle Top Pill */}
+        <div className="pt-2.5 pb-1 flex justify-center shrink-0">
+          <span className="w-10 h-1 rounded-full bg-white/20" />
+        </div>
+
         {/* Drawer Header */}
-        <div className="p-4 sm:p-5 border-b border-[#1E232B] flex items-center justify-between bg-[#13161B]">
+        <div className="px-4 sm:px-5 py-3 border-b border-[#1E232B] flex items-center justify-between bg-[#13161B] shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-[#00D2FF]/10 border border-[#00D2FF]/30 text-[#00D2FF]">
+            <div className="p-2 rounded-xl bg-[#71D2F6]/10 border border-[#71D2F6]/30 text-[#71D2F6]">
               <ShoppingBag className="w-5 h-5 stroke-[2.5]" />
             </div>
             <div>
@@ -112,19 +147,24 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               </button>
             )}
 
+            {/* Close Control: Downward Arrow Without Tail */}
             <button
               type="button"
-              onClick={onClose}
-              className="p-2 rounded-xl bg-[#1A1E26] hover:bg-[#252A34] text-[#94A3B8] hover:text-white transition-colors cursor-pointer"
+              onClick={handleClose}
+              className="p-2 sm:p-2.5 rounded-xl bg-[#1A1E26] hover:bg-[#252A34] text-[#94A3B8] hover:text-white transition-colors cursor-pointer flex items-center justify-center active:scale-95"
               aria-label={lang === 'he' ? 'סגור סל' : 'Close cart'}
             >
-              <X className="w-5 h-5" />
+              <DownwardArrowNoTail className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        {/* Drawer Body */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5">
+        {/* Drawer Body with controlled scrolling */}
+        <div
+          className={`flex-1 p-4 sm:p-5 space-y-5 ${
+            isReadyToScroll && !isClosing ? 'overflow-y-auto' : 'overflow-hidden'
+          }`}
+        >
           {items.length === 0 ? (
             <div className="py-16 text-center flex flex-col items-center justify-center">
               <div className="w-16 h-16 rounded-2xl bg-[#161A22] border border-[#252A32] flex items-center justify-center text-[#64748B] mb-3">
@@ -152,7 +192,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     onClick={() => setOrderType('pickup')}
                     className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                       orderType === 'pickup'
-                        ? 'bg-[#00D2FF]/10 text-[#00D2FF] border-[#00D2FF]'
+                        ? 'bg-[#71D2F6]/10 text-[#71D2F6] border-[#71D2F6]'
                         : 'bg-[#13161B] text-[#94A3B8] border-[#252A32] hover:border-white/20'
                     }`}
                   >
@@ -165,7 +205,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     onClick={() => setOrderType('delivery')}
                     className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                       orderType === 'delivery'
-                        ? 'bg-[#00D2FF]/10 text-[#00D2FF] border-[#00D2FF]'
+                        ? 'bg-[#71D2F6]/10 text-[#71D2F6] border-[#71D2F6]'
                         : 'bg-[#13161B] text-[#94A3B8] border-[#252A32] hover:border-white/20'
                     }`}
                   >
@@ -190,7 +230,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       <h4 className="text-xs sm:text-sm font-bold text-[#FAF9F6] truncate">
                         {item.name[lang]}
                       </h4>
-                      <div className="text-xs font-black text-[#00D2FF] mt-0.5">
+                      <div className="text-xs font-black text-[#71D2F6] mt-0.5">
                         ₪{item.price * item.quantity}
                         <span className="text-[10px] text-[#64748B] font-normal mr-1">
                           (₪{item.price} ליחידה)
@@ -209,14 +249,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         <Minus className="w-2.5 h-2.5" />
                       </button>
 
-                      <span className="w-5 text-center text-xs font-mono font-bold text-[#00D2FF]">
+                      <span className="w-5 text-center text-xs font-mono font-bold text-[#71D2F6]">
                         {item.quantity}
                       </span>
 
                       <button
                         type="button"
                         onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                        className="w-5 h-5 rounded bg-[#00D2FF] text-[#0B0C0E] flex items-center justify-center hover:bg-[#38BDF8] transition-colors cursor-pointer font-bold"
+                        className="w-5 h-5 rounded bg-[#71D2F6] text-[#0B0C0E] flex items-center justify-center hover:opacity-90 transition-opacity cursor-pointer font-bold"
                         aria-label="Increase"
                       >
                         <Plus className="w-2.5 h-2.5 stroke-[3]" />
@@ -238,14 +278,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
                     placeholder={lang === 'he' ? 'שם מלא' : 'Full Name'}
-                    className="w-full bg-[#13161B] border border-[#252A32] focus:border-[#00D2FF]/60 rounded-xl px-3 py-1.5 text-xs text-[#FAF9F6] placeholder-[#64748B] focus:outline-none"
+                    className="w-full bg-[#13161B] border border-[#252A32] focus:border-[#71D2F6]/60 rounded-xl px-3 py-1.5 text-xs text-[#FAF9F6] placeholder-[#64748B] focus:outline-none"
                   />
                   <input
                     type="tel"
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
                     placeholder={lang === 'he' ? 'מספר טלפון' : 'Phone'}
-                    className="w-full bg-[#13161B] border border-[#252A32] focus:border-[#00D2FF]/60 rounded-xl px-3 py-1.5 text-xs text-[#FAF9F6] placeholder-[#64748B] focus:outline-none"
+                    className="w-full bg-[#13161B] border border-[#252A32] focus:border-[#71D2F6]/60 rounded-xl px-3 py-1.5 text-xs text-[#FAF9F6] placeholder-[#64748B] focus:outline-none"
                   />
                 </div>
 
@@ -258,7 +298,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       : 'Special requests (e.g. extra sauce, brown egg)...'
                   }
                   rows={2}
-                  className="w-full bg-[#13161B] border border-[#252A32] focus:border-[#00D2FF]/60 rounded-xl px-3 py-1.5 text-xs text-[#FAF9F6] placeholder-[#64748B] focus:outline-none resize-none"
+                  className="w-full bg-[#13161B] border border-[#252A32] focus:border-[#71D2F6]/60 rounded-xl px-3 py-1.5 text-xs text-[#FAF9F6] placeholder-[#64748B] focus:outline-none resize-none"
                 />
               </div>
 
@@ -266,15 +306,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               <div className="bg-[#13161B] border border-[#1E232B] rounded-xl p-3 space-y-1.5 text-xs">
                 <div className="flex items-center justify-between text-[#94A3B8]">
                   <span>{lang === 'he' ? 'סיכום ביניים' : 'Subtotal'}</span>
-                  <span>₪{totalPrice}</span>
+                  <span className="text-[#86EFAC] font-normal font-sans">₪{totalPrice}</span>
                 </div>
                 <div className="flex items-center justify-between text-[#94A3B8]">
                   <span>{lang === 'he' ? 'אריזה ושירות' : 'Packaging & Service'}</span>
-                  <span className="text-[#22C55E] font-bold">{lang === 'he' ? 'חינם' : 'Free'}</span>
+                  <span className="text-[#86EFAC] font-normal">{lang === 'he' ? 'חינם' : 'Free'}</span>
                 </div>
-                <div className="pt-2 border-t border-[#1E232B] flex items-center justify-between font-black text-sm text-[#FAF9F6]">
-                  <span>{lang === 'he' ? 'סה"כ לתשלום' : 'Total'}</span>
-                  <span className="text-base text-[#00D2FF]">₪{totalPrice}</span>
+                <div className="pt-2 border-t border-[#1E232B] flex items-center justify-between text-sm text-[#FAF9F6]">
+                  <span className="font-normal">{lang === 'he' ? 'סה"כ לתשלום' : 'Total'}</span>
+                  <span className="text-base text-[#86EFAC] font-normal font-sans">₪{totalPrice}</span>
                 </div>
               </div>
             </>
@@ -288,7 +328,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               type="button"
               onClick={handleSendOrder}
               disabled={isSubmitting}
-              className="w-full py-3 rounded-xl bg-[#00D2FF] hover:bg-[#38BDF8] active:scale-[0.98] text-[#0B0C0E] text-sm font-black transition-all shadow-[0_4px_20px_rgba(0,210,255,0.3)] flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3 rounded-xl bg-[#71D2F6] hover:opacity-90 active:scale-[0.98] text-[#0B0C0E] text-sm font-black transition-all shadow-[0_4px_20px_rgba(113,210,246,0.3)] flex items-center justify-center gap-2 cursor-pointer"
             >
               <Send className="w-4 h-4" />
               <span>{lang === 'he' ? 'שליחת הזמנה ישירה' : 'Send Direct Order'}</span>
@@ -301,7 +341,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             </p>
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 };

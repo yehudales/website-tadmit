@@ -30,7 +30,7 @@ export const ShopBanner: React.FC<ShopBannerProps> = ({ lang, isLocked = false }
         >
           <defs>
             <radialGradient id="bannerAmbientGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#00D2FF" stopOpacity="0.2" />
+              <stop offset="0%" stopColor="#71D2F6" stopOpacity="0.2" />
               <stop offset="60%" stopColor="#FF7B1C" stopOpacity="0.08" />
               <stop offset="100%" stopColor="#0B0C0E" stopOpacity="0" />
             </radialGradient>
@@ -42,11 +42,11 @@ export const ShopBanner: React.FC<ShopBannerProps> = ({ lang, isLocked = false }
           {/* Awning structure */}
           <rect x="250" y="10" width="300" height="4" rx="2" fill="#252A32" />
           <path d="M 260,14 L 300,14 L 295,45 L 255,45 Z" fill="#1A1E24" />
-          <path d="M 300,14 L 340,14 L 335,45 L 295,45 Z" fill="#00D2FF" fillOpacity="0.4" />
+          <path d="M 300,14 L 340,14 L 335,45 L 295,45 Z" fill="#71D2F6" fillOpacity="0.4" />
           <path d="M 340,14 L 380,14 L 375,45 L 335,45 Z" fill="#1A1E24" />
-          <path d="M 380,14 L 420,14 L 415,45 L 375,45 Z" fill="#00D2FF" fillOpacity="0.4" />
+          <path d="M 380,14 L 420,14 L 415,45 L 375,45 Z" fill="#71D2F6" fillOpacity="0.4" />
           <path d="M 420,14 L 460,14 L 465,45 L 425,45 Z" fill="#1A1E24" />
-          <path d="M 460,14 L 500,14 L 505,45 L 465,45 Z" fill="#00D2FF" fillOpacity="0.4" />
+          <path d="M 460,14 L 500,14 L 505,45 L 465,45 Z" fill="#71D2F6" fillOpacity="0.4" />
           <path d="M 500,14 L 540,14 L 545,45 L 505,45 Z" fill="#1A1E24" />
         </svg>
       </div>
@@ -73,7 +73,7 @@ export const ShopBanner: React.FC<ShopBannerProps> = ({ lang, isLocked = false }
             dir="ltr"
             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#13161B]/90 border border-[#252A32] shadow-sm backdrop-blur-sm text-xs sm:text-sm font-mono font-bold text-white tracking-widest"
           >
-            <Clock className="w-3.5 h-3.5 text-[#00D2FF] shrink-0" />
+            <Clock className="w-3.5 h-3.5 text-[#71D2F6] shrink-0" />
             <span>{timerStr}</span>
           </div>
         </div>

@@ -8,6 +8,14 @@ import { CartDrawer } from './CartDrawer';
 import { ProductSheetModal } from './ProductSheetModal';
 import { useCart } from '../../hooks/useCart';
 
+// Proximity trigger distance (in px) from the sticky category navigation bar.
+// When a category's content boundary comes within this distance of the sticky bar, that category activates early.
+export const CATEGORY_ACTIVE_TRIGGER_OFFSET = 32;
+
+// Visual vertical gap (in px) between the bottom edge of the sticky category navigation bar
+// and the top edge of the category title after clicking a category.
+export const CATEGORY_SCROLL_TOP_GAP = 16;
+
 interface ShopSectionProps {
   lang: Language;
   isShopMode: boolean;
@@ -25,6 +33,9 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
   const [specialtyOnly, setSpecialtyOnly] = useState<boolean>(false);
   const [selectedSheetProduct, setSelectedSheetProduct] = useState<MenuItem | null>(null);
+
+  const isManualClickRef = useRef(false);
+  const manualClickTimerRef = useRef<number | null>(null);
 
   // Cart Management
   const {
@@ -74,35 +85,73 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
     return map;
   }, [filteredItems]);
 
-  // Smooth scroll to category inside the appropriate scroll container
+  // Smooth scroll to category with consistent gap beneath the sticky category navigation bar
   const handleSelectCategory = (categoryId: string) => {
     setActiveCategory(categoryId);
+    isManualClickRef.current = true;
+    if (manualClickTimerRef.current) {
+      window.clearTimeout(manualClickTimerRef.current);
+    }
+    manualClickTimerRef.current = window.setTimeout(() => {
+      isManualClickRef.current = false;
+    }, 650);
+
     const targetEl = document.getElementById(`shop-category-${categoryId}`);
     if (targetEl) {
+      const categoryBarEl = document.getElementById('shop-category-bar');
+      // Actual current sticky category navigation height from DOM measurements:
+      const barHeight = categoryBarEl?.getBoundingClientRect().height || categoryBarEl?.offsetHeight || 60;
+
       if (isShopMode && shopContainerRef.current) {
         const container = shopContainerRef.current;
-        const categoryBarEl = document.getElementById('shop-category-bar');
-        const barHeight = categoryBarEl?.offsetHeight || 60;
-        const targetTop = targetEl.offsetTop - barHeight;
+        const containerRect = container.getBoundingClientRect();
+        const targetRect = targetEl.getBoundingClientRect();
+
+        // Exact category position in container's scroll coordinate system
+        const categoryPosition = targetRect.top - containerRect.top + container.scrollTop;
+
+        // Calculate target scroll position using:
+        // category position MINUS sticky category navigation bar height MINUS CATEGORY_SCROLL_TOP_GAP
+        const targetTop = categoryPosition - barHeight - CATEGORY_SCROLL_TOP_GAP;
+
         container.scrollTo({
           top: Math.max(0, targetTop),
           behavior: 'smooth',
         });
       } else {
-        targetEl.scrollIntoView({
+        const targetRect = targetEl.getBoundingClientRect();
+        const topmostHeader = document.getElementById('topmost-header-row');
+        const topHeaderHeight = topmostHeader?.getBoundingClientRect().height || topmostHeader?.offsetHeight || 96;
+
+        // Total sticky obstruction height above content
+        const totalStickyHeight = topHeaderHeight + barHeight;
+
+        // Category position in document scroll coordinates
+        const categoryPosition = targetRect.top + window.scrollY;
+
+        // Calculate target scroll position using:
+        // category position MINUS sticky navigation obstruction MINUS CATEGORY_SCROLL_TOP_GAP
+        const targetTop = categoryPosition - totalStickyHeight - CATEGORY_SCROLL_TOP_GAP;
+
+        window.scrollTo({
+          top: Math.max(0, targetTop),
           behavior: 'smooth',
-          block: 'start',
         });
       }
     }
   };
 
-  // Active category detection on scroll
+  // Active category detection on scroll with proximity trigger to the sticky category navigation bar
   useEffect(() => {
     const scrollTarget = isShopMode ? shopContainerRef.current : window;
     if (!scrollTarget) return;
 
+    let rafId: number | null = null;
+
     const handleScrollCategories = () => {
+      // Avoid overriding user click target while smooth scroll is underway
+      if (isManualClickRef.current) return;
+
       const categoryElements = MENU_CATEGORIES.map((cat) => ({
         id: cat.id,
         el: document.getElementById(`shop-category-${cat.id}`),
@@ -110,19 +159,63 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
 
       if (categoryElements.length === 0) return;
 
-      const triggerOffset = isShopMode ? 140 : 200;
+      // Measure current geometry of the sticky category navigation bar
+      const categoryBarEl = document.getElementById('shop-category-bar');
+      const barRect = categoryBarEl?.getBoundingClientRect();
+      const barBottom = barRect ? barRect.bottom : (isShopMode ? 180 : 180);
+
+      // Proximity threshold: activates category as soon as its beginning content reaches within
+      // CATEGORY_ACTIVE_TRIGGER_OFFSET (32px) of the sticky category bar
+      const triggerThreshold = barBottom + CATEGORY_ACTIVE_TRIGGER_OFFSET;
+
+      // Handle scroll reaching the absolute bottom of the container
+      if (isShopMode && shopContainerRef.current) {
+        const c = shopContainerRef.current;
+        if (c.scrollHeight - c.scrollTop - c.clientHeight <= 2) {
+          const lastCat = categoryElements[categoryElements.length - 1];
+          setActiveCategory((prev) => (prev !== lastCat.id ? lastCat.id : prev));
+          return;
+        }
+      } else if (!isShopMode) {
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
+          const lastCat = categoryElements[categoryElements.length - 1];
+          setActiveCategory((prev) => (prev !== lastCat.id ? lastCat.id : prev));
+          return;
+        }
+      }
+
+      // Detect active category from bottom-most category upwards
+      let matchedCategory = categoryElements[0].id;
       for (let i = categoryElements.length - 1; i >= 0; i--) {
         const rect = categoryElements[i].el.getBoundingClientRect();
-        if (rect.top <= triggerOffset) {
-          setActiveCategory(categoryElements[i].id);
+        if (rect.top <= triggerThreshold) {
+          matchedCategory = categoryElements[i].id;
           break;
         }
       }
+
+      setActiveCategory((prev) => (prev !== matchedCategory ? matchedCategory : prev));
     };
 
-    scrollTarget.addEventListener('scroll', handleScrollCategories, { passive: true });
+    const onScroll = () => {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        handleScrollCategories();
+      });
+    };
+
+    // Initial detection on mount or mode change
+    handleScrollCategories();
+
+    scrollTarget.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+
     return () => {
-      scrollTarget.removeEventListener('scroll', handleScrollCategories);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      if (manualClickTimerRef.current) window.clearTimeout(manualClickTimerRef.current);
+      scrollTarget.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
     };
   }, [isShopMode]);
 
@@ -165,7 +258,7 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
       {specialtyOnly && (
         <div
           dir={lang === 'he' ? 'rtl' : 'ltr'}
-          className="max-w-4xl mx-auto px-4 py-2 flex items-center justify-between text-xs bg-[#00D2FF]/10 text-[#00D2FF] border-b border-[#00D2FF]/20"
+          className="max-w-4xl mx-auto px-4 py-2 flex items-center justify-between text-xs bg-[#71D2F6]/10 text-[#71D2F6] border-b border-[#71D2F6]/20"
         >
           <span>{lang === 'he' ? 'מוצגות מנות דגל וספיישלים בלבד' : 'Showing specialty dishes only'}</span>
           <button
@@ -179,7 +272,7 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
       )}
 
       {/* Vertical Continuous Category & Product Flow */}
-      <div className="max-w-4xl mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-8 sm:space-y-10">
+      <div className="max-w-4xl mx-auto px-4 sm:px-8 py-4 sm:py-6 space-y-6 sm:space-y-8">
         {MENU_CATEGORIES.map((category) => {
           const products = categoryProducts[category.id] || [];
           if (products.length === 0 && searchTerm) return null;
@@ -191,26 +284,19 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
               data-category-id={category.id}
               className="scroll-mt-36 sm:scroll-mt-40"
             >
-              {/* Category Header matching screenshot 1 (Bullet dot + Category Name | English uppercase menu subtitle in cyan) */}
+              {/* Category Header */}
               <div
                 dir={lang === 'he' ? 'rtl' : 'ltr'}
-                className="flex items-center justify-between gap-3 mb-2 pb-2 border-b border-[#1E232B]"
+                className="mb-1.5 pb-2 border-b border-white/[0.12]"
               >
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#00D2FF] shrink-0 animate-pulse" />
-                  <h3 className="text-base sm:text-lg font-black text-[#FAF9F6] tracking-tight">
-                    {category.name[lang]}
-                  </h3>
-                </div>
-
-                <span className="text-[11px] sm:text-xs font-black tracking-wider text-[#00D2FF] uppercase font-sans">
-                  {category.name.en.toUpperCase()} MENU
-                </span>
+                <h3 className="font-shop-headline font-semibold text-[1.25rem] leading-[1.2] text-[#FAF9F6] tracking-tight">
+                  {category.name[lang]}
+                </h3>
               </div>
 
               {/* Vertical Free-Standing Products List */}
               {products.length > 0 ? (
-                <div className="divide-y divide-[#1A1F28]">
+                <div className="divide-y divide-white/[0.12]">
                   {products.map((product) => (
                     <ShopProductItem
                       key={product.id}
@@ -224,7 +310,7 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
                   ))}
                 </div>
               ) : (
-                <div className="p-4 rounded-xl bg-[#13161B] border border-[#1E232B] text-center text-xs text-[#64748B]">
+                <div className="p-4 rounded-xl bg-[#13161B] border border-white/10 text-center font-shop-body text-[0.875rem] text-white/50">
                   {lang === 'he'
                     ? 'לא נמצאו מנות התואמות את החיפוש'
                     : 'No items match your search'}

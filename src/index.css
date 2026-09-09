@@ -1,7 +1,14 @@
 @import "tailwindcss";
 
+@theme {
+  --color-cyan: #71D2F6;
+}
+
 @layer base {
   :root {
+    /* Official YEHUDAL'ES Cyan Color */
+    --color-cyan: #71D2F6;
+
     /* Brand Dark Luxury Color System */
     --brand-bg-deep: #0B0C0E;
     --brand-bg-soft: #121417;
@@ -22,6 +29,118 @@
     /* Fonts */
     --font-primary: 'Outfit', 'Assistant', 'Arimo', system-ui, -apple-system, sans-serif;
     --font-numeric: 'Rubik', 'Outfit', 'Assistant', system-ui, sans-serif;
+
+    /* Wolt-derived Shop Typography System */
+    --font-shop-headline: "DD Scoop", -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI", "Arimo", "Open Sans", sans-serif;
+    --font-shop-body: -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI", "Arimo", "Open Sans", sans-serif;
+  }
+
+  /* Wolt-derived Shop Font Families */
+  .font-shop-headline {
+    font-family: var(--font-shop-headline);
+  }
+
+  .font-shop-body {
+    font-family: var(--font-shop-body);
+  }
+
+  /* Wolt-derived Exact Type Scale Utilities */
+  .text-shop-display {
+    font-family: var(--font-shop-headline);
+    font-weight: 700;
+    font-size: 2.5rem;
+    line-height: 1.1;
+  }
+
+  .text-shop-large-title {
+    font-family: var(--font-shop-headline);
+    font-weight: 700;
+    font-size: 2rem;
+    line-height: 1.09375;
+  }
+
+  .text-shop-title {
+    font-family: var(--font-shop-headline);
+    font-weight: 700;
+    font-size: 1.5rem;
+    line-height: 1.20833;
+  }
+
+  .text-shop-headline {
+    font-family: var(--font-shop-headline);
+    font-weight: 600;
+    font-size: 1.25rem;
+    line-height: 1.2;
+  }
+
+  .text-shop-subheadline {
+    font-family: var(--font-shop-body);
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.1875;
+  }
+
+  .text-shop-body {
+    font-family: var(--font-shop-body);
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.375;
+  }
+
+  .text-shop-body-label {
+    font-family: var(--font-shop-body);
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.375;
+  }
+
+  .text-shop-body-medium {
+    font-family: var(--font-shop-body);
+    font-weight: 500;
+    font-size: 1rem;
+    line-height: 1.375;
+  }
+
+  .text-shop-caption {
+    font-family: var(--font-shop-body);
+    font-weight: 400;
+    font-size: 0.875rem;
+    line-height: 1.42857;
+  }
+
+  .text-shop-caption-label {
+    font-family: var(--font-shop-body);
+    font-weight: 600;
+    font-size: 0.875rem;
+    line-height: 1.42857;
+  }
+
+  .text-shop-caption-medium {
+    font-family: var(--font-shop-body);
+    font-weight: 500;
+    font-size: 0.875rem;
+    line-height: 1.42857;
+  }
+
+  .text-shop-footnote {
+    font-family: var(--font-shop-body);
+    font-weight: 400;
+    font-size: 0.75rem;
+    line-height: 1.41667;
+  }
+
+  .text-shop-footnote-label {
+    font-family: var(--font-shop-body);
+    font-weight: 600;
+    font-size: 0.75rem;
+    line-height: 1.41667;
+  }
+
+  .text-shop-footnote-medium {
+    font-family: var(--font-shop-body);
+    font-weight: 500;
+    font-size: 0.75rem;
+    line-height: 1.41667;
   }
 
   html {

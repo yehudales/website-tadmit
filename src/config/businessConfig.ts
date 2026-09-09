@@ -352,6 +352,18 @@ export const MENU_CATEGORIES: MenuCategory[] = [
     }
   },
   {
+    id: 'kugel',
+    name: {
+      he: 'קיגל',
+      en: 'Kugel'
+    },
+    iconName: 'Utensils',
+    description: {
+      he: 'קיגל חם ומסורתי',
+      en: 'Traditional warm kugel'
+    }
+  },
+  {
     id: 'special-thursday',
     name: {
       he: 'חמישי שמח',
@@ -398,6 +410,14 @@ export const MENU_CATEGORIES: MenuCategory[] = [
       he: 'שתייה קרה וסיומת מתוקה לחוויה',
       en: 'Chilled drinks and traditional sweet treats'
     }
+  },
+  {
+    id: 'breads',
+    name: {
+      he: 'לחמים',
+      en: 'Breads'
+    },
+    iconName: 'Utensils'
   }
 ];
 
@@ -511,6 +531,22 @@ export const SAMPLE_MENU_ITEMS: MenuItem[] = [
       he: 'בד״ץ העדה החרדית',
       en: 'Badatz Edah HaChareidis'
     }
+  },
+  {
+    id: 'kugel-itriyot',
+    name: {
+      he: 'קיגל אטריות',
+      en: 'Noodle Kugel'
+    },
+    category: 'kugel'
+  },
+  {
+    id: 'kugel-tapuach-adama',
+    name: {
+      he: 'קיגל תפו״א',
+      en: 'Potato Kugel'
+    },
+    category: 'kugel'
   },
   {
     id: 'cholent-kishke',
@@ -711,6 +747,46 @@ export const SAMPLE_MENU_ITEMS: MenuItem[] = [
       he: 'בד״ץ העדה החרדית',
       en: 'Badatz Edah HaChareidis'
     }
+  },
+  {
+    id: 'bread-sweet-roll',
+    name: {
+      he: 'לחמנייה מתוקה',
+      en: 'Sweet Roll'
+    },
+    price: 4,
+    category: 'breads',
+    availability: 'in_stock'
+  },
+  {
+    id: 'bread-vizhnitz-roll',
+    name: {
+      he: 'לחמנייה וויזניץ',
+      en: 'Vizhnitz Roll'
+    },
+    price: 5,
+    category: 'breads',
+    availability: 'in_stock'
+  },
+  {
+    id: 'bread-frena',
+    name: {
+      he: 'פרנה',
+      en: 'Frena'
+    },
+    price: 8,
+    category: 'breads',
+    availability: 'in_stock'
+  },
+  {
+    id: 'bread-lachuch',
+    name: {
+      he: 'לחוח',
+      en: 'Lachuch'
+    },
+    price: 6,
+    category: 'breads',
+    availability: 'in_stock'
   }
 ];
 

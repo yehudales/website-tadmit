@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-// DEBUG_MARKER: 93
+// DEBUG_MARKER: 107
 import { Language, NavSectionId } from './types';
 import { TopmostHeaderRow } from './components/TopmostHeaderRow';
 import { KashrutSection } from './components/KashrutSection';

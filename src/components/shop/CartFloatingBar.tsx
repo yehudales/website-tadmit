@@ -1,6 +1,5 @@
 import React from 'react';
 import { Language } from '../../types';
-import { ShoppingBag } from 'lucide-react';
 
 interface CartFloatingBarProps {
   lang: Language;
@@ -23,27 +22,25 @@ export const CartFloatingBar: React.FC<CartFloatingBarProps> = ({
       aria-label={lang === 'he' ? 'סרגל הזמנה צף' : 'Floating cart bar'}
       className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-8 sm:w-80 z-40 animate-fade-in-up select-none"
     >
-      {/* Vibrant Cyan Pill Button strictly matching Screenshot 1 */}
+      {/* Clean Horizontal Rectangular Bar with slight rounding, NO glow, NO shadow */}
       <button
         type="button"
         onClick={onOpenCart}
         dir={lang === 'he' ? 'rtl' : 'ltr'}
-        className="w-full bg-[#00D2FF] hover:bg-[#38BDF8] text-[#0B0C0E] py-3 px-5 rounded-full shadow-[0_8px_30px_rgba(0,210,255,0.4)] flex items-center justify-between transition-all active:scale-[0.98] cursor-pointer group"
+        className="w-full bg-[#71D2F6] hover:opacity-90 text-[#0B0C0E] py-2.5 px-3.5 rounded-lg flex items-center justify-between transition-all active:scale-[0.98] cursor-pointer"
       >
-        {/* Shopping Bag Icon on Right (in RTL) */}
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-[#00A2C7]/20 flex items-center justify-center">
-            <ShoppingBag className="w-5 h-5 text-[#0B0C0E] stroke-[2.5]" />
-          </div>
+        {/* Right side in RTL: Black circle with item count (no icon, no emoji) */}
+        <div className="w-7 h-7 rounded-full bg-[#0B0C0E] text-white flex items-center justify-center text-xs font-bold shrink-0">
+          {totalItems}
         </div>
 
-        {/* Action Title in Center */}
+        {/* Center: Action Title */}
         <div className="font-black text-sm sm:text-base tracking-tight text-[#0B0C0E]">
-          {lang === 'he' ? `צפייה בפרטים (${totalItems})` : `View Order (${totalItems})`}
+          {lang === 'he' ? 'הצגת פריטים' : 'View Items'}
         </div>
 
-        {/* Total Price on Left (in RTL) */}
-        <div className="font-black text-sm sm:text-base tracking-tight text-[#0B0C0E] font-sans">
+        {/* Left side in RTL: Total Price directly as plain text without any separate frame */}
+        <div className="text-sm sm:text-base font-bold text-[#0B0C0E] shrink-0 font-sans">
           ₪{totalPrice}
         </div>
       </button>

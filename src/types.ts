@@ -8,7 +8,7 @@ export interface MenuItem {
     he: string;
     en: string;
   };
-  description: {
+  description?: {
     he: string;
     en: string;
   };
