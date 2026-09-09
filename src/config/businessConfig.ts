@@ -340,6 +340,18 @@ export const MENU_CATEGORIES: MenuCategory[] = [
     }
   },
   {
+    id: 'fried',
+    name: {
+      he: 'מטוגנים',
+      en: 'Fried Menu'
+    },
+    iconName: 'Utensils',
+    description: {
+      he: 'מטוגנים פריכים וטריים, בלינצ\'סים, סיגרים ופסטלים',
+      en: 'Fresh crispy fried bites, blintzes, cigars, and pastels'
+    }
+  },
+  {
     id: 'special-thursday',
     name: {
       he: 'חמישי שמח',
@@ -398,7 +410,7 @@ export const SAMPLE_MENU_ITEMS: MenuItem[] = [
       en: 'Asado Beef Cholent'
     },
     description: {
-      he: 'מורכב מ: תפוחי אדמה • שעועית • גריסים • בשר בקר משובח "אסאדו" • ביצה חומה',
+      he: 'מורכב מ: - תפוחי אדמה - שעועית - גריסים - בשר בקר משובח - "אסאדו" - ביצה חומה',
       en: 'Potatoes • Beans • Barley • Prime Asado Beef • Hard-boiled egg'
     },
     price: 30,
@@ -417,7 +429,7 @@ export const SAMPLE_MENU_ITEMS: MenuItem[] = [
       en: 'Classic Beef Cholent'
     },
     description: {
-      he: 'מורכב מ: תפוחי אדמה • שעועית • גריסים • בשר בקר מובחר • ביצה חומה',
+      he: 'מורכב מ: - תפוחי אדמה - שעועית - גריסים - בשר בקר מובחר - ביצה חומה',
       en: 'Potatoes • Beans • Barley • Select Tender Beef • Hard-boiled egg'
     },
     price: 34,
@@ -426,6 +438,78 @@ export const SAMPLE_MENU_ITEMS: MenuItem[] = [
     kashrutNote: {
       he: 'בשר נווה ציון | בד״ץ העדה החרדית',
       en: 'Neve Zion Beef | Badatz Edah HaChareidis'
+    }
+  },
+  {
+    id: 'fried-tomato-paste',
+    name: {
+      he: 'רסק עגבניות',
+      en: 'Fresh Tomato Dip'
+    },
+    description: {
+      he: 'רסק עגבניות טרי ומתובל בתיבול ביתי עדין',
+      en: 'Freshly grated seasoned tomato dip'
+    },
+    price: 3,
+    category: 'fried',
+    availability: 'in_stock',
+    kashrutNote: {
+      he: 'בד״ץ העדה החרדית',
+      en: 'Badatz Edah HaChareidis'
+    }
+  },
+  {
+    id: 'fried-blintz-sausage',
+    name: {
+      he: 'בלינצ\'ס נקניק',
+      en: 'Sausage Blintz'
+    },
+    description: {
+      he: '(2 ב-10₪) בלינצ\'ס חם ופריך במילוי נקניק מובחר',
+      en: '(2 for ₪10) Crispy warm blintzes filled with prime sausage'
+    },
+    price: 6,
+    category: 'fried',
+    availability: 'in_stock',
+    kashrutNote: {
+      he: 'בשר נווה ציון',
+      en: 'Neve Zion Meat'
+    }
+  },
+  {
+    id: 'fried-meat-cigar',
+    name: {
+      he: 'סיגר בשר',
+      en: 'Crispy Meat Cigar'
+    },
+    description: {
+      he: '(2 ב-5₪) סיגר פריך במילוי בשר בקר מתובל',
+      en: '(2 for ₪5) Crispy Moroccan cigar filled with seasoned beef'
+    },
+    price: 3,
+    category: 'fried',
+    availability: 'in_stock',
+    kashrutNote: {
+      he: 'בשר נווה ציון',
+      en: 'Neve Zion Meat'
+    }
+  },
+  {
+    id: 'fried-potato-pastel',
+    name: {
+      he: 'פסטל תפו״א',
+      en: 'Potato Pastel'
+    },
+    description: {
+      he: 'פסטל פריך במילוי מחית תפוחי אדמה חמה ומתובלת',
+      en: 'Crispy pastry filled with seasoned savory mashed potatoes'
+    },
+    price: 3,
+    category: 'fried',
+    availability: 'in_stock',
+    kashrutNote: {
+      he: 'בד״ץ העדה החרדית',
+      en: 'Badatz Edah HaChareidis'
     }
   },
   {

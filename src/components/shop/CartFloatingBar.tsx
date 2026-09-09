@@ -1,6 +1,6 @@
 import React from 'react';
 import { Language } from '../../types';
-import { ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 
 interface CartFloatingBarProps {
   lang: Language;
@@ -21,41 +21,30 @@ export const CartFloatingBar: React.FC<CartFloatingBarProps> = ({
     <aside
       id="cart-floating-bar"
       aria-label={lang === 'he' ? 'סרגל הזמנה צף' : 'Floating cart bar'}
-      className="fixed bottom-4 left-3 right-3 sm:left-auto sm:right-6 sm:w-96 z-40 animate-fade-in-up"
+      className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-8 sm:w-80 z-40 animate-fade-in-up select-none"
     >
+      {/* Vibrant Cyan Pill Button strictly matching Screenshot 1 */}
       <button
         type="button"
         onClick={onOpenCart}
         dir={lang === 'he' ? 'rtl' : 'ltr'}
-        className="w-full bg-[#0E1116]/95 hover:bg-[#151922] backdrop-blur-md border border-[#00D2FF]/50 hover:border-[#00D2FF] text-[#FAF9F6] p-3 sm:p-3.5 rounded-2xl shadow-[0_8px_30px_rgba(0,210,255,0.2)] flex items-center justify-between gap-3 transition-all active:scale-[0.98] cursor-pointer group"
+        className="w-full bg-[#00D2FF] hover:bg-[#38BDF8] text-[#0B0C0E] py-3 px-5 rounded-full shadow-[0_8px_30px_rgba(0,210,255,0.4)] flex items-center justify-between transition-all active:scale-[0.98] cursor-pointer group"
       >
-        {/* Total Items & Price Badge */}
-        <div className="flex items-center gap-2.5">
-          <div className="relative p-2 rounded-xl bg-[#00D2FF] text-[#0B0C0E] font-black flex items-center justify-center">
-            <ShoppingBag className="w-5 h-5 stroke-[2.5]" />
-            <span className="absolute -top-1 -right-1 bg-[#FF7B1C] text-white text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full border border-[#0B0C0E]">
-              {totalItems}
-            </span>
-          </div>
-
-          <div className="text-right">
-            <div className="text-xs font-medium text-[#94A3B8]">
-              {lang === 'he' ? `${totalItems} פריטים בהזמנה` : `${totalItems} items in order`}
-            </div>
-            <div className="text-base sm:text-lg font-black text-[#00D2FF] tracking-tight">
-              ₪{totalPrice}
-            </div>
+        {/* Shopping Bag Icon on Right (in RTL) */}
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-[#00A2C7]/20 flex items-center justify-center">
+            <ShoppingBag className="w-5 h-5 text-[#0B0C0E] stroke-[2.5]" />
           </div>
         </div>
 
-        {/* Action Button Label with Directional Arrow */}
-        <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#00D2FF] group-hover:bg-[#38BDF8] text-[#0B0C0E] text-xs sm:text-sm font-black transition-colors shadow-sm">
-          <span>{lang === 'he' ? 'לצפייה בהזמנה' : 'View Order'}</span>
-          {lang === 'he' ? (
-            <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
-          ) : (
-            <ArrowRight className="w-4 h-4 stroke-[2.5]" />
-          )}
+        {/* Action Title in Center */}
+        <div className="font-black text-sm sm:text-base tracking-tight text-[#0B0C0E]">
+          {lang === 'he' ? `צפייה בפרטים (${totalItems})` : `View Order (${totalItems})`}
+        </div>
+
+        {/* Total Price on Left (in RTL) */}
+        <div className="font-black text-sm sm:text-base tracking-tight text-[#0B0C0E] font-sans">
+          ₪{totalPrice}
         </div>
       </button>
     </aside>

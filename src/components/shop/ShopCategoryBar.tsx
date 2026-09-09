@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { MenuCategory, Language } from '../../types';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { Search, SlidersHorizontal, Sun, X } from 'lucide-react';
 
 interface ShopCategoryBarProps {
   lang: Language;
@@ -136,6 +136,15 @@ export const ShopCategoryBar: React.FC<ShopCategoryBarProps> = ({
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
             <span>{lang === 'he' ? 'מסנן' : 'Filter'}</span>
+          </button>
+
+          {/* Sun / Theme Button matching screenshot 2 */}
+          <button
+            type="button"
+            className="p-2 rounded-xl bg-[#13161B] hover:bg-[#181C22] text-[#94A3B8] hover:text-[#00D2FF] border border-[#252A32] transition-colors cursor-pointer"
+            aria-label={lang === 'he' ? 'שנה ערכת נושא' : 'Toggle theme'}
+          >
+            <Sun className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>

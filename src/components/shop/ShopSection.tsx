@@ -5,6 +5,7 @@ import { ShopCategoryBar } from './ShopCategoryBar';
 import { ShopProductItem } from './ShopProductItem';
 import { CartFloatingBar } from './CartFloatingBar';
 import { CartDrawer } from './CartDrawer';
+import { ProductSheetModal } from './ProductSheetModal';
 import { useCart } from '../../hooks/useCart';
 
 interface ShopSectionProps {
@@ -23,6 +24,7 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
   const [specialtyOnly, setSpecialtyOnly] = useState<boolean>(false);
+  const [selectedSheetProduct, setSelectedSheetProduct] = useState<MenuItem | null>(null);
 
   // Cart Management
   const {
@@ -72,30 +74,81 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
     return map;
   }, [filteredItems]);
 
-  // Smooth scroll to category without screen jumps
+  // Smooth scroll to category inside the appropriate scroll container
   const handleSelectCategory = (categoryId: string) => {
     setActiveCategory(categoryId);
     const targetEl = document.getElementById(`shop-category-${categoryId}`);
     if (targetEl) {
-      targetEl.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
+      if (isShopMode && shopContainerRef.current) {
+        const container = shopContainerRef.current;
+        const categoryBarEl = document.getElementById('shop-category-bar');
+        const barHeight = categoryBarEl?.offsetHeight || 60;
+        const targetTop = targetEl.offsetTop - barHeight;
+        container.scrollTo({
+          top: Math.max(0, targetTop),
+          behavior: 'smooth',
+        });
+      } else {
+        targetEl.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
     }
   };
+
+  // Active category detection on scroll
+  useEffect(() => {
+    const scrollTarget = isShopMode ? shopContainerRef.current : window;
+    if (!scrollTarget) return;
+
+    const handleScrollCategories = () => {
+      const categoryElements = MENU_CATEGORIES.map((cat) => ({
+        id: cat.id,
+        el: document.getElementById(`shop-category-${cat.id}`),
+      })).filter((item): item is { id: string; el: HTMLElement } => item.el !== null);
+
+      if (categoryElements.length === 0) return;
+
+      const triggerOffset = isShopMode ? 140 : 200;
+      for (let i = categoryElements.length - 1; i >= 0; i--) {
+        const rect = categoryElements[i].el.getBoundingClientRect();
+        if (rect.top <= triggerOffset) {
+          setActiveCategory(categoryElements[i].id);
+          break;
+        }
+      }
+    };
+
+    scrollTarget.addEventListener('scroll', handleScrollCategories, { passive: true });
+    return () => {
+      scrollTarget.removeEventListener('scroll', handleScrollCategories);
+    };
+  }, [isShopMode]);
 
   return (
     <section
       id="shop-experience"
       ref={shopContainerRef}
       aria-label={lang === 'he' ? "חנות יהודל'ס" : "Yehudales Shop"}
-      className="relative z-20 bg-[#0B0C0E] border-t border-[#1E232B]"
+      className={
+        isShopMode
+          ? "fixed inset-x-0 bottom-0 top-[96px] z-40 overflow-y-auto overscroll-contain bg-[#0B0C0E] border-t border-[#1E232B] pb-24 sm:pb-28"
+          : "relative z-20 bg-[#0B0C0E] border-t border-[#1E232B]"
+      }
     >
       {/* 
         Sticky Shop Header (Horizontal Category Nav)
-        Locks cleanly directly beneath the permanently fixed top header component (min-h: 96px)
+        In normal mode: locks at top-[96px] (beneath topmost fixed header).
+        In Shop Mode: locks at top-0 (inside the dedicated Shop scrolling container).
       */}
-      <div className="sticky top-[96px] z-40 bg-[#0B0C0E]/98 backdrop-blur-md shadow-xl border-b border-[#1E232B]">
+      <div
+        className={
+          isShopMode
+            ? "sticky top-0 z-40 bg-[#0B0C0E]/98 backdrop-blur-md shadow-xl border-b border-[#1E232B]"
+            : "sticky top-[96px] z-40 bg-[#0B0C0E]/98 backdrop-blur-md shadow-xl border-b border-[#1E232B]"
+        }
+      >
         <ShopCategoryBar
           lang={lang}
           categories={MENU_CATEGORIES}
@@ -138,30 +191,26 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
               data-category-id={category.id}
               className="scroll-mt-36 sm:scroll-mt-40"
             >
-              {/* Category Header matching screenshot */}
+              {/* Category Header matching screenshot 1 (Bullet dot + Category Name | English uppercase menu subtitle in cyan) */}
               <div
                 dir={lang === 'he' ? 'rtl' : 'ltr'}
-                className="flex items-center justify-between gap-3 mb-3 pb-2 border-b border-[#1E232B]"
+                className="flex items-center justify-between gap-3 mb-2 pb-2 border-b border-[#1E232B]"
               >
-                <div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#00D2FF] shrink-0 animate-pulse" />
                   <h3 className="text-base sm:text-lg font-black text-[#FAF9F6] tracking-tight">
                     {category.name[lang]}
                   </h3>
-                  {category.description && category.description[lang] && (
-                    <p className="text-xs text-[#64748B] mt-0.5">
-                      {category.description[lang]}
-                    </p>
-                  )}
                 </div>
 
-                <span className="text-xs font-bold text-[#00D2FF] bg-[#00D2FF]/10 border border-[#00D2FF]/25 px-2.5 py-0.5 rounded-full shrink-0">
-                  {products.length} {lang === 'he' ? 'מנות' : 'items'}
+                <span className="text-[11px] sm:text-xs font-black tracking-wider text-[#00D2FF] uppercase font-sans">
+                  {category.name.en.toUpperCase()} MENU
                 </span>
               </div>
 
-              {/* Vertical Products List */}
+              {/* Vertical Free-Standing Products List */}
               {products.length > 0 ? (
-                <div className="space-y-2.5 sm:space-y-3">
+                <div className="divide-y divide-[#1A1F28]">
                   {products.map((product) => (
                     <ShopProductItem
                       key={product.id}
@@ -170,6 +219,7 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
                       quantityInCart={getItemQuantity(product.id)}
                       onAddToCart={addItem}
                       onUpdateQuantity={updateQuantity}
+                      onOpenSheet={(p) => setSelectedSheetProduct(p)}
                     />
                   ))}
                 </div>
@@ -184,6 +234,19 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
           );
         })}
       </div>
+
+      {/* Product Bottom Sheet Modal matching Screenshot 2 */}
+      <ProductSheetModal
+        product={selectedSheetProduct}
+        isOpen={Boolean(selectedSheetProduct)}
+        onClose={() => setSelectedSheetProduct(null)}
+        lang={lang}
+        onAddToCart={(product, qty) => {
+          for (let i = 0; i < (qty || 1); i++) {
+            addItem(product);
+          }
+        }}
+      />
 
       {/* Floating Bottom Cart Bar */}
       <CartFloatingBar

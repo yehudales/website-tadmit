@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+// DEBUG_MARKER: 93
 import { Language, NavSectionId } from './types';
 import { TopmostHeaderRow } from './components/TopmostHeaderRow';
 import { KashrutSection } from './components/KashrutSection';
@@ -61,9 +62,50 @@ export default function App() {
     }
   }, []);
 
-  // Deterministic Pre-Scroll Interception & Exact Shop Lock Boundary
-  // PREVENTS default scroll BEFORE the browser can ever paint an overshot frame
+  const lockedScrollYRef = useRef<number>(0);
+
+  // Lock body scroll and physically freeze main document when entering Shop Mode
   useEffect(() => {
+    if (isShopMode) {
+      const scrollY = window.scrollY;
+      lockedScrollYRef.current = scrollY;
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      }
+    } else {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }
+
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+  }, [isShopMode]);
+
+  // Exact Geometric Shop Mode Trigger
+  // Activates ONLY when Shop Category Bar touches the bottom of the fixed top header
+  useEffect(() => {
+    if (isShopMode) return;
+
     const getExactLockScrollY = (): number => {
       const headerEl = document.getElementById('topmost-header-row');
       const shopEl = document.getElementById('shop-experience') || document.getElementById('shop-category-bar');
@@ -76,165 +118,20 @@ export default function App() {
       return Math.max(0, shopDocTop - headerHeight);
     };
 
-    let cachedLock = 0;
-    const updateLockBoundary = () => {
-      const computed = getExactLockScrollY();
-      if (computed > 0) {
-        cachedLock = computed;
-      }
-    };
+    const handleScroll = () => {
+      const exactLock = getExactLockScrollY();
+      if (exactLock <= 0) return;
 
-    // Calculate on mount and window resize
-    updateLockBoundary();
-    window.addEventListener('resize', updateLockBoundary, { passive: true });
-
-    const getAuthoritativeLock = (): number => {
-      if (cachedLock > 0) return cachedLock;
-      const computed = getExactLockScrollY();
-      if (computed > 0) cachedLock = computed;
-      return computed;
-    };
-
-    const activateShopMode = (exactLock: number) => {
-      if (!isShopModeRef.current) {
-        isShopModeRef.current = true;
-        lockScrollYRef.current = exactLock;
+      if (window.scrollY >= exactLock - 0.5) {
         setIsShopMode(true);
       }
     };
 
-    // 1. PRE-SCROLL WHEEL / TRACKPAD INTERCEPTION (non-passive)
-    const handleWheel = (e: WheelEvent) => {
-      const exactLock = getAuthoritativeLock();
-      if (exactLock <= 0) return;
-
-      const currentScrollY = window.scrollY;
-      const projectedScrollY = currentScrollY + e.deltaY;
-
-      if (!isShopModeRef.current) {
-        // Moving DOWN and projected to reach or cross exact Shop boundary
-        if (e.deltaY > 0 && projectedScrollY >= exactLock) {
-          e.preventDefault();
-          window.scrollTo({ top: exactLock, left: 0, behavior: 'instant' });
-          activateShopMode(exactLock);
-        }
-      } else {
-        // In Shop Mode:
-        // Downward wheel (deltaY > 0) is completely FREE.
-        // Upward wheel (deltaY < 0) that would move above exact boundary is PREVENTED.
-        if (e.deltaY < 0) {
-          if (projectedScrollY <= exactLock || currentScrollY <= exactLock + 0.5) {
-            e.preventDefault();
-            window.scrollTo({ top: exactLock, left: 0, behavior: 'instant' });
-          }
-        }
-      }
-    };
-
-    // 2. PRE-SCROLL TOUCH / SWIPE INTERCEPTION (non-passive)
-    let lastTouchY = 0;
-    const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        lastTouchY = e.touches[0].clientY;
-      }
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length === 0) return;
-      const exactLock = getAuthoritativeLock();
-      if (exactLock <= 0) return;
-
-      const currentTouchY = e.touches[0].clientY;
-      const touchDelta = lastTouchY - currentTouchY; // positive = user swipes up -> page moves down
-      lastTouchY = currentTouchY;
-
-      const currentScrollY = window.scrollY;
-      const projectedScrollY = currentScrollY + touchDelta;
-
-      if (!isShopModeRef.current) {
-        // Swiping UP (page moving DOWN) that crosses or reaches exact Shop boundary
-        if (touchDelta > 0 && projectedScrollY >= exactLock) {
-          if (e.cancelable) e.preventDefault();
-          window.scrollTo({ top: exactLock, left: 0, behavior: 'instant' });
-          activateShopMode(exactLock);
-        }
-      } else {
-        // In Shop Mode:
-        // Swiping UP (page moving DOWN) is completely FREE.
-        // Swiping DOWN (page moving UP) is PREVENTED when near or above exact boundary.
-        if (touchDelta < 0) {
-          if (projectedScrollY <= exactLock || currentScrollY <= exactLock + 0.5) {
-            if (e.cancelable) e.preventDefault();
-            window.scrollTo({ top: exactLock, left: 0, behavior: 'instant' });
-          }
-        }
-      }
-    };
-
-    // 3. PRE-SCROLL KEYBOARD INTERCEPTION (non-passive)
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const exactLock = getAuthoritativeLock();
-      if (exactLock <= 0) return;
-
-      const currentScrollY = window.scrollY;
-
-      if (!isShopModeRef.current) {
-        let step = 0;
-        if (e.key === 'ArrowDown') step = 40;
-        else if (e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey)) step = window.innerHeight * 0.8;
-
-        if (step > 0 && currentScrollY + step >= exactLock) {
-          e.preventDefault();
-          window.scrollTo({ top: exactLock, left: 0, behavior: 'instant' });
-          activateShopMode(exactLock);
-        }
-      } else {
-        if (e.key === 'Home') {
-          e.preventDefault();
-          window.scrollTo({ top: exactLock, left: 0, behavior: 'instant' });
-        } else if (e.key === 'ArrowUp' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey)) {
-          const step = e.key === 'ArrowUp' ? 40 : window.innerHeight * 0.8;
-          if (currentScrollY - step <= exactLock || currentScrollY <= exactLock + 2) {
-            e.preventDefault();
-            window.scrollTo({ top: exactLock, left: 0, behavior: 'instant' });
-          }
-        }
-      }
-    };
-
-    // 4. SECONDARY SCROLL OBSERVATION
-    const handleScroll = () => {
-      const exactLock = getAuthoritativeLock();
-      if (exactLock <= 0) return;
-
-      const currentScrollY = window.scrollY;
-
-      if (!isShopModeRef.current) {
-        if (currentScrollY >= exactLock - 0.5) {
-          activateShopMode(exactLock);
-        }
-      } else {
-        if (currentScrollY < exactLock) {
-          window.scrollTo({ top: exactLock, left: 0, behavior: 'instant' });
-        }
-      }
-    };
-
-    window.addEventListener('wheel', handleWheel, { passive: false });
-    window.addEventListener('touchstart', handleTouchStart, { passive: true });
-    window.addEventListener('touchmove', handleTouchMove, { passive: false });
-    window.addEventListener('keydown', handleKeyDown, { passive: false });
-    window.addEventListener('scroll', handleScroll, { passive: false });
-
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
-      window.removeEventListener('resize', updateLockBoundary);
-      window.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [isShopMode]);
 
   // Listen to in-session back/forward navigation only
   useEffect(() => {
@@ -281,7 +178,6 @@ export default function App() {
 
   // Exit Shop Mode, close drawers/modals, restore normal scrolling and return smoothly/instantly to Home/Hero
   const handleGoHome = () => {
-    lockScrollYRef.current = null;
     setIsShopMode(false);
     setActiveSection(null);
     setIsKashrutOpen(false);
@@ -289,11 +185,13 @@ export default function App() {
       try {
         window.history.replaceState(null, '', '/');
       } catch {}
-      try {
-        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-      } catch {
-        window.scrollTo(0, 0);
-      }
+      setTimeout(() => {
+        try {
+          window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        } catch {
+          window.scrollTo(0, 0);
+        }
+      }, 0);
     }
   };
 
@@ -308,7 +206,7 @@ export default function App() {
         className="fixed top-2 left-2 z-[9999] pointer-events-none w-6 h-6 rounded-full bg-[#1A1D22]/80 border border-white/20 text-[#FAF9F6]/80 text-[10px] font-mono font-bold flex items-center justify-center select-none shadow-sm"
         aria-hidden="true"
       >
-        81
+        91
       </div>
 
       {/* Accessible Skip Link */}

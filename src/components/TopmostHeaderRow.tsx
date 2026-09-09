@@ -3,6 +3,7 @@ import { Settings, Home } from 'lucide-react';
 import { BUSINESS_CONFIG } from '../config/businessConfig';
 import { Language } from '../types';
 import { Logo } from './Logo';
+import { TraditionalShopEmblem } from './shop/TraditionalShopEmblem';
 
 interface TopmostHeaderRowProps {
   lang: Language;
@@ -26,7 +27,7 @@ export const TopmostHeaderRow: React.FC<TopmostHeaderRowProps> = ({
     >
       <div
         id="header-row1-grid"
-        className="max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 grid grid-cols-3 items-center shrink-0 -mt-4 pl-3 ml-0 pt-0"
+        className={`max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 grid grid-cols-3 items-center shrink-0 ${isShopMode ? 'py-1' : '-mt-4'} pl-3 ml-0 pt-0`}
       >
         {/* Left / Home shortcut (Left Col) */}
         <div className="flex items-center justify-start">
@@ -47,32 +48,18 @@ export const TopmostHeaderRow: React.FC<TopmostHeaderRowProps> = ({
           </button>
         </div>
 
-        {/* Center: Brand Logo or Shop Title in Shop Mode (Center Col) */}
-        <div className="flex flex-col items-center justify-center">
-          <button
-            type="button"
-            onClick={() => {
-              if (onGoHome) {
-                onGoHome();
-              } else {
-                if (onCloseSection) onCloseSection();
-                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-              }
-            }}
-            className="flex items-center justify-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF7B1C] rounded-lg transition-transform duration-300 hover:scale-105"
-            aria-label={isShopMode ? (lang === 'he' ? "יהודל'ס חנות - חזרה למעלה" : "Yehudales Shop - Back to top") : `${BUSINESS_CONFIG.name[lang]} - דף הבית`}
+        {/* Center: Brand Logo or Animated Traditional Shop Emblem in Shop Mode (Center Col) */}
+        <div className="flex flex-col items-center justify-center select-none">
+          <div
+            className="flex items-center justify-center select-none pointer-events-auto"
+            aria-label={isShopMode ? (lang === 'he' ? "יהודל'ס חנות" : "Yehudales Shop") : `${BUSINESS_CONFIG.name[lang]}`}
           >
             {isShopMode ? (
-              <span
-                id="shop-mode-center-title"
-                className="font-['Frank_Ruhl_Libre',serif] text-[#00D2FF] text-xl sm:text-2xl md:text-2xl font-black tracking-wide select-none drop-shadow-[0_2px_10px_rgba(0,210,255,0.4)] whitespace-nowrap"
-              >
-                {lang === 'he' ? "יהודל'ס חנות" : "YEHUDAL'ES SHOP"}
-              </span>
+              <TraditionalShopEmblem lang={lang} />
             ) : (
-              <Logo className="h-[89.6px] sm:h-8 md:h-9 w-auto" />
+              <Logo className="h-[89.6px] sm:h-8 md:h-9 w-auto select-none" />
             )}
-          </button>
+          </div>
         </div>
 
         {/* Right / Settings Action (Right Col) */}
