@@ -40,7 +40,7 @@ export const CartFloatingBar: React.FC<CartFloatingBarProps> = ({
         </div>
 
         {/* Left side in RTL: Total Price directly as plain text without any separate frame */}
-        <div className="text-sm sm:text-base font-bold text-[#0B0C0E] shrink-0 font-sans">
+        <div className="text-sm sm:text-base font-bold text-[#0B0C0E] shrink-0">
           ₪{totalPrice}
         </div>
       </button>

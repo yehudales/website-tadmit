@@ -226,8 +226,8 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
       aria-label={lang === 'he' ? "חנות יהודל'ס" : "Yehudales Shop"}
       className={
         isShopMode
-          ? "fixed inset-x-0 bottom-0 top-[96px] z-40 overflow-y-auto overscroll-contain bg-[#0B0C0E] border-t border-[#1E232B] pb-24 sm:pb-28"
-          : "relative z-20 bg-[#0B0C0E] border-t border-[#1E232B]"
+          ? "fixed inset-x-0 bottom-0 top-[96px] z-40 overflow-y-auto overscroll-contain bg-[#0B0C0E] border-t border-[#1E232B] pb-24 sm:pb-28 font-shop shop-scope"
+          : "relative z-20 bg-[#0B0C0E] border-t border-[#1E232B] font-shop shop-scope"
       }
     >
       {/* 
@@ -332,6 +332,8 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
             addItem(product);
           }
         }}
+        getItemQuantity={getItemQuantity}
+        onUpdateQuantity={updateQuantity}
       />
 
       {/* Floating Bottom Cart Bar */}

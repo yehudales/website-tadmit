@@ -1,6 +1,6 @@
 import React from 'react';
-import { ChevronUp } from 'lucide-react';
 import { triggerMobileHaptic } from '../utils/haptics';
+import { CanonicalArrow } from './CanonicalArrow';
 
 interface InteractiveDisclosureTriggerProps {
   isOpen: boolean;
@@ -272,11 +272,11 @@ export const InteractiveDisclosureTrigger: React.FC<InteractiveDisclosureTrigger
             }
             aria-hidden="true"
           >
-            <ChevronUp
+            <CanonicalArrow
+              direction="up"
               className="w-3.5 h-3.5 shrink-0"
               style={{ color: accentColor }}
-              strokeWidth={2.4}
-              aria-hidden="true"
+              strokeWidth={2.2}
             />
           </span>
         )}

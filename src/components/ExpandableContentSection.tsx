@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion, useIsPresent } from 'motion/react';
 import {
-  ChevronUp,
   Info,
   Bell,
   Briefcase,
@@ -25,6 +24,7 @@ import { Language, NavSectionId } from '../types';
 import { BUSINESS_CONFIG, getWhatsAppOrderUrl } from '../config/businessConfig';
 import { getBannerRevealConfig } from '../utils/drawerAnimation';
 import { PageEntranceAnimation } from './PageEntranceAnimation';
+import { CanonicalArrow } from './CanonicalArrow';
 
 interface ExpandableContentSectionProps {
   lang: Language;
@@ -782,7 +782,7 @@ const BannerPanelContent: React.FC<BannerPanelContentProps> = ({
               aria-label={lang === 'he' ? 'סגור חלונית' : 'Close panel'}
               title={lang === 'he' ? 'סגור חלונית' : 'Close panel'}
             >
-              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors" strokeWidth={2.2} aria-hidden="true" />
+              <CanonicalArrow direction="up" className="w-4 h-4 sm:w-5 sm:h-5 text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors" strokeWidth={2.2} />
             </button>
           </div>
         </motion.div>

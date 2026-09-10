@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Camera, X, ChevronLeft, ChevronRight, Maximize2, ShieldCheck } from 'lucide-react';
+import { Camera, X, Maximize2, ShieldCheck } from 'lucide-react';
 import { GALLERY_ITEMS, BUSINESS_CONFIG } from '../config/businessConfig';
 import { Language, GalleryItem } from '../types';
+import { CanonicalArrow } from './CanonicalArrow';
 
 interface GallerySectionProps {
   lang: Language;
@@ -180,7 +181,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ lang }) => {
             aria-label={lang === 'he' ? 'תמונה קודמת' : 'Previous image'}
             className="min-h-[44px] min-w-[44px] absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-20 p-3 rounded-xl bg-[#1A1D22] hover:bg-[#22262D] text-[#FAF9F6] border border-[#252A32] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E0BE55] flex items-center justify-center"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <CanonicalArrow direction="left" className="w-5 h-5" strokeWidth={2.2} />
           </button>
 
           <button
@@ -191,7 +192,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ lang }) => {
             aria-label={lang === 'he' ? 'תמונה הבאה' : 'Next image'}
             className="min-h-[44px] min-w-[44px] absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-20 p-3 rounded-xl bg-[#1A1D22] hover:bg-[#22262D] text-[#FAF9F6] border border-[#252A32] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E0BE55] flex items-center justify-center"
           >
-            <ChevronRight className="w-5 h-5" />
+            <CanonicalArrow direction="right" className="w-5 h-5" strokeWidth={2.2} />
           </button>
 
           {/* Lightbox Content */}

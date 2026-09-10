@@ -38,18 +38,57 @@
     --font-primary: 'Outfit', 'Assistant', 'Arimo', system-ui, -apple-system, sans-serif;
     --font-numeric: 'Rubik', 'Outfit', 'Assistant', system-ui, sans-serif;
 
-    /* Wolt-derived Shop Typography System */
-    --font-shop-headline: "DD Scoop", -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI", "Arimo", "Open Sans", sans-serif;
-    --font-shop-body: -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI", "Arimo", "Open Sans", sans-serif;
+    /* Central Unified Shop Font Token (Wolt Standard) */
+    --shop-font-family: -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI", "Arimo", "Open Sans", sans-serif;
+    --font-shop-headline: var(--shop-font-family);
+    --font-shop-body: var(--shop-font-family);
   }
 
-  /* Wolt-derived Shop Font Families */
-  .font-shop-headline {
-    font-family: var(--font-shop-headline);
-  }
-
+  /* Wolt-derived Shop Font Families referencing Central Unified Shop Font Token */
+  .font-shop,
+  .font-shop-headline,
   .font-shop-body {
-    font-family: var(--font-shop-body);
+    font-family: var(--shop-font-family);
+  }
+
+  /* Universal Shop Scope Font Enforcement:
+     Ensures every visible text element, heading, button, input, textarea, label,
+     modal, drawer, and bottom sheet inside the Shop experience shares the identical unified font */
+  .shop-scope,
+  #shop,
+  #shop-section,
+  #shop-banner,
+  #shop-category-bar,
+  #product-sheet-modal,
+  #cart-drawer-modal-portal,
+  #cart-floating-bar {
+    font-family: var(--shop-font-family) !important;
+  }
+
+  /* Form controls and interactive button elements in Shop scope */
+  .shop-scope button,
+  .shop-scope input,
+  .shop-scope textarea,
+  .shop-scope select,
+  .shop-scope label,
+  #shop button,
+  #shop input,
+  #shop textarea,
+  #shop select,
+  #shop label,
+  #shop-banner button,
+  #shop-category-bar button,
+  #shop-category-bar input,
+  #product-sheet-modal button,
+  #product-sheet-modal input,
+  #product-sheet-modal textarea,
+  #product-sheet-modal select,
+  #cart-drawer-modal-portal button,
+  #cart-drawer-modal-portal input,
+  #cart-drawer-modal-portal textarea,
+  #cart-drawer-modal-portal select,
+  #cart-floating-bar button {
+    font-family: var(--shop-font-family) !important;
   }
 
   /* Wolt-derived Exact Type Scale Utilities */

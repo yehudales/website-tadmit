@@ -16,7 +16,7 @@ export const ShopBanner: React.FC<ShopBannerProps> = ({ lang, isLocked = false }
   return (
     <div
       id="shop-banner"
-      className="relative w-full overflow-hidden bg-[#0B0C0E] border-b border-[#1E232B] select-none py-3.5 sm:py-4.5 transition-all duration-300"
+      className="relative w-full overflow-hidden bg-[#0B0C0E] border-b border-[#1E232B] select-none py-3.5 sm:py-4.5 transition-all duration-300 font-shop"
     >
       {/* Subtle Storefront with Sun Umbrella / Awning Silhouette in Background */}
       <div
@@ -71,7 +71,7 @@ export const ShopBanner: React.FC<ShopBannerProps> = ({ lang, isLocked = false }
 
           <div
             dir="ltr"
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#13161B]/90 border border-[#252A32] shadow-sm backdrop-blur-sm text-xs sm:text-sm font-mono font-bold text-white tracking-widest"
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#13161B]/90 border border-[#252A32] shadow-sm backdrop-blur-sm text-xs sm:text-sm font-bold text-white tracking-widest tabular-nums"
           >
             <Clock className="w-3.5 h-3.5 text-[#71D2F6] shrink-0" />
             <span>{timerStr}</span>

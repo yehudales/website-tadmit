@@ -1,7 +1,8 @@
 import React from 'react';
-import { Bell, Calendar, Sparkles, MessageCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Bell, Calendar, Sparkles, MessageCircle, CheckCircle2 } from 'lucide-react';
 import { Language } from '../types';
 import { BUSINESS_CONFIG, getWhatsAppOrderUrl } from '../config/businessConfig';
+import { CanonicalArrow } from './CanonicalArrow';
 
 interface UpdatesSectionProps {
   lang: Language;
@@ -145,7 +146,7 @@ export const UpdatesSection: React.FC<UpdatesSectionProps> = ({ lang, onOpenWhat
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-[#E0BE55] hover:text-[#FAF9F6] transition-colors min-h-[44px] px-2"
                 >
                   <span>{lang === 'he' ? 'לפרטים' : 'Details'}</span>
-                  <ArrowLeft className={`w-3.5 h-3.5 ${lang === 'en' ? 'rotate-180' : ''}`} />
+                  <CanonicalArrow direction={lang === 'en' ? 'right' : 'left'} className="w-3.5 h-3.5" strokeWidth={2.2} />
                 </button>
               </div>
             </div>

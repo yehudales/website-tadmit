@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronUp } from 'lucide-react';
+import { CanonicalArrow } from './CanonicalArrow';
 import { triggerMobileHaptic } from '../utils/haptics';
 
 interface BannerBottomCloseButtonProps {
@@ -34,10 +34,10 @@ export const BannerBottomCloseButton: React.FC<BannerBottomCloseButtonProps> = (
         aria-label={ariaLabel}
         title={title || ariaLabel}
       >
-        <ChevronUp
+        <CanonicalArrow
+          direction="up"
           className="w-4 h-4 sm:w-5 sm:h-5 text-[#FAF9F6] group-hover:text-[#FF7B1C] transition-colors"
           strokeWidth={2.2}
-          aria-hidden="true"
         />
       </button>
     </div>

@@ -5,6 +5,7 @@ import { Plus, Minus, Trash2, ShoppingBag, Send, CheckCircle2, Clock, MapPin, St
 import { getWhatsAppOrderUrl } from '../../config/businessConfig';
 import { DownwardArrowNoTail } from './DownwardArrowNoTail';
 import { motion } from 'motion/react';
+import { getOverlayRoot } from '../../utils/overlayRoot';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   lang,
 }) => {
   const [orderType, setOrderType] = useState<'pickup' | 'delivery'>('pickup');
+  const [paymentMethod, setPaymentMethod] = useState<'cash_or_bit' | 'bit'>('cash_or_bit');
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [orderNotes, setOrderNotes] = useState('');
@@ -37,6 +39,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   const [isSuccess, setIsSuccess] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isReadyToScroll, setIsReadyToScroll] = useState(false);
+  const [isDetailsExpanded, setIsDetailsExpanded] = useState(true);
 
   useEffect(() => {
     if (isOpen) {
@@ -55,6 +58,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     if (isClosing) {
       setIsClosing(false);
       setIsReadyToScroll(false);
+      if (isSuccess) {
+        setIsSuccess(false);
+      }
       onClose();
     } else if (isOpen) {
       setIsReadyToScroll(true);
@@ -66,12 +72,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
     // Build structured order summary
     const typeLabel = orderType === 'pickup' ? 'איסוף עצמי (טייק אווי)' : 'משלוח ליל שישי';
+    const paymentLabel = paymentMethod === 'bit' ? 'ביט (Bit)' : 'מזומן / ביט בעת המסירה';
     
     let message = `🍲 *הזמנה חדשה מ-YEHUDAL'ES .NET*\n`;
     message += `-------------------------\n`;
     if (customerName) message += `👤 *שם:* ${customerName}\n`;
     if (customerPhone) message += `📞 *טלפון:* ${customerPhone}\n`;
-    message += `🛵 *סוג הזמנה:* ${typeLabel}\n\n`;
+    message += `🛵 *סוג הזמנה:* ${typeLabel}\n`;
+    message += `💳 *אמצעי תשלום:* ${paymentLabel}\n\n`;
     message += `📋 *פירוט המנות:*\n`;
 
     items.forEach((item) => {
@@ -97,7 +105,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   if (typeof document === 'undefined') return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[var(--z-modal-overlay,60)] overflow-hidden select-none">
+    <div
+      id="cart-drawer-modal-portal"
+      className="fixed inset-0 overflow-hidden select-none pointer-events-auto z-[60] font-shop shop-scope"
+      style={{ zIndex: 'var(--z-modal-overlay, 60)' }}
+    >
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -115,7 +127,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
         animate={{ y: isClosing ? '100%' : 0 }}
         transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
         onAnimationComplete={handleAnimationComplete}
-        className="fixed inset-x-0 bottom-0 max-w-lg mx-auto w-full max-h-[88vh] bg-[#0E1116] border-t border-[#1E232B] rounded-t-[28px] shadow-2xl flex flex-col z-10 overflow-hidden"
+        className="fixed inset-x-0 bottom-0 max-w-lg mx-auto w-full max-h-[88vh] bg-[#0E1116] border-t border-[#1E232B] rounded-t-[28px] shadow-2xl flex flex-col z-10 overflow-hidden font-shop shop-scope"
       >
         {/* Drag Handle Top Pill */}
         <div className="pt-2.5 pb-1 flex justify-center shrink-0">
@@ -126,20 +138,28 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
         <div className="px-4 sm:px-5 py-3 border-b border-[#1E232B] flex items-center justify-between bg-[#13161B] shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-[#71D2F6]/10 border border-[#71D2F6]/30 text-[#71D2F6]">
-              <ShoppingBag className="w-5 h-5 stroke-[2.5]" />
+              {isSuccess ? (
+                <CheckCircle2 className="w-5 h-5 stroke-[2.5]" />
+              ) : (
+                <ShoppingBag className="w-5 h-5 stroke-[2.5]" />
+              )}
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-black text-[#FAF9F6] tracking-tight">
-                {lang === 'he' ? 'סיכום הזמנה' : 'Order Summary'}
+                {isSuccess
+                  ? (lang === 'he' ? 'אישור הזמנה' : 'Order Confirmation')
+                  : (lang === 'he' ? 'סיכום הזמנה' : 'Order Summary')}
               </h2>
               <span className="text-xs text-[#94A3B8]">
-                {totalItems} {lang === 'he' ? 'פריטים בסל' : 'items in cart'}
+                {isSuccess
+                  ? (lang === 'he' ? 'ההזמנה בטיפול' : 'Order In Progress')
+                  : `${totalItems} ${lang === 'he' ? 'פריטים בסל' : 'items in cart'}`}
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            {items.length > 0 && (
+            {!isSuccess && items.length > 0 && (
               <button
                 type="button"
                 onClick={onClearCart}
@@ -168,7 +188,129 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             isReadyToScroll && !isClosing ? 'overflow-y-auto' : 'overflow-hidden'
           }`}
         >
-          {items.length === 0 ? (
+          {isSuccess ? (
+            /* ==========================================================
+               ORDER CONFIRMATION & ORDER STATUS SCREEN
+               ========================================================== */
+            <div className="space-y-4 py-2">
+              {/* Order Status Badge */}
+              <div className="p-4 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/30 text-center space-y-2">
+                <div className="w-12 h-12 rounded-full bg-[#10B981]/20 border border-[#10B981]/40 mx-auto flex items-center justify-center text-[#10B981]">
+                  <CheckCircle2 className="w-6 h-6 stroke-[2.5]" />
+                </div>
+                <h3 className="text-base font-bold text-white">
+                  {lang === 'he' ? 'ההזמנה נשלחה בהצלחה ב-WhatsApp!' : 'Order Sent via WhatsApp!'}
+                </h3>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#13161B] border border-white/10 text-xs font-semibold text-[#86EFAC]">
+                  <Clock className="w-3.5 h-3.5 text-[#71D2F6]" />
+                  <span>{lang === 'he' ? 'סטטוס הזמנה: בטיפול מול בית העסק' : 'Order Status: Processing by store'}</span>
+                </div>
+                <p className="text-xs text-[#94A3B8] leading-relaxed pt-1">
+                  {lang === 'he'
+                    ? "נציג יהודל'ס יאשר את פרטי ההזמנה, זמני המסירה וחישוב הסל ישירות בצ'אט ה-WhatsApp שנפתח מולך."
+                    : 'A Yehudales representative will confirm your order details and delivery window directly on WhatsApp.'}
+                </p>
+              </div>
+
+              {/* Collapsible / Expandable Order Details "צפייה בפרטי ההזמנה" */}
+              <div className="bg-[#13161B] border border-[#1E232B] rounded-xl overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setIsDetailsExpanded((prev) => !prev)}
+                  className="w-full px-4 py-3 flex items-center justify-between bg-[#171B22] text-right font-bold text-xs sm:text-sm text-[#FAF9F6] hover:bg-[#1E232C] transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <ShoppingBag className="w-4 h-4 text-[#71D2F6]" />
+                    <span>{lang === 'he' ? 'צפייה בפרטי ההזמנה' : 'View Order Details'}</span>
+                  </span>
+                  <span className="text-xs text-[#71D2F6] font-medium">
+                    {isDetailsExpanded
+                      ? (lang === 'he' ? 'הסתר פרטים' : 'Hide')
+                      : (lang === 'he' ? 'הצג פרטים' : 'Show')}
+                  </span>
+                </button>
+
+                {isDetailsExpanded && (
+                  <div className="p-4 space-y-3 text-xs border-t border-[#1E232B]">
+                    {/* Customer Info */}
+                    <div className="space-y-1 pb-2 border-b border-white/5">
+                      <div className="text-[#94A3B8] font-bold">
+                        {lang === 'he' ? 'פרטי לקוח:' : 'Customer Details:'}
+                      </div>
+                      <div className="text-[#FAF9F6]">
+                        {customerName ? customerName : (lang === 'he' ? 'הוזמן ללא שם' : 'Anonymous')}{' '}
+                        {customerPhone && `• ${customerPhone}`}
+                      </div>
+                    </div>
+
+                    {/* Delivery / Pickup */}
+                    <div className="space-y-1 pb-2 border-b border-white/5">
+                      <div className="text-[#94A3B8] font-bold">
+                        {lang === 'he' ? 'אופן קבלת ההזמנה:' : 'Fulfillment:'}
+                      </div>
+                      <div className="text-[#FAF9F6]">
+                        {orderType === 'pickup'
+                          ? (lang === 'he' ? 'איסוף עצמי (טייק אווי)' : 'Self Pickup')
+                          : (lang === 'he' ? 'משלוח ליל שישי' : 'Friday Night Delivery')}
+                      </div>
+                    </div>
+
+                    {/* Payment Info */}
+                    <div className="space-y-1 pb-2 border-b border-white/5">
+                      <div className="text-[#94A3B8] font-bold">
+                        {lang === 'he' ? 'פרטי תשלום:' : 'Payment Details:'}
+                      </div>
+                      <div className="text-[#FAF9F6]">
+                        {lang === 'he' ? 'מזומן / ביט בעת המסירה' : 'Cash or Bit on delivery'}
+                      </div>
+                    </div>
+
+                    {/* Items List */}
+                    <div className="space-y-1.5 pb-2 border-b border-white/5">
+                      <div className="text-[#94A3B8] font-bold">
+                        {lang === 'he' ? 'סיכום פריטים:' : 'Ordered Items:'}
+                      </div>
+                      {items.map((item) => (
+                        <div key={item.id} className="flex justify-between items-center text-[#FAF9F6]">
+                          <span>{item.quantity}x {item.name[lang]}</span>
+                          <span className="text-[#71D2F6] font-bold">₪{item.price * item.quantity}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Total */}
+                    <div className="pt-1 flex justify-between items-center text-sm font-bold text-white">
+                      <span>{lang === 'he' ? 'סה"כ לתשלום:' : 'Total:'}</span>
+                      <span className="text-[#86EFAC]">₪{totalPrice}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+                {/* Actions */}
+                <div className="space-y-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleSendOrder}
+                    className="w-full py-3 rounded-xl bg-[#71D2F6] hover:opacity-90 text-[#0B0C0E] text-xs sm:text-sm font-bold flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>{lang === 'he' ? 'פתח שוב ב-WhatsApp' : 'Open WhatsApp Again'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClearCart();
+                      handleClose();
+                    }}
+                    className="w-full py-2.5 rounded-xl bg-[#1A1E26] hover:bg-[#252A34] text-white text-xs font-semibold flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <span>{lang === 'he' ? 'חזרה לתפריט והמשך הזמנה' : 'Back to Menu'}</span>
+                  </button>
+                </div>
+            </div>
+          ) : items.length === 0 ? (
             <div className="py-16 text-center flex flex-col items-center justify-center">
               <div className="w-16 h-16 rounded-2xl bg-[#161A22] border border-[#252A32] flex items-center justify-center text-[#64748B] mb-3">
                 <ShoppingBag className="w-8 h-8 stroke-[1.5]" />
@@ -184,7 +326,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             </div>
           ) : (
             <>
-              {/* Order Type Tabs */}
+              {/* Order Type Tabs (Delivery / Pickup Details) */}
               <div>
                 <label className="block text-xs font-bold text-[#94A3B8] mb-2">
                   {lang === 'he' ? 'אופן קבלת ההזמנה:' : 'Order Type:'}
@@ -252,7 +394,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         <Minus className="w-2.5 h-2.5" />
                       </button>
 
-                      <span className="w-5 text-center text-xs font-mono font-bold text-[#71D2F6]">
+                      <span className="w-5 text-center text-xs font-bold text-[#71D2F6]">
                         {item.quantity}
                       </span>
 
@@ -305,11 +447,30 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 />
               </div>
 
-              {/* Price Breakdown */}
+              {/* Payment Section */}
+              <div className="space-y-2 pt-2 border-t border-[#1E232B]">
+                <label className="block text-xs font-bold text-[#94A3B8]">
+                  {lang === 'he' ? 'אמצעי תשלום:' : 'Payment Method:'}
+                </label>
+
+                <div className="p-2.5 rounded-xl bg-[#13161B] border border-[#252A32] flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#86EFAC]" />
+                    <span className="text-[#FAF9F6] font-medium">
+                      {lang === 'he' ? 'מזומן / ביט (Bit) בעת המסירה' : 'Cash / Bit on delivery'}
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-[#71D2F6] font-bold">
+                    {lang === 'he' ? 'מאובטח' : 'Secure'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Price Breakdown / Order Summary */}
               <div className="bg-[#13161B] border border-[#1E232B] rounded-xl p-3 space-y-1.5 text-xs">
                 <div className="flex items-center justify-between text-[#94A3B8]">
                   <span>{lang === 'he' ? 'סיכום ביניים' : 'Subtotal'}</span>
-                  <span className="text-[#86EFAC] font-normal font-sans">₪{totalPrice}</span>
+                  <span className="text-[#86EFAC] font-normal">₪{totalPrice}</span>
                 </div>
                 <div className="flex items-center justify-between text-[#94A3B8]">
                   <span>{lang === 'he' ? 'אריזה ושירות' : 'Packaging & Service'}</span>
@@ -317,15 +478,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 </div>
                 <div className="pt-2 border-t border-[#1E232B] flex items-center justify-between text-sm text-[#FAF9F6]">
                   <span className="font-normal">{lang === 'he' ? 'סה"כ לתשלום' : 'Total'}</span>
-                  <span className="text-base text-[#86EFAC] font-normal font-sans">₪{totalPrice}</span>
+                  <span className="text-base text-[#86EFAC] font-normal">₪{totalPrice}</span>
                 </div>
               </div>
             </>
           )}
         </div>
 
-        {/* Drawer Footer */}
-        {items.length > 0 && (
+        {/* Drawer Footer / Checkout CTA "שלח הזמנה" */}
+        {!isSuccess && items.length > 0 && (
           <div className="p-4 border-t border-[#1E232B] bg-[#13161B] space-y-2">
             <button
               type="button"
@@ -334,18 +495,18 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               className="w-full py-3 rounded-xl bg-[#71D2F6] hover:opacity-90 active:scale-[0.98] text-[#0B0C0E] text-sm font-black transition-all shadow-[0_4px_20px_rgba(113,210,246,0.3)] flex items-center justify-center gap-2 cursor-pointer"
             >
               <Send className="w-4 h-4" />
-              <span>{lang === 'he' ? 'שליחת הזמנה ישירה' : 'Send Direct Order'}</span>
+              <span>{lang === 'he' ? 'שלח הזמנה' : 'Send Order'}</span>
             </button>
 
-            <p className="text-[10px] text-center text-[#64748B]">
+            <p className="text-[11px] text-center text-[#94A3B8]">
               {lang === 'he'
-                ? 'בלחיצה על הכפתור תועבר לסיכום ההזמנה המהיר של יהודלס'
-                : 'Clicking will direct you to confirm your Yehudales feast'}
+                ? 'בלחיצה על "שלח הזמנה" תועבר לסיכום מהיר ב-WhatsApp לאישור מול בית העסק'
+                : 'Clicking "Send Order" will connect you to WhatsApp for instant confirmation'}
             </p>
           </div>
         )}
       </motion.div>
     </div>,
-    document.body
+    getOverlayRoot()
   );
 };

@@ -1,6 +1,7 @@
 import React from 'react';
 import { MenuItem, Language } from '../../types';
-import { Plus, Minus, BookOpen, Ban } from 'lucide-react';
+import { BookOpen, Ban } from 'lucide-react';
+import { ProductExpandableControl } from './ProductExpandableControl';
 
 interface ShopProductItemProps {
   product: MenuItem;
@@ -72,7 +73,7 @@ export const ShopProductItem: React.FC<ShopProductItemProps> = ({
         {/* The Image (Click to open sheet) */}
         <div
           onClick={() => onOpenSheet && onOpenSheet(product)}
-          className="w-full h-full flex items-center justify-center cursor-pointer"
+          className="relative w-full h-full flex items-center justify-center cursor-pointer"
         >
           {product.imagePlaceholder ? (
             <img
@@ -84,66 +85,28 @@ export const ShopProductItem: React.FC<ShopProductItemProps> = ({
           ) : (
             <BookOpen className="w-8 h-8 sm:w-9 sm:h-9 stroke-[1.25] text-[#334155] group-hover/img:text-[#71D2F6]/80 transition-colors" />
           )}
+
+          {/* Top-Center Image Indicator (Subtle horizontal rounded gray line ≈ 6% image width) */}
+          <div className="absolute top-1 sm:top-1.5 inset-x-0 flex justify-center pointer-events-none z-10">
+            <span className="w-[6%] h-[2px] rounded-full bg-[#A1A1AA]/70 shadow-[0_0.5px_1px_rgba(0,0,0,0.5)]" />
+          </div>
+
+          {/* Bottom Black Fade (Gradual upward fade on bottom ~18% of image) */}
+          <div
+            className="absolute bottom-0 inset-x-0 h-[18%] pointer-events-none z-10 bg-gradient-to-t from-black/75 via-black/35 to-transparent"
+            aria-hidden="true"
+          />
         </div>
 
         {/* Top-Left Overlaid Expandable Button */}
-        {!isOutOfStock && (
-          <div
-            dir="ltr"
-            className={`absolute top-0 left-0 z-10 h-[32px] sm:h-[34px] flex flex-row items-center bg-[#71D2F6] text-[#0B0C0E] rounded-none rounded-br-[18px] transition-[width] duration-250 ease-out overflow-hidden shadow-md ${
-              quantityInCart > 0 ? 'w-[78px] sm:w-[84px]' : 'w-[32px] sm:w-[34px]'
-            }`}
-          >
-            {/* Visual 1: Leftmost PLUS Button (Stationary at left: 0) */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (quantityInCart === 0) {
-                  onAddToCart(product);
-                } else {
-                  onUpdateQuantity(product.id, Math.min(100, quantityInCart + 1));
-                }
-              }}
-              className="w-[32px] sm:w-[34px] h-[32px] sm:h-[34px] shrink-0 flex items-center justify-center text-[#0B0C0E] hover:bg-black/10 active:bg-black/25 transition-colors cursor-pointer"
-              aria-label={
-                quantityInCart === 0
-                  ? `${lang === 'he' ? 'הוספה להזמנה' : 'Add to order'} ${product.name[lang]}`
-                  : lang === 'he'
-                  ? 'הוסף כמות'
-                  : 'Increase quantity'
-              }
-            >
-              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
-            </button>
-
-            {/* Visual 2: Center QUANTITY */}
-            <span
-              className={`w-[20px] sm:w-[22px] text-center font-shop-body font-bold text-xs sm:text-[0.8125rem] text-[#0B0C0E] shrink-0 transition-opacity duration-200 select-none ${
-                quantityInCart > 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'
-              }`}
-            >
-              {quantityInCart}
-            </span>
-
-            {/* Visual 3: Rightmost MINUS Button */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (quantityInCart > 0) {
-                  onUpdateQuantity(product.id, quantityInCart - 1);
-                }
-              }}
-              className={`w-[26px] sm:w-[28px] h-[32px] sm:h-[34px] shrink-0 flex items-center justify-center text-[#0B0C0E] hover:bg-black/10 active:bg-black/25 transition-all cursor-pointer ${
-                quantityInCart > 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'
-              }`}
-              aria-label={lang === 'he' ? 'הפחת כמות' : 'Decrease quantity'}
-            >
-              <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
-            </button>
-          </div>
-        )}
+        <ProductExpandableControl
+          product={product}
+          lang={lang}
+          quantityInCart={quantityInCart}
+          onAddToCart={onAddToCart}
+          onUpdateQuantity={onUpdateQuantity}
+          position="top-left"
+        />
       </div>
     </article>
   );
