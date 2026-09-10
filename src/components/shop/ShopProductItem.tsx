@@ -86,11 +86,6 @@ export const ShopProductItem: React.FC<ShopProductItemProps> = ({
             <BookOpen className="w-8 h-8 sm:w-9 sm:h-9 stroke-[1.25] text-[#334155] group-hover/img:text-[#71D2F6]/80 transition-colors" />
           )}
 
-          {/* Top-Center Image Indicator (Subtle horizontal rounded gray line ≈ 6% image width) */}
-          <div className="absolute top-1 sm:top-1.5 inset-x-0 flex justify-center pointer-events-none z-10">
-            <span className="w-[6%] h-[2px] rounded-full bg-[#A1A1AA]/70 shadow-[0_0.5px_1px_rgba(0,0,0,0.5)]" />
-          </div>
-
           {/* Bottom Black Fade (Gradual upward fade on bottom ~18% of image) */}
           <div
             className="absolute bottom-0 inset-x-0 h-[18%] pointer-events-none z-10 bg-gradient-to-t from-black/75 via-black/35 to-transparent"

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-// DEBUG_MARKER: 114
+// DEBUG_MARKER: 116
 import { Language, NavSectionId } from './types';
 import { TopmostHeaderRow } from './components/TopmostHeaderRow';
 import { KashrutSection } from './components/KashrutSection';
@@ -206,7 +206,7 @@ export default function App() {
         className="fixed top-2 left-2 z-[9999] pointer-events-none w-6 h-6 rounded-full bg-[#1A1D22]/80 border border-white/20 text-[#FAF9F6]/80 text-[10px] font-mono font-bold flex items-center justify-center select-none shadow-sm"
         aria-hidden="true"
       >
-        114
+        116
       </div>
 
       {/* Accessible Skip Link */}
