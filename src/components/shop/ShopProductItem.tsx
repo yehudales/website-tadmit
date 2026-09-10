@@ -1,23 +1,19 @@
 import React from 'react';
 import { MenuItem, Language } from '../../types';
 import { BookOpen, Ban } from 'lucide-react';
-import { ProductExpandableControl } from './ProductExpandableControl';
 
 interface ShopProductItemProps {
   product: MenuItem;
   lang: Language;
-  quantityInCart: number;
-  onAddToCart: (product: MenuItem) => void;
-  onUpdateQuantity: (productId: string, qty: number) => void;
+  quantityInCart?: number;
+  onAddToCart?: (product: MenuItem) => void;
+  onUpdateQuantity?: (productId: string, qty: number) => void;
   onOpenSheet?: (product: MenuItem) => void;
 }
 
 export const ShopProductItem: React.FC<ShopProductItemProps> = ({
   product,
   lang,
-  quantityInCart,
-  onAddToCart,
-  onUpdateQuantity,
   onOpenSheet,
 }) => {
   const isOutOfStock = product.availability === 'out_of_stock';
@@ -68,7 +64,7 @@ export const ShopProductItem: React.FC<ShopProductItemProps> = ({
         </div>
       </div>
 
-      {/* Left: Product Image with Overlaid Top-Left Add Button */}
+      {/* Left: Product Image */}
       <div className="relative w-20 h-20 sm:w-[92px] sm:h-[92px] rounded-xl overflow-hidden shrink-0 bg-[#12151B] border border-white/10 flex items-center justify-center select-none shadow-inner group/img">
         {/* The Image (Click to open sheet) */}
         <div
@@ -92,16 +88,6 @@ export const ShopProductItem: React.FC<ShopProductItemProps> = ({
             aria-hidden="true"
           />
         </div>
-
-        {/* Top-Left Overlaid Expandable Button */}
-        <ProductExpandableControl
-          product={product}
-          lang={lang}
-          quantityInCart={quantityInCart}
-          onAddToCart={onAddToCart}
-          onUpdateQuantity={onUpdateQuantity}
-          position="top-left"
-        />
       </div>
     </article>
   );

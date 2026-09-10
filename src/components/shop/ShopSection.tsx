@@ -324,16 +324,15 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
       {/* Product Bottom Sheet Modal matching Screenshot 2 */}
       <ProductSheetModal
         product={selectedSheetProduct}
+        allProducts={SAMPLE_MENU_ITEMS}
         isOpen={Boolean(selectedSheetProduct)}
         onClose={() => setSelectedSheetProduct(null)}
         lang={lang}
-        onAddToCart={(product, qty) => {
-          for (let i = 0; i < (qty || 1); i++) {
-            addItem(product);
-          }
-        }}
         getItemQuantity={getItemQuantity}
         onUpdateQuantity={updateQuantity}
+        onAddToCart={(product, qty) => {
+          addItem(product, qty || 1);
+        }}
       />
 
       {/* Floating Bottom Cart Bar */}
